@@ -1,0 +1,13 @@
+TableFormatter - trouver une meilleure solution que:
+    columnsInnerWidth.get(this.columns.indexOf(column)))
+
+
+@Override
+public void hydrate(Data dataObject) throws ModelException {
+    for (Country country : dataObject.countries) {
+        this.addCountry(country);
+    }
+
+    // Si je fais ça, ça me dit que this::addCountry throw un Exception non catchée
+    dataObject.countries.forEach(this::addCountry);
+}

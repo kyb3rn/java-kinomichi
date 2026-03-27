@@ -1,0 +1,18 @@
+- StringBuilder - BoxDisplayer, TableFormatter
+- List - TableFormatter
+- Map - Main (menus)
+- Static methods - Main (initDataManager)
+- Supplier - Main (menus)
+- Getters & setters - TableFormatter (Column)
+- Interface - CustomSerializable, Hydratable
+- Héritage - Reader > StringReader > FileReader > JsonReader
+- Génériques - Readers, Writers, CustomSerializable, Hydratable
+- Sous-classe - TableFormatter (Column)
+- Exceptions - ModelException, ParserException > StringParserException
+- Enums - WebsiteForReader (basique), FileType, TableFormattingOptions
+- Singleton - CountryDataManager
+- Stream: reduce - TableFormatter : display() (totalInnerWidth)
+- Stream: max - TableFormatter : display() (maxAmountOfRowsToDisplay)
+- Stream: IntStream, mapToObj, map, collect - TableFormatter : display() (rows)
+- Condition ternaire - TableFormatter : display() (separationWidth)
+- Librairie externe - Gson (DataManager, méthodes parseJson())

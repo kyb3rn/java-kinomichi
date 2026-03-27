@@ -1,0 +1,52 @@
+{
+    "clubs": [
+        {
+            "id": 1,
+            "name": "Giocoso asbl - Dojo Bruxelles (Institut Dalcroze)",
+            "addressId": 1,
+            "googleMapsPositionLink": "https://maps.app.goo.gl/D9y4QR2bb8GWW37E9"
+        },
+        {
+            "id": 2,
+            "name": "Giocoso asbl - Dojo Bruxelles (Dojo du Brochet)",
+            "addressId": 2,
+            "googleMapsPositionLink": "https://maps.app.goo.gl/rty5wk1qTAubaCZu8"
+        },
+        {
+            "id": 3,
+            "name": "Kishin Ryu asbl - Dojo Wavre",
+            "addressId": 3,
+            "googleMapsPositionLink": "https://maps.app.goo.gl/svBiP7U62JvV9SVy9"
+        },
+        {
+            "id": 4,
+            "name": "Club André Baillon - Salle La Barraka",
+            "addressId": 4,
+            "googleMapsPositionLink": "https://maps.app.goo.gl/Fy9h574trNkBXYUw8"
+        },
+        {
+            "id": 5,
+            "name": "Club André Baillon - Avenue de l'Observatoire",
+            "addressId": 5,
+            "googleMapsPositionLink": "https://maps.app.goo.gl/K9B5DFeazig76Dt38"
+        },
+        {
+            "id": 6,
+            "name": "ASBL Ouverture - Dojo Liège",
+            "addressId": 6,
+            "googleMapsPositionLink": "https://maps.app.goo.gl/UBWX1LvMYwCMnEAj6"
+        },
+        {
+            "id": 7,
+            "name": "ASBL Ouverture - Blegny (stages mensuels)",
+            "addressId": 7,
+            "googleMapsPositionLink": "https://maps.app.goo.gl/YsLgFWQdrmxUrCZK7"
+        },
+        {
+            "id": 8,
+            "name": "Harmonie du Mouvement - Dojo Angleur",
+            "addressId": 8,
+            "googleMapsPositionLink": "https://maps.app.goo.gl/UPh2yd6gfyow8aCS8"
+        }
+    ]
+}
