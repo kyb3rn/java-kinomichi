@@ -1,5 +1,6 @@
 package app.models.formatting;
 
+import app.models.Model;
 import utils.io.helpers.tables.Table;
 import utils.io.helpers.tables.TableDisplay;
 import utils.io.helpers.tables.TableDisplayFormattingOptions;
@@ -16,7 +17,7 @@ public class ModelTableFormatter {
 
     // ─── Utility methods ─── //
 
-    public static <T> Table forList(List<T> items) {
+    public static <T extends Model> Table forList(List<T> items) {
         if (items.isEmpty()) {
             return new Table();
         }
@@ -40,7 +41,7 @@ public class ModelTableFormatter {
         return formatter;
     }
 
-    public static <T> Table forDetail(T item) {
+    public static <T extends Model> Table forDetail(T item) {
         List<AnnotatedMethod> annotatedMethods = getAnnotatedMethods(item.getClass());
 
         EnumSet<TableOptions> options = EnumSet.of(

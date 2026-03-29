@@ -84,11 +84,7 @@ public class Address extends Model implements Hydratable<Address.Data> {
             throw new ModelException("Le pays est requis pour une adresse (valeur null reçue)");
         }
 
-        if (!country.isValid()) {
-            throw new ModelException("L'objet Country reçu n'est pas valide");
-        }
-
-        this.country = country;
+        this.setCountryFromIso3(country.getIso3());
     }
 
     public void setZipCode(int zipCode) throws ModelException {
@@ -207,7 +203,7 @@ public class Address extends Model implements Hydratable<Address.Data> {
 
     @Override
     public boolean isValid() {
-        return this.id > 0 && this.zipCode > 0 && this.city != null && this.street != null && this.number != null;
+        return this.id > 0 && this.country != null && this.zipCode > 0 && this.city != null && this.street != null && this.number != null;
     }
 
     // ─── Sub classes ─── //

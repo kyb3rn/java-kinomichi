@@ -47,14 +47,14 @@ public class Club extends Model implements Hydratable<Club.Data> {
         return this.address;
     }
 
-    @TableDisplay(name = "Google Maps", order = 4)
+    @TableDisplay(name = "Lien Google Maps", order = 4)
     public String getGoogleMapsLink() {
         return this.googleMapsLink;
     }
 
     // ─── Special getters ─── //
 
-    @TableDisplay(name = "ID adresse", format = @TableDisplayFormattingOptions(preset = ModelKeyTextFormattingPreset.class, alignment = TextAlignement.CENTER), order = 3)
+    @TableDisplay(name = "#& (adresse)", format = @TableDisplayFormattingOptions(preset = ModelKeyTextFormattingPreset.class, alignment = TextAlignement.CENTER), order = 3)
     public int getAddressId() {
         return this.address.getId();
     }
@@ -82,7 +82,7 @@ public class Club extends Model implements Hydratable<Club.Data> {
             throw new ModelException("L'adresse est requise pour un club (valeur null reçue)");
         }
 
-        this.address = address;
+        this.setAddressFromId(address.getId());
     }
 
     public void setGoogleMapsLink(String googleMapsLink) throws ModelException {
@@ -138,7 +138,7 @@ public class Club extends Model implements Hydratable<Club.Data> {
 
     @Override
     public boolean isValid() {
-        return this.id > 0 && this.name != null;
+        return this.id > 0 && this.address != null && this.name != null;
     }
 
     // ─── Sub classes ─── //
