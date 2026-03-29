@@ -19,17 +19,17 @@ public enum TextBackgroundColor {
     BRIGHT_CYAN("106"),
     BRIGHT_WHITE("107");
 
-    /** Properties **/
+    // ─── Properties ─── //
 
     private final String code;
 
-    /** Constructors **/
+    // ─── Constructors ─── //
 
     TextBackgroundColor(String code) {
         this.code = code;
     }
 
-    /** Getters **/
+    // ─── Getters ─── //
 
     public String getCode() {
         return this.code;

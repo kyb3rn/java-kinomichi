@@ -2,6 +2,8 @@ package app.data_management.managers;
 
 public class DataManagerException extends Exception {
 
+    // ─── Constructors ─── //
+
     public DataManagerException(String message) {
         super(message);
     }

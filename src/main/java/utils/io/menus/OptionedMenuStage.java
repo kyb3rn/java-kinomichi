@@ -6,11 +6,11 @@ import java.util.Scanner;
 
 public abstract class OptionedMenuStage extends MenuStage {
 
-    /** Properties **/
+    // ─── Properties ─── //
 
     protected final List<MenuOption> options = new ArrayList<>();
 
-    /** Special methods **/
+    // ─── Utility methods ─── //
 
     public void addOption(MenuOption option) {
         this.options.add(option);
@@ -31,7 +31,7 @@ public abstract class OptionedMenuStage extends MenuStage {
         return false;
     }
 
-    /** Overrides & inheritance **/
+    // ─── Overrides & inheritance ─── //
 
     public abstract void display();
 

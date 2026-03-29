@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class ListCountriesMenu extends MenuStage {
 
-    /** Overrides & inheritance **/
+    // ─── Overrides & inheritance ─── //
 
     @Override
     public String use() {

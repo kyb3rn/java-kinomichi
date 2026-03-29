@@ -11,13 +11,13 @@ import java.nio.file.Path;
 
 public abstract class FileReader<T extends CustomSerializable> extends StringReader<T> {
 
-    /** Constructors **/
+    // ─── Constructors ─── //
 
     public FileReader(Writer<T> writer) {
         super(writer);
     }
 
-    /** Special methods **/
+    // ─── Utility methods ─── //
 
     public boolean fileExists(String filePath) {
         return new File(filePath).exists();

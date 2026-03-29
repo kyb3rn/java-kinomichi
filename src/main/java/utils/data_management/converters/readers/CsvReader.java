@@ -8,17 +8,13 @@ import java.io.IOException;
 
 public class CsvReader<T extends CsvConvertible> extends FileReader<T> {
 
-    /**
-     * Constructors
-     **/
+    // ─── Constructors ─── //
 
     public CsvReader(Writer<T> writer) {
         super(writer);
     }
 
-    /**
-     * Special methods
-     **/
+    // ─── Utility methods ─── //
 
     public void readFile(String filePath, T parsedObject, boolean containsHeaders) throws IOException, StringParserException {
         String fileContent = this.getFileContent(filePath);
@@ -42,9 +38,7 @@ public class CsvReader<T extends CsvConvertible> extends FileReader<T> {
         }
     }
 
-    /**
-     * Overrides & inheritance
-     **/
+    // ─── Overrides & inheritance ─── //
 
     @Override
     protected void parse(String data, T parsedObject) throws StringParserException {

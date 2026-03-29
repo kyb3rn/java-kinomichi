@@ -13,7 +13,7 @@ import java.util.Scanner;
 
 public class AddClubMenu extends MenuStage {
 
-    /** Overrides & inheritance **/
+    // ─── Overrides & inheritance ─── //
 
     @Override
     public String use() {

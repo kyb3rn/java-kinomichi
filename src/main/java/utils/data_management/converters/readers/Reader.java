@@ -5,11 +5,11 @@ import utils.data_management.converters.writers.Writer;
 
 public abstract class Reader<T extends CustomSerializable> {
 
-    /** Properties **/
+    // ─── Properties ─── //
 
     protected final Writer<T> writer;
 
-    /** Constructors **/
+    // ─── Constructors ─── //
 
     public Reader(Writer<T> writer) {
         this.writer = writer;

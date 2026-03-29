@@ -14,7 +14,7 @@ import java.util.*;
 
 public class ModelTableFormatter {
 
-    // ─── Special methods ─── //
+    // ─── Utility methods ─── //
 
     public static <T> Table forList(List<T> items) {
         if (items.isEmpty()) {

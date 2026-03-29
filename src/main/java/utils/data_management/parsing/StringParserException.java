@@ -2,7 +2,7 @@ package utils.data_management.parsing;
 
 public class StringParserException extends ParserException {
 
-    /** Constructors **/
+    // ─── Constructors ─── //
 
     public StringParserException(String message) {
         super(message);

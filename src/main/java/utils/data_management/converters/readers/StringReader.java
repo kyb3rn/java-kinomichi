@@ -6,13 +6,13 @@ import utils.data_management.parsing.ParserException;
 
 public abstract class StringReader<T extends CustomSerializable> extends Reader<T> {
 
-    /** Constructors **/
+    // ─── Constructors ─── //
 
     public StringReader(Writer<T> writer) {
         super(writer);
     }
 
-    /** Special methods **/
+    // ─── Utility methods ─── //
 
     protected abstract void parse(String data, T parsedObject) throws ParserException;
 

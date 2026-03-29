@@ -6,11 +6,11 @@ import java.util.Map;
 
 public class DataManagers {
 
-    /** Properties **/
+    // ─── Properties ─── //
 
     private static final Map<Class<?>, DataManager<?>> instances = new HashMap<>();
 
-    /** Special methods **/
+    // ─── Utility methods ─── //
 
     @SuppressWarnings("unchecked")
     public static <M extends DataManager<?>> M get(Class<M> clazz) throws LoadDataManagerDataException {

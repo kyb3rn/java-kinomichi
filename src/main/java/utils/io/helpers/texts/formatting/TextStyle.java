@@ -10,17 +10,17 @@ public enum TextStyle {
     HIDDEN("8"),
     STRIKETHROUGH("9");
 
-    /** Properties **/
+    // ─── Properties ─── //
 
     private final String code;
 
-    /** Constructors **/
+    // ─── Constructors ─── //
 
     TextStyle(String code) {
         this.code = code;
     }
 
-    /** Getters **/
+    // ─── Getters ─── //
 
     public String getCode() {
         return this.code;

@@ -19,14 +19,20 @@ import java.nio.file.Path;
 
 public abstract class DataManager<T extends CustomSerializable> implements Hydratable<T> {
 
+    // ─── Properties ─── //
+
     protected static final Path DATA_FOLDER = new File(System.getProperty("user.dir")).toPath().resolve("data");
 
     protected FileType defaultFileType = FileType.JSON;
     protected final String fileName = Functions.toSnakeCase(this.getClass().getSimpleName().replace("DataManager", ""));
 
+    // ─── Special getters ─── //
+
     protected Path getFilePath() {
-        return DATA_FOLDER.resolve(this.fileName + defaultFileType.getExtension());
+        return DATA_FOLDER.resolve(this.fileName + this.defaultFileType.getExtension());
     }
+
+    // ─── Utility methods ─── //
 
     protected abstract void export(FileType fileType) throws DataManagerException, ModelException;
 

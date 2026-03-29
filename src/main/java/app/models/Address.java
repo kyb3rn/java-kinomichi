@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 public class Address extends Model implements Hydratable<Address.Data> {
 
-    /** Properties **/
+    // ─── Properties ─── //
 
     private int id = -1;
     private Country country;
@@ -33,7 +33,7 @@ public class Address extends Model implements Hydratable<Address.Data> {
     private String number;
     private Integer boxNumber;
 
-    /** Getters **/
+    // ─── Getters ─── //
 
     @TableDisplay(name = "#", format = @TableDisplayFormattingOptions(preset = ModelPrimaryKeyTextFormattingPreset.class, alignment = TextAlignement.RIGHT), order = 1)
     public int getId() {
@@ -137,14 +137,13 @@ public class Address extends Model implements Hydratable<Address.Data> {
         }
     }
 
-    /** Special setters **/
+    // ─── Special setters ─── //
 
     public void setCountryFromIso3(String iso3) throws ModelException {
         this.country = getCountryFromIso3(iso3);
     }
 
-    /** Special method **/
-
+    // ─── Utility methods ─── //
 
     public static Country getCountryFromIso3(String iso3) throws ModelException {
         if (iso3 == null || iso3.isBlank()) {
@@ -178,7 +177,7 @@ public class Address extends Model implements Hydratable<Address.Data> {
         return country;
     }
 
-    /** Overrides & inheritance **/
+    // ─── Overrides & inheritance ─── //
 
     @Override
     public String toString() {
@@ -211,11 +210,11 @@ public class Address extends Model implements Hydratable<Address.Data> {
         return this.id > 0 && this.zipCode > 0 && this.city != null && this.street != null && this.number != null;
     }
 
-    /** Sub-classes **/
+    // ─── Sub classes ─── //
 
     public static class Data implements CustomSerializable, JsonConvertible {
 
-        /** Properties **/
+        // ─── Properties ─── //
 
         private int id = -1;
         private String countryIso3;
@@ -225,7 +224,7 @@ public class Address extends Model implements Hydratable<Address.Data> {
         private String number;
         private Integer boxNumber;
 
-        /** Constructors **/
+        // ─── Constructors ─── //
 
         public Data() {}
 
@@ -239,7 +238,7 @@ public class Address extends Model implements Hydratable<Address.Data> {
             this.setBoxNumber(address.getBoxNumber());
         }
 
-        /** Getters **/
+        // ─── Getters ─── //
 
         public int getId() {
             return this.id;
@@ -269,7 +268,7 @@ public class Address extends Model implements Hydratable<Address.Data> {
             return this.boxNumber;
         }
 
-        /** Setters **/
+        // ─── Setters ─── //
 
         public void setId(int id) throws ModelException {
             if (id <= 0 && id != -1) {
@@ -393,7 +392,7 @@ public class Address extends Model implements Hydratable<Address.Data> {
             }
         }
 
-        /** Overrides & inheritance **/
+        // ─── Overrides & inheritance ─── //
 
         @Override
         public void parseJson(String json) throws ParserException {

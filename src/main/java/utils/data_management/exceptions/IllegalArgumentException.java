@@ -2,7 +2,7 @@ package utils.data_management.exceptions;
 
 public class IllegalArgumentException extends Exception {
 
-    /** Constructors **/
+    // ─── Constructors ─── //
 
     public IllegalArgumentException(String message) {
         super(message);

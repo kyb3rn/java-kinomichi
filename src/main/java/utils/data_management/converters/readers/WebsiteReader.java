@@ -13,13 +13,13 @@ import java.net.http.HttpResponse;
 
 public abstract class WebsiteReader<T extends CustomSerializable> extends StringReader<T> {
 
-    /** Constructors **/
+    // ─── Constructors ─── //
 
     public WebsiteReader(Writer<T> writer) {
         super(writer);
     }
 
-    /** Special methods **/
+    // ─── Utility methods ─── //
 
     protected String scrap(String url) throws IOException, InterruptedException, StringParserException, URISyntaxException {
         HttpResponse<String> response;

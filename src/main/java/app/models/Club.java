@@ -24,18 +24,14 @@ import java.util.regex.Pattern;
 
 public class Club extends Model implements Hydratable<Club.Data> {
 
-    /**
-     * Properties
-     **/
+    // ─── Properties ─── //
 
     private int id = -1;
     private String name;
     private Address address;
     private String googleMapsLink;
 
-    /**
-     * Getters
-     **/
+    // ─── Getters ─── //
 
     @TableDisplay(name = "#", format = @TableDisplayFormattingOptions(preset = ModelPrimaryKeyTextFormattingPreset.class, alignment = TextAlignement.RIGHT), order = 1)
     public int getId() {
@@ -63,9 +59,7 @@ public class Club extends Model implements Hydratable<Club.Data> {
         return this.address.getId();
     }
 
-    /**
-     * Setters
-     **/
+    // ─── Setters ─── //
 
     public void setId(int id) throws ModelException {
         if (id <= 0 && id != -1) {
@@ -127,6 +121,8 @@ public class Club extends Model implements Hydratable<Club.Data> {
         this.address = address;
     }
 
+    // ─── Overrides & inheritance ─── //
+
     @Override
     public void hydrate(Data dataObject) throws ModelException {
         this.setId(dataObject.getId());
@@ -145,11 +141,18 @@ public class Club extends Model implements Hydratable<Club.Data> {
         return this.id > 0 && this.name != null;
     }
 
+    // ─── Sub classes ─── //
+
     public static class Data implements CustomSerializable, JsonConvertible {
+
+        // ─── Properties ─── //
+
         private int id = -1;
         private String name;
         private int addressId = -1;
         private String googleMapsLink;
+
+        // ─── Constructors ─── //
 
         public Data() {}
 
@@ -159,6 +162,8 @@ public class Club extends Model implements Hydratable<Club.Data> {
             this.setAddressId(addressId);
             this.setGoogleMapsLink(googleMapsLink);
         }
+
+        // ─── Getters ─── //
 
         public int getId() {
             return this.id;
@@ -175,6 +180,8 @@ public class Club extends Model implements Hydratable<Club.Data> {
         public String getGoogleMapsLink() {
             return this.googleMapsLink;
         }
+
+        // ─── Setters ─── //
 
         public void setId(int id) throws ModelException {
             if (id <= 0 && id != -1) {
@@ -233,6 +240,8 @@ public class Club extends Model implements Hydratable<Club.Data> {
                 this.googleMapsLink = googleMapsLink.strip();
             }
         }
+
+        // ─── Overrides & inheritance ─── //
 
         @Override
         public void parseJson(String json) throws ParserException {

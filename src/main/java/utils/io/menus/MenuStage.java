@@ -2,7 +2,7 @@ package utils.io.menus;
 
 public abstract class MenuStage {
 
-    /** Special methods **/
+    // ─── Utility methods ─── //
 
     public abstract String use();
 

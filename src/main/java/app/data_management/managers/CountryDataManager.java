@@ -16,7 +16,11 @@ import java.util.HashMap;
 
 public class CountryDataManager extends DataManager<CountryDataManager.Data> {
 
+    // ─── Properties ─── //
+
     private final HashMap<String, Country> countries = new HashMap<>();
+
+    // ─── Constructors ─── //
 
     private CountryDataManager() throws LoadDataManagerDataException {
         this.defaultFileType = FileType.CSV;
@@ -39,6 +43,8 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
         }
     }
 
+    // ─── Getters ─── //
+
     public HashMap<String, Country> getCountries() {
         return this.countries;
     }
@@ -46,6 +52,8 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
     public Country getCountry(String iso3) {
         return this.countries.get(iso3);
     }
+
+    // ─── Utility methods ─── //
 
     public void addCountry(Country country) throws ModelException {
         if (!country.isValid()) {
@@ -58,6 +66,8 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
 
         this.countries.put(country.getIso3(), country);
     }
+
+    // ─── Overrides & inheritance ─── //
 
     @Override
     public void export(FileType fileType) throws DataManagerException {
@@ -82,17 +92,23 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
         return new Data(this);
     }
 
+    // ─── Sub classes ─── //
+
     public static class Data implements CustomSerializable, CsvConvertible {
 
-        /** Properties **/
+        // ─── Properties ─── //
 
         private final List<Country> countries = new ArrayList<>();
+
+        // ─── Constructors ─── //
 
         public Data(CountryDataManager countryManager) {
             this.countries.addAll(countryManager.getCountries().values());
         }
 
         public Data() {}
+
+        // ─── Overrides & inheritance ─── //
 
         @Override
         public void parseLine(String[] columns) throws ParserException {

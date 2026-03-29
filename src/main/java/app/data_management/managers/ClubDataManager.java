@@ -17,7 +17,11 @@ import java.util.List;
 
 public class ClubDataManager extends DataManager<ClubDataManager.Data> {
 
+    // ─── Properties ─── //
+
     private final HashMap<Integer, Club> clubs = new HashMap<>();
+
+    // ─── Constructors ─── //
 
     private ClubDataManager() throws LoadDataManagerDataException {
         DataWriter<ClubDataManager.Data> dataWriter = new DataWriter<>();
@@ -38,6 +42,8 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
         }
     }
 
+    // ─── Getters ─── //
+
     public HashMap<Integer, Club> getClubs() {
         return this.clubs;
     }
@@ -45,6 +51,8 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
     public Club getClub(Integer id) {
         return this.clubs.get(id);
     }
+
+    // ─── Utility methods ─── //
 
     public void addClub(Club club) throws ModelException {
         if (!club.isValid()) {
@@ -70,6 +78,8 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
         return club;
     }
 
+    // ─── Overrides & inheritance ─── //
+
     @Override
     public void export(FileType fileType) throws DataManagerException, ModelException {
         ClubDataManager.Data data = new Data(this);
@@ -93,11 +103,15 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
         return new Data(this);
     }
 
+    // ─── Sub classes ─── //
+
     public static class Data implements CustomSerializable, JsonConvertible {
 
-        /** Properties **/
+        // ─── Properties ─── //
 
         private final List<Club.Data> clubs = new ArrayList<>();
+
+        // ─── Constructors ─── //
 
         public Data(ClubDataManager clubManager) throws ModelException {
             for (Club club : clubManager.getClubs().values()) {
@@ -106,6 +120,8 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
         }
 
         public Data() {}
+
+        // ─── Overrides & inheritance ─── //
 
         @Override
         public void parseJson(String json) throws ParserException {

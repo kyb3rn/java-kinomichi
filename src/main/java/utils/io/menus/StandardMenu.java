@@ -10,11 +10,11 @@ import utils.io.helpers.texts.formatting.TextStyle;
 
 public class StandardMenu extends OptionedMenuStage {
 
-    /** Properties **/
+    // ─── Properties ─── //
 
     private String title = null;
 
-    /** Constructors **/
+    // ─── Constructors ─── //
 
     public StandardMenu(String title) {
         this.setTitle(title);
@@ -22,7 +22,7 @@ public class StandardMenu extends OptionedMenuStage {
 
     public StandardMenu() {}
 
-    /** Setters **/
+    // ─── Setters ─── //
 
     public void setTitle(String title) {
         if (title.isBlank()) {
@@ -36,7 +36,7 @@ public class StandardMenu extends OptionedMenuStage {
         this.title = title;
     }
 
-    /** Overrides & inheritance **/
+    // ─── Overrides & inheritance ─── //
 
     public void display() {
         Table menuTable = new Table();

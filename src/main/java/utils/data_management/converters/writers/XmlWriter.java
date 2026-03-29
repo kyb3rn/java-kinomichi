@@ -8,7 +8,7 @@ import java.nio.file.Path;
 
 public class XmlWriter<T extends XmlConvertible> extends FileWriter<T> {
 
-    /** Special methods **/
+    // ─── Overrides & inheritance ─── //
 
     public void writeFile(String filePath) throws IOException {
         String xml = this.data.toXml();

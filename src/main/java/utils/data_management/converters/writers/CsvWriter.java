@@ -9,7 +9,7 @@ import java.util.List;
 
 public class CsvWriter<T extends CsvConvertible> extends FileWriter<T> {
 
-    /** Special methods **/
+    // ─── Overrides & inheritance ─── //
 
     @Override
     public void writeFile(String filePath) throws IOException {

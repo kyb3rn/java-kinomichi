@@ -4,11 +4,11 @@ import java.io.Serializable;
 
 public abstract class Writer<T extends Serializable> {
 
-    /** Properties **/
+    // ─── Properties ─── //
 
     protected T data;
 
-    /** Special methods **/
+    // ─── Utility methods ─── //
 
     public void write(T serializable) {
         this.data = serializable;

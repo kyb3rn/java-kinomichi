@@ -10,23 +10,18 @@ import java.net.URISyntaxException;
 
 public class HtmlReader<T extends WebsiteDataParseable> extends WebsiteReader<T> {
 
-    /** Properties **/
+    // ─── Properties ─── //
 
     private final WebsitesForReader site;
 
-    /** Constructors **/
+    // ─── Constructors ─── //
 
     public HtmlReader(Writer<T> writer, WebsitesForReader site) {
         super(writer);
         this.site = site;
     }
 
-    /** Overrides & inheritance **/
-
-    @Override
-    protected void parse(String data, T parsedObject) throws StringParserException {
-        parsedObject.parseWebsiteData(this.site, data);
-    }
+    // ─── Utility methods ─── //
 
     public void readWebsite(String url, T modelData) throws StringParserException, IOException, URISyntaxException, InterruptedException {
         String data = switch (this.site) {
@@ -34,6 +29,13 @@ public class HtmlReader<T extends WebsiteDataParseable> extends WebsiteReader<T>
         };
 
         this.parse(data, modelData);
+    }
+
+    // ─── Overrides & inheritance ─── //
+
+    @Override
+    protected void parse(String data, T parsedObject) throws StringParserException {
+        parsedObject.parseWebsiteData(this.site, data);
     }
 
 }

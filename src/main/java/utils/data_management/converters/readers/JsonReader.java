@@ -6,13 +6,13 @@ import utils.data_management.parsing.StringParserException;
 
 public class JsonReader<T extends JsonConvertible> extends FileReader<T> {
 
-    /** Constructors **/
+    // ─── Constructors ─── //
 
     public JsonReader(Writer<T> writer) {
         super(writer);
     }
 
-    /** Overrides & inheritance **/
+    // ─── Overrides & inheritance ─── //
 
     @Override
     protected void parse(String data, T parsedObject) throws StringParserException {

@@ -8,7 +8,7 @@ import java.nio.file.Path;
 
 public class JsonWriter<T extends JsonConvertible> extends FileWriter<T> {
 
-    /** Special methods **/
+    // ─── Overrides & inheritance ─── //
 
     @Override
     public void writeFile(String filePath) throws IOException {

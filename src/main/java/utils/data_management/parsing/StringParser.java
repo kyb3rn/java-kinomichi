@@ -2,7 +2,7 @@ package utils.data_management.parsing;
 
 public class StringParser {
 
-    /** Special methods **/
+    // ─── Utility methods ─── //
 
     public static int toPositiveInt(String raw, String fieldName) throws StringParserException {
         try {

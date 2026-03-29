@@ -6,13 +6,13 @@ import utils.data_management.converters.writers.Writer;
 
 public class DataReader<T extends CustomSerializable> extends Reader<T> {
 
-    /** Constructors **/
+    // ─── Constructors ─── //
 
     public DataReader(Writer<T> writer) {
         super(writer);
     }
 
-    /** Special methods **/
+    // ─── Utility methods ─── //
 
     public void parse(Hydratable<T> hydratableObject) throws Exception {
         T dataObject = hydratableObject.dehydrate();

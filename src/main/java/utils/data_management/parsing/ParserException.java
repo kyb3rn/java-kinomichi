@@ -2,6 +2,8 @@ package utils.data_management.parsing;
 
 public class ParserException extends RuntimeException {
 
+    // ─── Constructors ─── //
+
     public ParserException(String message) {
         super(message);
     }

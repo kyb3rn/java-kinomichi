@@ -6,13 +6,13 @@ import utils.data_management.parsing.StringParserException;
 
 public class XmlReader<T extends XmlConvertible> extends FileReader<T> {
 
-    /** Constructors **/
+    // ─── Constructors ─── //
 
     public XmlReader(Writer<T> writer) {
         super(writer);
     }
 
-    /** Overrides & inheritance **/
+    // ─── Overrides & inheritance ─── //
 
     @Override
     protected void parse(String data, T parsedObject) throws StringParserException {

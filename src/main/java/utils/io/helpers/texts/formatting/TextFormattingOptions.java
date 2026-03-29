@@ -5,7 +5,7 @@ import java.util.stream.*;
 
 public class TextFormattingOptions {
 
-    /** Properties **/
+    // ─── Properties ─── //
 
     private TextColor color;
     private TextBackgroundColor backgroundColor;
@@ -13,7 +13,7 @@ public class TextFormattingOptions {
     private TextAlignement alignment;
     private int minWidth;
 
-    /** Constructors **/
+    // ─── Constructors ─── //
 
     public TextFormattingOptions() {
         this.color = null;
@@ -23,7 +23,7 @@ public class TextFormattingOptions {
         this.minWidth = 0;
     }
 
-    /** Getters **/
+    // ─── Getters ─── //
 
     public TextColor getColor() {
         return this.color;
@@ -45,7 +45,7 @@ public class TextFormattingOptions {
         return this.minWidth;
     }
 
-    /** Setters **/
+    // ─── Setters ─── //
 
     public TextFormattingOptions setColor(TextColor color) {
         this.color = color;
@@ -71,7 +71,7 @@ public class TextFormattingOptions {
         return this;
     }
 
-    /** Special methods **/
+    // ─── Utility methods ─── //
 
     public TextFormattingOptions addStyle(TextStyle style) {
         this.styles.add(style);

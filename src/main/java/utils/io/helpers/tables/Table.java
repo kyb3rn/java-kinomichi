@@ -11,9 +11,7 @@ import java.util.stream.IntStream;
 
 public class Table {
 
-    /**
-     * Properties
-     **/
+    // ─── Properties ─── //
 
     private final ArrayList<Column> columns = new ArrayList<>();
     private String singleHeader = null;
@@ -25,9 +23,7 @@ public class Table {
         TableOptions.BOX_AROUND
     );
 
-    /**
-     * Constructors
-     **/
+    // ─── Constructors ─── //
 
     public Table() {
     }
@@ -40,9 +36,7 @@ public class Table {
         this.columns.addAll(columns);
     }
 
-    /**
-     * Setters
-     **/
+    // ─── Setters ─── //
 
     public void setSingleHeader(String singleHeader) {
         this.singleHeader = singleHeader;
@@ -56,9 +50,7 @@ public class Table {
         this.horizontalPadding = horizontalPadding;
     }
 
-    /**
-     * Special methods
-     **/
+    // ─── Utility methods ─── //
 
     public void addColumn(Column column) {
         this.columns.add(column);
@@ -87,7 +79,7 @@ public class Table {
     }
 
     public void addColumnValue(int columnIndex, String value) {
-        Column column = columns.get(columnIndex);
+        Column column = this.columns.get(columnIndex);
 
         if (column == null) {
             throw new IndexOutOfBoundsException("Cet index de colonne n'existe pas");
@@ -97,7 +89,7 @@ public class Table {
     }
 
     public void addColumnValues(int columnIndex, List<String> values) {
-        Column column = columns.get(columnIndex);
+        Column column = this.columns.get(columnIndex);
 
         if (column == null) {
             throw new IndexOutOfBoundsException("Cet index de colonne n'existe pas");
@@ -120,7 +112,7 @@ public class Table {
         if (!this.columns.isEmpty()) {
             // Calculate and save columns width
             ArrayList<Integer> columnsInnerWidth = new ArrayList<>();
-            for (Column column : columns) {
+            for (Column column : this.columns) {
                 int columnLongestValueLength = column.getValues().stream().mapToInt(Functions::visibleLength).max().orElse(0);
                 int columnHeaderLength = this.options.contains(TableOptions.DISPLAY_HEADER) ? (column.getName() != null ? Functions.visibleLength(column.getName()) : 0) : 0;
                 columnsInnerWidth.add(Math.max(columnLongestValueLength, columnHeaderLength));
@@ -342,19 +334,17 @@ public class Table {
         System.out.println(stringBuilder);
     }
 
+    // ─── Sub classes ─── //
+
     public static class Column {
 
-        /**
-         * Properties
-         **/
+        // ─── Properties ─── //
 
         private final List<String> values = new ArrayList<>();
         private String name = null;
         private TextFormattingOptions formattingOptions = new TextFormattingOptions();
 
-        /**
-         * Constructors
-         **/
+        // ─── Constructors ─── //
 
         public Column(String name, TextFormattingOptions formattingOptions) {
             this.setName(name);
@@ -381,9 +371,7 @@ public class Table {
         public Column() {
         }
 
-        /**
-         * Getters
-         **/
+        // ─── Getters ─── //
 
         public List<String> getValues() {
             return this.values;
@@ -401,9 +389,7 @@ public class Table {
             return this.formattingOptions.getAlignment();
         }
 
-        /**
-         * Setters
-         **/
+        // ─── Setters ─── //
 
         public void setName(String name) {
             if (name == null || name.isBlank()) {
@@ -413,9 +399,7 @@ public class Table {
             this.name = name.strip();
         }
 
-        /**
-         * Special methods
-         **/
+        // ─── Utility methods ─── //
 
         public void addValue(String value) {
             if (value == null) {

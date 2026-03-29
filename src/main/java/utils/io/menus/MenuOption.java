@@ -2,29 +2,29 @@ package utils.io.menus;
 
 public class MenuOption {
 
-    /** Properties **/
+    // ─── Properties ─── //
 
     private String text;
     private String leadTo;
 
-    /** Constructors **/
+    // ─── Constructors ─── //
 
     public MenuOption(String text, String leadTo) {
         this.setText(text);
         this.setLeadTo(leadTo);
     }
 
-    /** Getters **/
+    // ─── Getters ─── //
 
     public String getText() {
         return this.text;
     }
 
     public String getLeadTo() {
-        return leadTo;
+        return this.leadTo;
     }
 
-    /** Setters **/
+    // ─── Setters ─── //
 
     public void setText(String text) {
         if (text.isBlank()) {

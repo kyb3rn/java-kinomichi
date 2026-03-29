@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class ListClubsMenu extends MenuStage {
 
-    /** Overrides & inheritance **/
+    // ─── Overrides & inheritance ─── //
 
     @Override
     public String use() {

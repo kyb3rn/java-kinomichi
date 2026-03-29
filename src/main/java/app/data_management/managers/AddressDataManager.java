@@ -22,7 +22,11 @@ import java.util.List;
 
 public class AddressDataManager extends DataManager<AddressDataManager.Data> {
 
+    // ─── Properties ─── //
+
     private final HashMap<Integer, Address> addresses = new HashMap<>();
+
+    // ─── Constructors ─── //
 
     private AddressDataManager() throws LoadDataManagerDataException {
         DataWriter<AddressDataManager.Data> dataWriter = new DataWriter<>();
@@ -43,6 +47,8 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
         }
     }
 
+    // ─── Getters ─── //
+
     public HashMap<Integer, Address> getAddresses() {
         return this.addresses;
     }
@@ -50,6 +56,8 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
     public Address getAddress(Integer id) {
         return this.addresses.get(id);
     }
+
+    // ─── Utility methods ─── //
 
     public void addAddress(Address address) throws ModelException {
         if (!address.isValid()) {
@@ -74,6 +82,8 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
 
         return address;
     }
+
+    // ─── Overrides & inheritance ─── //
 
     @Override
     public void export(FileType fileType) throws DataManagerException, ModelException {
@@ -105,11 +115,15 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
         return new Data(this);
     }
 
+    // ─── Sub classes ─── //
+
     public static class Data implements CustomSerializable, JsonConvertible {
 
-        /** Properties **/
+        // ─── Properties ─── //
 
         private final List<Address.Data> addresses = new ArrayList<>();
+
+        // ─── Constructors ─── //
 
         public Data(AddressDataManager addressManager) throws ModelException {
             for (Address address : addressManager.getAddresses().values()) {
@@ -118,6 +132,8 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
         }
 
         public Data() {}
+
+        // ─── Overrides & inheritance ─── //
 
         @Override
         public void parseJson(String json) throws ParserException {

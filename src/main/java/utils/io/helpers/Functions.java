@@ -4,7 +4,7 @@ import utils.io.helpers.texts.formatting.TextFormatter;
 
 public class Functions {
 
-    /** Special methods **/
+    // ─── Utility methods ─── //
 
     public static String toSnakeCase(String value) {
         if (value == null || value.isBlank()) {

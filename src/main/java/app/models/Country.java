@@ -18,13 +18,13 @@ import java.util.regex.Pattern;
 
 public class Country extends Model implements CustomSerializable, CsvConvertible {
 
-    /** Properties **/
+    // ─── Properties ─── //
 
     private String name;
     private String iso2;
     private String iso3;
 
-    /** Getters **/
+    // ─── Getters ─── //
 
     @TableDisplay(name = "Nom", format = @TableDisplayFormattingOptions(styles = {TextStyle.ITALIC}), order = 1)
     public String getName() {
@@ -41,7 +41,7 @@ public class Country extends Model implements CustomSerializable, CsvConvertible
         return this.iso3;
     }
 
-    /** Setters **/
+    // ─── Setters ─── //
 
     public void setName(String name) throws ModelException {
         if (name == null || name.isBlank()) {
@@ -92,6 +92,8 @@ public class Country extends Model implements CustomSerializable, CsvConvertible
 
         this.iso3 = iso3;
     }
+
+    // ─── Overrides & inheritance ─── //
 
     @Override
     public void parseLine(String[] columns) throws ParserException {

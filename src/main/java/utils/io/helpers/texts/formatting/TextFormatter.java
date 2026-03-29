@@ -9,7 +9,7 @@ public class TextFormatter {
     private static final String ESCAPE = "\033[";
     private static final String RESET = ESCAPE + "0m";
 
-    /** Special methods **/
+    // ─── Utility methods ─── //
 
     // Couleurs de texte
 
