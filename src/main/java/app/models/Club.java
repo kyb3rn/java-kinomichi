@@ -13,6 +13,13 @@ import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 
+import app.models.formatting.ModelKeyTextFormattingPreset;
+import app.models.formatting.ModelPrimaryKeyTextFormattingPreset;
+import utils.io.helpers.tables.TableDisplay;
+import utils.io.helpers.tables.TableDisplayFormattingOptions;
+import utils.io.helpers.texts.formatting.TextAlignement;
+import utils.io.helpers.texts.formatting.TextStyle;
+
 import java.util.regex.Pattern;
 
 public class Club extends Model implements Hydratable<Club.Data> {
@@ -30,10 +37,12 @@ public class Club extends Model implements Hydratable<Club.Data> {
      * Getters
      **/
 
+    @TableDisplay(name = "#", format = @TableDisplayFormattingOptions(preset = ModelPrimaryKeyTextFormattingPreset.class, alignment = TextAlignement.RIGHT), order = 1)
     public int getId() {
         return this.id;
     }
 
+    @TableDisplay(name = "Nom", format = @TableDisplayFormattingOptions(styles = {TextStyle.ITALIC}), order = 2)
     public String getName() {
         return this.name;
     }
@@ -42,8 +51,16 @@ public class Club extends Model implements Hydratable<Club.Data> {
         return this.address;
     }
 
+    @TableDisplay(name = "Google Maps", order = 4)
     public String getGoogleMapsPositionLink() {
         return this.googleMapsPositionLink;
+    }
+
+    // ─── Special getters ─── //
+
+    @TableDisplay(name = "ID adresse", format = @TableDisplayFormattingOptions(preset = ModelKeyTextFormattingPreset.class, alignment = TextAlignement.CENTER), order = 3)
+    public int getAddressId() {
+        return this.address.getId();
     }
 
     /**

@@ -1,6 +1,7 @@
 package utils.io.helpers.texts.formatting;
 
 public enum TextColor {
+    NONE(null),
     BLACK("30"),
     RED("31"),
     GREEN("32"),

@@ -4,13 +4,13 @@ import app.data_management.managers.CountryDataManager;
 import app.data_management.managers.DataManagers;
 import app.data_management.managers.LoadDataManagerDataException;
 import app.models.Country;
-import utils.io.helpers.tables.TableFormatter;
-import utils.io.helpers.texts.aligning.TextAlignement;
+import app.models.formatting.ModelTableFormatter;
 import utils.io.menus.MenuStage;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ListCountriesMenu extends MenuStage {
 
@@ -26,23 +26,11 @@ public class ListCountriesMenu extends MenuStage {
             return "countries.manage";
         }
 
-        ArrayList<TableFormatter.Column> columns = new ArrayList<>();
-        columns.add(new TableFormatter.Column("Nom", TextAlignement.LEFT));
-        columns.add(new TableFormatter.Column("ISO 2", TextAlignement.CENTER));
-        columns.add(new TableFormatter.Column("ISO 3", TextAlignement.CENTER));
+        List<Country> sorted = countries.stream()
+                .sorted(Comparator.comparing(Country::getName))
+                .collect(Collectors.toList());
 
-        TableFormatter tableFormatter = new TableFormatter(columns);
-
-        countries.stream()
-            .sorted(Comparator.comparing(Country::getName))
-            .forEach(country -> {
-                tableFormatter.addColumnValue(0, country.getName());
-                tableFormatter.addColumnValue(1, country.getIso2());
-                tableFormatter.addColumnValue(2, country.getIso3());
-            }
-        );
-
-        tableFormatter.display();
+        ModelTableFormatter.forList(sorted).display();
 
         return "countries.manage";
     }

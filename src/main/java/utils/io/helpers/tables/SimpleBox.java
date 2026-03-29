@@ -4,23 +4,23 @@ import java.util.EnumSet;
 
 public class SimpleBox {
 
-    private final TableFormatter tableFormatter;
+    private final Table table;
 
     public SimpleBox() {
-        EnumSet<TableFormattingOptions> tableFormattingOptions = EnumSet.of(
-            TableFormattingOptions.BOX_AROUND,
-            TableFormattingOptions.SEPARATE_HEADER
+        EnumSet<TableOptions> tableOptions = EnumSet.of(
+            TableOptions.BOX_AROUND,
+            TableOptions.SEPARATE_HEADER
         );
-        this.tableFormatter = new TableFormatter(tableFormattingOptions);
-        this.tableFormatter.addColumn();
+        this.table = new Table(tableOptions);
+        this.table.addColumn();
     }
 
     public void addLine(String line) {
-        this.tableFormatter.addColumnValue(0, line);
+        this.table.addColumnValue(0, line);
     }
 
     public void display() {
-        this.tableFormatter.display();
+        this.table.display();
     }
 
 }

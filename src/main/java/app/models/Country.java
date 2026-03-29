@@ -8,6 +8,12 @@ import utils.data_management.parsing.StringParserException;
 
 import java.util.ArrayList;
 import java.util.List;
+import app.models.formatting.ModelPrimaryKeyTextFormattingPreset;
+import utils.io.helpers.tables.TableDisplay;
+import utils.io.helpers.tables.TableDisplayFormattingOptions;
+import utils.io.helpers.texts.formatting.TextAlignement;
+import utils.io.helpers.texts.formatting.TextStyle;
+
 import java.util.regex.Pattern;
 
 public class Country extends Model implements CustomSerializable, CsvConvertible {
@@ -20,14 +26,17 @@ public class Country extends Model implements CustomSerializable, CsvConvertible
 
     /** Getters **/
 
+    @TableDisplay(name = "Nom", format = @TableDisplayFormattingOptions(styles = {TextStyle.ITALIC}), order = 1)
     public String getName() {
         return this.name;
     }
 
+    @TableDisplay(name = "ISO 3166-1 alpha-2", format = @TableDisplayFormattingOptions(alignment = TextAlignement.CENTER), order = 2)
     public String getIso2() {
         return this.iso2;
     }
 
+    @TableDisplay(name = "ISO 3166-1 alpha-3", format = @TableDisplayFormattingOptions(preset = ModelPrimaryKeyTextFormattingPreset.class, alignment = TextAlignement.CENTER), order = 3)
     public String getIso3() {
         return this.iso3;
     }

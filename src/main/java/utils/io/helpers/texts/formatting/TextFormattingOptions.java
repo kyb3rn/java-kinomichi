@@ -10,6 +10,8 @@ public class TextFormattingOptions {
     private TextColor color;
     private TextBackgroundColor backgroundColor;
     private final EnumSet<TextStyle> styles;
+    private TextAlignement alignment;
+    private int minWidth;
 
     /** Constructors **/
 
@@ -17,6 +19,8 @@ public class TextFormattingOptions {
         this.color = null;
         this.backgroundColor = null;
         this.styles = EnumSet.noneOf(TextStyle.class);
+        this.alignment = TextAlignement.LEFT;
+        this.minWidth = 0;
     }
 
     /** Getters **/
@@ -33,6 +37,14 @@ public class TextFormattingOptions {
         return this.styles;
     }
 
+    public TextAlignement getAlignment() {
+        return this.alignment;
+    }
+
+    public int getMinWidth() {
+        return this.minWidth;
+    }
+
     /** Setters **/
 
     public TextFormattingOptions setColor(TextColor color) {
@@ -42,6 +54,20 @@ public class TextFormattingOptions {
 
     public TextFormattingOptions setBackgroundColor(TextBackgroundColor backgroundColor) {
         this.backgroundColor = backgroundColor;
+        return this;
+    }
+
+    public TextFormattingOptions setAlignment(TextAlignement alignment) {
+        this.alignment = alignment;
+        return this;
+    }
+
+    public TextFormattingOptions setMinWidth(int minWidth) {
+        if (minWidth < 0) {
+            throw new IllegalArgumentException("La longueur minimale d'un texte doit être un entier positif");
+        }
+
+        this.minWidth = minWidth;
         return this;
     }
 
@@ -60,11 +86,11 @@ public class TextFormattingOptions {
     public String buildEscapeSequence() {
         List<String> codes = new ArrayList<>();
 
-        if (this.color != null) {
+        if (this.color != null && this.color != TextColor.NONE) {
             codes.add(this.color.getCode());
         }
 
-        if (this.backgroundColor != null) {
+        if (this.backgroundColor != null && this.backgroundColor != TextBackgroundColor.NONE) {
             codes.add(this.backgroundColor.getCode());
         }
 

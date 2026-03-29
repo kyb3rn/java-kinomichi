@@ -1,8 +1,8 @@
 package utils.io.menus;
 
-import utils.io.helpers.tables.TableFormatter;
-import utils.io.helpers.tables.TableFormattingOptions;
-import utils.io.helpers.texts.aligning.TextAlignement;
+import utils.io.helpers.tables.Table;
+import utils.io.helpers.tables.TableOptions;
+import utils.io.helpers.texts.formatting.TextAlignement;
 import utils.io.helpers.texts.formatting.TextColor;
 import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.helpers.texts.formatting.TextFormattingOptions;
@@ -39,24 +39,24 @@ public class StandardMenu extends OptionedMenuStage {
     /** Overrides & inheritance **/
 
     public void display() {
-        TableFormatter menuTableFormatter = new TableFormatter();
+        Table menuTable = new Table();
 
         TextFormattingOptions singleHeaderTextFormattingOptions = new TextFormattingOptions();
         singleHeaderTextFormattingOptions.setColor(TextColor.MAGENTA);
         singleHeaderTextFormattingOptions.addStyle(TextStyle.BOLD);
-        menuTableFormatter.setSingleHeader(TextFormatter.format(this.title, singleHeaderTextFormattingOptions));
+        menuTable.setSingleHeader(TextFormatter.format(this.title, singleHeaderTextFormattingOptions));
 
-        menuTableFormatter.removeOption(TableFormattingOptions.SEPARATE_COLUMNS);
-        TableFormatter.Column prefixNumbersColumn = new TableFormatter.Column(TextAlignement.RIGHT);
-        TableFormatter.Column optionsColumn = new TableFormatter.Column();
-        menuTableFormatter.addColumn(prefixNumbersColumn);
-        menuTableFormatter.addColumn(optionsColumn);
+        menuTable.removeOption(TableOptions.SEPARATE_COLUMNS);
+        Table.Column prefixNumbersColumn = new Table.Column(TextAlignement.RIGHT);
+        Table.Column optionsColumn = new Table.Column();
+        menuTable.addColumn(prefixNumbersColumn);
+        menuTable.addColumn(optionsColumn);
         for (int i = 0; i < this.options.size(); i++) {
             prefixNumbersColumn.addValue(TextFormatter.bold(String.valueOf(i + 1)) + ".");
             optionsColumn.addValue(this.options.get(i).getText());
         }
 
-        menuTableFormatter.display();
+        menuTable.display();
     }
 
 }

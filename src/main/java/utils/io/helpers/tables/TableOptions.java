@@ -1,6 +1,6 @@
 package utils.io.helpers.tables;
 
-public enum TableFormattingOptions {
+public enum TableOptions {
     SEPARATE_COLUMNS,
     SEPARATE_ROWS,
     SEPARATE_HEADER,

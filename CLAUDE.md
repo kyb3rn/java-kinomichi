@@ -7,8 +7,8 @@ Les classes doivent être organisées avec des commentaires de section `// ─�
 1. `// ─── Properties ─── //`
 2. `// ─── Constructors ─── //`
 3. `// ─── Getters ─── //`
-4. `// ─── Setters ─── //`
-5. `// ─── Special getters ─── //`
+4. `// ─── Special getters ─── //`
+5. `// ─── Setters ─── //`
 6. `// ─── Special setters ─── //`
 7. `// ─── Special methods ─── //`
 8. `// ─── Overrides & inheritance ─── //`

@@ -4,11 +4,11 @@ import app.data_management.managers.ClubDataManager;
 import app.data_management.managers.DataManagers;
 import app.data_management.managers.LoadDataManagerDataException;
 import app.models.Club;
-import utils.io.helpers.tables.TableFormatter;
-import utils.io.helpers.texts.aligning.TextAlignement;
+import app.models.formatting.ModelTableFormatter;
 import utils.io.menus.MenuStage;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ListClubsMenu extends MenuStage {
 
@@ -20,29 +20,15 @@ public class ListClubsMenu extends MenuStage {
         try {
             clubs = DataManagers.get(ClubDataManager.class).getClubs().values();
         } catch (LoadDataManagerDataException e) {
-            System.out.printf("%nLes pays n'ont pas pu être chargés dans l'application.%n%n");
-            return "countries.manage";
+            System.out.printf("%nLes clubs n'ont pas pu être chargés dans l'application.%n%n");
+            return "clubs.manage";
         }
 
-        ArrayList<TableFormatter.Column> columns = new ArrayList<>();
-        columns.add(new TableFormatter.Column("ID", TextAlignement.CENTER));
-        columns.add(new TableFormatter.Column("Nom", TextAlignement.LEFT));
-        columns.add(new TableFormatter.Column("ID adresse", TextAlignement.CENTER));
-        columns.add(new TableFormatter.Column("Lien Google Maps", TextAlignement.LEFT));
+        List<Club> sorted = clubs.stream()
+                .sorted(Comparator.comparingInt(Club::getId))
+                .collect(Collectors.toList());
 
-        TableFormatter tableFormatter = new TableFormatter(columns);
-
-        clubs.stream()
-            .sorted(Comparator.comparingInt(Club::getId))
-            .forEach(country -> {
-                tableFormatter.addColumnValue(0, String.valueOf(country.getId()));
-                tableFormatter.addColumnValue(1, country.getName());
-                tableFormatter.addColumnValue(2, String.valueOf(country.getAddress().getId()));
-                tableFormatter.addColumnValue(3, country.getGoogleMapsPositionLink());
-            }
-        );
-
-        tableFormatter.display();
+        ModelTableFormatter.forList(sorted).display();
 
         return "clubs.manage";
     }

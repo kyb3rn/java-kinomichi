@@ -1,14 +1,15 @@
 package utils.io.helpers.tables;
 
 import utils.io.helpers.Functions;
-import utils.io.helpers.texts.aligning.TextAlignement;
-import utils.io.helpers.texts.aligning.TextAligner;
+import utils.io.helpers.texts.formatting.TextAlignement;
+import utils.io.helpers.texts.formatting.TextFormatter;
+import utils.io.helpers.texts.formatting.TextFormattingOptions;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class TableFormatter {
+public class Table {
 
     /**
      * Properties
@@ -17,25 +18,25 @@ public class TableFormatter {
     private final ArrayList<Column> columns = new ArrayList<>();
     private String singleHeader = null;
     private int horizontalPadding = 1;
-    private EnumSet<TableFormattingOptions> options = EnumSet.of(
-        TableFormattingOptions.SEPARATE_COLUMNS,
-        TableFormattingOptions.SEPARATE_HEADER,
-        TableFormattingOptions.DISPLAY_HEADER,
-        TableFormattingOptions.BOX_AROUND
+    private EnumSet<TableOptions> options = EnumSet.of(
+        TableOptions.SEPARATE_COLUMNS,
+        TableOptions.SEPARATE_HEADER,
+        TableOptions.DISPLAY_HEADER,
+        TableOptions.BOX_AROUND
     );
 
     /**
      * Constructors
      **/
 
-    public TableFormatter() {
+    public Table() {
     }
 
-    public TableFormatter(EnumSet<TableFormattingOptions> options) {
+    public Table(EnumSet<TableOptions> options) {
         this.options = options;
     }
 
-    public TableFormatter(ArrayList<Column> columns) {
+    public Table(ArrayList<Column> columns) {
         this.columns.addAll(columns);
     }
 
@@ -105,11 +106,11 @@ public class TableFormatter {
         column.addValues(values);
     }
 
-    public void addOption(TableFormattingOptions option) {
+    public void addOption(TableOptions option) {
         this.options.add(option);
     }
 
-    public void removeOption(TableFormattingOptions option) {
+    public void removeOption(TableOptions option) {
         this.options.remove(option);
     }
 
@@ -121,14 +122,14 @@ public class TableFormatter {
             ArrayList<Integer> columnsInnerWidth = new ArrayList<>();
             for (Column column : columns) {
                 int columnLongestValueLength = column.getValues().stream().mapToInt(Functions::visibleLength).max().orElse(0);
-                int columnHeaderLength = this.options.contains(TableFormattingOptions.DISPLAY_HEADER) ? (column.getName() != null ? Functions.visibleLength(column.getName()) : 0) : 0;
+                int columnHeaderLength = this.options.contains(TableOptions.DISPLAY_HEADER) ? (column.getName() != null ? Functions.visibleLength(column.getName()) : 0) : 0;
                 columnsInnerWidth.add(Math.max(columnLongestValueLength, columnHeaderLength));
             }
 
             // Column separation
             StringBuilder columnSeparationStringBuilder = new StringBuilder();
             columnSeparationStringBuilder.append(" ".repeat(this.horizontalPadding));
-            if (this.options.contains(TableFormattingOptions.SEPARATE_COLUMNS)) {
+            if (this.options.contains(TableOptions.SEPARATE_COLUMNS)) {
                 columnSeparationStringBuilder.append('│');
                 columnSeparationStringBuilder.append(" ".repeat(this.horizontalPadding));
             }
@@ -145,19 +146,19 @@ public class TableFormatter {
 
             // Format header
             StringBuilder headerStringBuilder = new StringBuilder();
-            if (this.options.contains(TableFormattingOptions.DISPLAY_HEADER)) {
+            if (this.options.contains(TableOptions.DISPLAY_HEADER)) {
                 if (this.singleHeader != null) {
-                    headerStringBuilder.append(TextAligner.getCenteredText(totalInnerWidth, this.singleHeader));
+                    headerStringBuilder.append(TextFormatter.center(totalInnerWidth, this.singleHeader));
                 } else {
                     headerStringBuilder.append(
                         this.columns.stream()
-                            .map(column -> TextAligner.getAlignedText(columnsInnerWidth.get(this.columns.indexOf(column)), column.getName(), column.getAlignement()))
+                            .map(column -> TextFormatter.align(columnsInnerWidth.get(this.columns.indexOf(column)), column.getName(), column.getAlignement()))
                             .collect(Collectors.joining(columnSeparationStringBuilder))
                     );
                 }
 
                 // Add surrounding vertical lines to header if box around option
-                if (this.options.contains(TableFormattingOptions.BOX_AROUND)) {
+                if (this.options.contains(TableOptions.BOX_AROUND)) {
                     headerStringBuilder.insert(0, " ".repeat(this.horizontalPadding));
                     headerStringBuilder.insert(0, '│');
                     headerStringBuilder.append(" ".repeat(this.horizontalPadding));
@@ -172,14 +173,21 @@ public class TableFormatter {
                     .range(0, maxAmountOfRowsToDisplay)
                     .mapToObj(i -> new StringBuilder().append(
                             this.columns.stream()
-                                .map(column -> TextAligner.getAlignedText(columnsInnerWidth.get(this.columns.indexOf(column)), column.getValues().get(i), column.getAlignement()))
+                                .map(column -> {
+                                    TextFormattingOptions opts = column.getFormattingOptions();
+                                    int savedMinWidth = opts.getMinWidth();
+                                    opts.setMinWidth(columnsInnerWidth.get(this.columns.indexOf(column)));
+                                    String formatted = TextFormatter.format(column.getValues().get(i), opts);
+                                    opts.setMinWidth(savedMinWidth);
+                                    return formatted;
+                                })
                                 .collect(Collectors.joining(columnSeparationStringBuilder))
                         )
                     ).toList()
             );
 
             // Add surrounding vertical lines to rows if box around option
-            if (this.options.contains(TableFormattingOptions.BOX_AROUND)) {
+            if (this.options.contains(TableOptions.BOX_AROUND)) {
                 rowsStringBuilder.forEach(row -> {
                     row.insert(0, " ".repeat(this.horizontalPadding));
                     row.insert(0, '│');
@@ -191,7 +199,7 @@ public class TableFormatter {
             // Intersections - X
             StringBuilder xIntersectionStringBuilder = new StringBuilder();
             xIntersectionStringBuilder.append("─".repeat(this.horizontalPadding));
-            if (this.options.contains(TableFormattingOptions.SEPARATE_COLUMNS)) {
+            if (this.options.contains(TableOptions.SEPARATE_COLUMNS)) {
                 xIntersectionStringBuilder.append('┼');
                 xIntersectionStringBuilder.append("─".repeat(this.horizontalPadding));
             }
@@ -199,7 +207,7 @@ public class TableFormatter {
             // Intersections - T downwards
             StringBuilder tDownwardsIntersectionStringBuilder = new StringBuilder();
             tDownwardsIntersectionStringBuilder.append("─".repeat(this.horizontalPadding));
-            if (this.options.contains(TableFormattingOptions.SEPARATE_COLUMNS)) {
+            if (this.options.contains(TableOptions.SEPARATE_COLUMNS)) {
                 tDownwardsIntersectionStringBuilder.append('┬');
                 tDownwardsIntersectionStringBuilder.append("─".repeat(this.horizontalPadding));
             }
@@ -207,7 +215,7 @@ public class TableFormatter {
             // Intersections - T upwards
             StringBuilder tUpwardsIntersectionStringBuilder = new StringBuilder();
             tUpwardsIntersectionStringBuilder.append("─".repeat(this.horizontalPadding));
-            if (this.options.contains(TableFormattingOptions.SEPARATE_COLUMNS)) {
+            if (this.options.contains(TableOptions.SEPARATE_COLUMNS)) {
                 tUpwardsIntersectionStringBuilder.append('┴');
                 tUpwardsIntersectionStringBuilder.append("─".repeat(this.horizontalPadding));
             }
@@ -215,7 +223,7 @@ public class TableFormatter {
             // Format row separation line
             StringBuilder rowSeparatorStringBuilder = new StringBuilder();
 
-            if (this.options.contains(TableFormattingOptions.BOX_AROUND)) {
+            if (this.options.contains(TableOptions.BOX_AROUND)) {
                 rowSeparatorStringBuilder.append('├').append("─".repeat(this.horizontalPadding));
             }
             rowSeparatorStringBuilder.append(
@@ -223,19 +231,19 @@ public class TableFormatter {
                     .map(column -> "─".repeat(columnsInnerWidth.get(this.columns.indexOf(column))))
                     .collect(Collectors.joining(xIntersectionStringBuilder))
             );
-            if (this.options.contains(TableFormattingOptions.BOX_AROUND)) {
+            if (this.options.contains(TableOptions.BOX_AROUND)) {
                 rowSeparatorStringBuilder.append("─".repeat(this.horizontalPadding)).append('┤');
             }
 
             // Insert separating rows between real rows
-            if (this.options.contains(TableFormattingOptions.SEPARATE_ROWS)) {
+            if (this.options.contains(TableOptions.SEPARATE_ROWS)) {
                 for (int i = rowsStringBuilder.size() - 1; i > 0; i--) {
                     rowsStringBuilder.add(i, rowSeparatorStringBuilder);
                 }
             }
 
             // Build the final stringBuilder
-            if (this.options.contains(TableFormattingOptions.BOX_AROUND)) {
+            if (this.options.contains(TableOptions.BOX_AROUND)) {
                 // Top line
                 StringBuilder topLineStringBuilder = new StringBuilder();
 
@@ -243,10 +251,10 @@ public class TableFormatter {
                 if (this.singleHeader != null) {
                     topLineColumnIntersection.append("─".repeat(this.horizontalPadding));
 
-                    if (this.options.contains(TableFormattingOptions.SEPARATE_COLUMNS)) {
+                    if (this.options.contains(TableOptions.SEPARATE_COLUMNS)) {
                         topLineColumnIntersection.append("─".repeat(1 + this.horizontalPadding));
                     }
-                } else if (!this.options.contains(TableFormattingOptions.SEPARATE_COLUMNS)) {
+                } else if (!this.options.contains(TableOptions.SEPARATE_COLUMNS)) {
                     topLineColumnIntersection.append("─".repeat(this.horizontalPadding));
                 } else {
                     topLineColumnIntersection = tDownwardsIntersectionStringBuilder;
@@ -271,14 +279,14 @@ public class TableFormatter {
                 stringBuilder.append(headerStringBuilder);
                 stringBuilder.append(System.lineSeparator());
 
-                if (this.options.contains(TableFormattingOptions.SEPARATE_HEADER)) {
+                if (this.options.contains(TableOptions.SEPARATE_HEADER)) {
                     StringBuilder headerSeparatingLineStringBuilder = new StringBuilder();
 
                     if (this.singleHeader != null) {
                         headerSeparatingLineStringBuilder.append('├');
                         headerSeparatingLineStringBuilder.append("─".repeat(this.horizontalPadding));
 
-                        if (!this.options.contains(TableFormattingOptions.SEPARATE_COLUMNS)) {
+                        if (!this.options.contains(TableOptions.SEPARATE_COLUMNS)) {
                             headerSeparatingLineStringBuilder.append("─".repeat(totalInnerWidth));
                         } else {
                             headerSeparatingLineStringBuilder.append(
@@ -305,12 +313,12 @@ public class TableFormatter {
                 stringBuilder.append(System.lineSeparator());
             });
 
-            if (this.options.contains(TableFormattingOptions.BOX_AROUND)) {
+            if (this.options.contains(TableOptions.BOX_AROUND)) {
                 // Bottom line
                 StringBuilder bottomLineStringBuilder = new StringBuilder();
 
                 StringBuilder bottomLineColumnIntersection = new StringBuilder();
-                if (!this.options.contains(TableFormattingOptions.SEPARATE_COLUMNS)) {
+                if (!this.options.contains(TableOptions.SEPARATE_COLUMNS)) {
                     bottomLineColumnIntersection.append("─".repeat(this.horizontalPadding));
                 } else {
                     bottomLineColumnIntersection = tUpwardsIntersectionStringBuilder;
@@ -342,19 +350,28 @@ public class TableFormatter {
 
         private final List<String> values = new ArrayList<>();
         private String name = null;
-        private TextAlignement alignement = TextAlignement.LEFT;
+        private TextFormattingOptions formattingOptions = new TextFormattingOptions();
 
         /**
          * Constructors
          **/
 
+        public Column(String name, TextFormattingOptions formattingOptions) {
+            this.setName(name);
+            this.formattingOptions = formattingOptions;
+        }
+
         public Column(String name, TextAlignement alignement) {
             this.setName(name);
-            this.alignement = alignement;
+            this.formattingOptions.setAlignment(alignement);
+        }
+
+        public Column(TextFormattingOptions formattingOptions) {
+            this.formattingOptions = formattingOptions;
         }
 
         public Column(TextAlignement alignement) {
-            this.alignement = alignement;
+            this.formattingOptions.setAlignment(alignement);
         }
 
         public Column(String name) {
@@ -373,11 +390,15 @@ public class TableFormatter {
         }
 
         public String getName() {
-            return name;
+            return this.name;
+        }
+
+        public TextFormattingOptions getFormattingOptions() {
+            return this.formattingOptions;
         }
 
         public TextAlignement getAlignement() {
-            return this.alignement;
+            return this.formattingOptions.getAlignment();
         }
 
         /**

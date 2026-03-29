@@ -13,6 +13,12 @@ import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 
+import app.models.formatting.ModelPrimaryKeyTextFormattingPreset;
+import utils.io.helpers.tables.TableDisplay;
+import utils.io.helpers.tables.TableDisplayFormattingOptions;
+import utils.io.helpers.texts.formatting.TextAlignement;
+import utils.io.helpers.texts.formatting.TextStyle;
+
 import java.util.regex.Pattern;
 
 public class Address extends Model implements Hydratable<Address.Data> {
@@ -29,6 +35,7 @@ public class Address extends Model implements Hydratable<Address.Data> {
 
     /** Getters **/
 
+    @TableDisplay(name = "#", format = @TableDisplayFormattingOptions(preset = ModelPrimaryKeyTextFormattingPreset.class, alignment = TextAlignement.RIGHT), order = 1)
     public int getId() {
         return this.id;
     }
@@ -37,22 +44,27 @@ public class Address extends Model implements Hydratable<Address.Data> {
         return this.country;
     }
 
+    @TableDisplay(name = "Code postal", order = 3)
     public int getZipCode() {
         return this.zipCode;
     }
 
+    @TableDisplay(name = "Ville", order = 4)
     public String getCity() {
         return this.city;
     }
 
+    @TableDisplay(name = "Rue", order = 5)
     public String getStreet() {
         return this.street;
     }
 
+    @TableDisplay(name = "Numéro", order = 6)
     public String getNumber() {
         return this.number;
     }
 
+    @TableDisplay(name = "Boîte", order = 7)
     public Integer getBoxNumber() {
         return this.boxNumber;
     }

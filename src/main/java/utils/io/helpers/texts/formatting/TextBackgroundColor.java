@@ -1,6 +1,7 @@
 package utils.io.helpers.texts.formatting;
 
 public enum TextBackgroundColor {
+    NONE(null),
     BLACK("40"),
     RED("41"),
     GREEN("42"),
