@@ -63,6 +63,28 @@ public class TableFormatter {
         this.columns.add(column);
     }
 
+    public void addColumn(String name, TextAlignement textAlignement) {
+        this.columns.add(new Column(name, textAlignement));
+    }
+
+    public void addColumn(String name) {
+        this.columns.add(new Column(name));
+    }
+
+    public void addColumn(TextAlignement textAlignement) {
+        this.columns.add(new Column(textAlignement));
+    }
+
+    public void addColumn() {
+        this.columns.add(new Column());
+    }
+
+    public void addColumns(int count) {
+        for (int i = 0; i < count; i++) {
+            this.columns.add(new Column());
+        }
+    }
+
     public void addColumnValue(int columnIndex, String value) {
         Column column = columns.get(columnIndex);
 
@@ -71,6 +93,16 @@ public class TableFormatter {
         }
 
         column.addValue(value);
+    }
+
+    public void addColumnValues(int columnIndex, List<String> values) {
+        Column column = columns.get(columnIndex);
+
+        if (column == null) {
+            throw new IndexOutOfBoundsException("Cet index de colonne n'existe pas");
+        }
+
+        column.addValues(values);
     }
 
     public void addOption(TableFormattingOptions option) {
@@ -373,6 +405,12 @@ public class TableFormatter {
                 }
 
                 this.values.add(value);
+            }
+        }
+
+        public void addValues(List<String> values) {
+            for (String value : values) {
+                this.addValue(value);
             }
         }
 

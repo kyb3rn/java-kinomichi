@@ -12,8 +12,7 @@ public class SimpleBox {
             TableFormattingOptions.SEPARATE_HEADER
         );
         this.tableFormatter = new TableFormatter(tableFormattingOptions);
-        TableFormatter.Column singleColumn = new TableFormatter.Column();
-        this.tableFormatter.addColumn(singleColumn);
+        this.tableFormatter.addColumn();
     }
 
     public void addLine(String line) {
