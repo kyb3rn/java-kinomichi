@@ -5,8 +5,7 @@ import app.models.Address;
 import app.models.Club;
 import app.models.ModelException;
 import utils.io.helpers.Functions;
-import utils.io.helpers.tables.TableFormatter;
-import utils.io.helpers.tables.TableFormattingOptions;
+import utils.io.helpers.tables.SimpleBox;
 import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.menus.MenuStage;
 
@@ -23,15 +22,10 @@ public class AddClubMenu extends MenuStage {
         Club.Data clubData = new Club.Data();
         Address.Data clubAddressData = new Address.Data();
 
-        TableFormatter sectionHeaderTableFormatter = new TableFormatter();
-        sectionHeaderTableFormatter.removeOption(TableFormattingOptions.DISPLAY_HEADER);
-        TableFormatter.Column sectionHeaderSingleColumn = new TableFormatter.Column();
-        sectionHeaderTableFormatter.addColumn(sectionHeaderSingleColumn);
-
-        sectionHeaderSingleColumn.addValue(TextFormatter.bold(TextFormatter.magenta("# Ajout d'un club")));
-        sectionHeaderSingleColumn.addValue(TextFormatter.italic("Pour annuler à tout moment, entrez la commande " + TextFormatter.bold("!q")));
-
-        sectionHeaderTableFormatter.display();
+        SimpleBox sectionHeaderSimpleBox = new SimpleBox();
+        sectionHeaderSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Ajout d'un club")));
+        sectionHeaderSimpleBox.addLine(TextFormatter.italic("Pour annuler à tout moment, entrez la commande " + TextFormatter.bold("!q")));
+        sectionHeaderSimpleBox.display();
 
         System.out.println(TextFormatter.bold(TextFormatter.green("1.")) + " Nom");
         while (true) {
@@ -197,15 +191,10 @@ public class AddClubMenu extends MenuStage {
             return "clubs.manage";
         }
 
-        TableFormatter clubAddedTableFormatter = new TableFormatter();
-        clubAddedTableFormatter.removeOption(TableFormattingOptions.DISPLAY_HEADER);
-        TableFormatter.Column clubAddedSingleColumn = new TableFormatter.Column();
-        clubAddedTableFormatter.addColumn(clubAddedSingleColumn);
-
-        clubAddedSingleColumn.addValue(TextFormatter.bold(TextFormatter.magenta("# Club ajouté")));
-        clubAddedSingleColumn.addValue(TextFormatter.italic("Le club a bien été enregistré sous l'identifiant " + TextFormatter.bold("#" + club.getId())));
-
-        clubAddedTableFormatter.display();
+        SimpleBox clubAddedSimpleBox = new SimpleBox();
+        clubAddedSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Club ajouté")));
+        clubAddedSimpleBox.addLine(TextFormatter.italic("Le club a bien été enregistré sous l'identifiant " + TextFormatter.bold("#" + club.getId())));
+        clubAddedSimpleBox.display();
 
         return "clubs.manage";
     }
