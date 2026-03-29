@@ -31,7 +31,7 @@ public class Club extends Model implements Hydratable<Club.Data> {
     private int id = -1;
     private String name;
     private Address address;
-    private String googleMapsPositionLink;
+    private String googleMapsLink;
 
     /**
      * Getters
@@ -52,8 +52,8 @@ public class Club extends Model implements Hydratable<Club.Data> {
     }
 
     @TableDisplay(name = "Google Maps", order = 4)
-    public String getGoogleMapsPositionLink() {
-        return this.googleMapsPositionLink;
+    public String getGoogleMapsLink() {
+        return this.googleMapsLink;
     }
 
     // ─── Special getters ─── //
@@ -91,22 +91,22 @@ public class Club extends Model implements Hydratable<Club.Data> {
         this.address = address;
     }
 
-    public void setGoogleMapsPositionLink(String googleMapsPositionLink) throws ModelException {
-        if (googleMapsPositionLink == null || googleMapsPositionLink.isEmpty()) {
-            this.googleMapsPositionLink = null;
+    public void setGoogleMapsLink(String googleMapsLink) throws ModelException {
+        if (googleMapsLink == null || googleMapsLink.isEmpty()) {
+            this.googleMapsLink = null;
         } else {
-            if (googleMapsPositionLink.isBlank()) {
+            if (googleMapsLink.isBlank()) {
                 throw new ModelException("Le lien Google Maps d'un club ne peut pas être vide (null accepté)");
             }
 
-            googleMapsPositionLink = googleMapsPositionLink.strip();
+            googleMapsLink = googleMapsLink.strip();
 
             Pattern googleMapsLinkPattern = Pattern.compile("^https://maps\\.app\\.goo\\.gl/[A-Za-z0-9]{17}$");
-            if (!googleMapsLinkPattern.matcher(googleMapsPositionLink).matches()) {
+            if (!googleMapsLinkPattern.matcher(googleMapsLink).matches()) {
                 throw new ModelException("Le format du lien Google Maps est invalide");
             }
 
-            this.googleMapsPositionLink = googleMapsPositionLink;
+            this.googleMapsLink = googleMapsLink;
         }
     }
 
@@ -132,12 +132,12 @@ public class Club extends Model implements Hydratable<Club.Data> {
         this.setId(dataObject.getId());
         this.setName(dataObject.getName());
         this.setAddressFromId(dataObject.getAddressId());
-        this.setGoogleMapsPositionLink(dataObject.getGoogleMapsPositionLink());
+        this.setGoogleMapsLink(dataObject.getGoogleMapsLink());
     }
 
     @Override
     public Data dehydrate() throws ModelException {
-        return new Data(this.getId(), this.getName(), this.getAddress().getId(), this.getGoogleMapsPositionLink());
+        return new Data(this.getId(), this.getName(), this.getAddress().getId(), this.getGoogleMapsLink());
     }
 
     @Override
@@ -149,15 +149,15 @@ public class Club extends Model implements Hydratable<Club.Data> {
         private int id = -1;
         private String name;
         private int addressId = -1;
-        private String googleMapsPositionLink;
+        private String googleMapsLink;
 
         public Data() {}
 
-        public Data(int id, String name, int addressId, String googleMapsPositionLink) throws ModelException {
+        public Data(int id, String name, int addressId, String googleMapsLink) throws ModelException {
             this.setId(id);
             this.setName(name);
             this.setAddressId(addressId);
-            this.setGoogleMapsPositionLink(googleMapsPositionLink);
+            this.setGoogleMapsLink(googleMapsLink);
         }
 
         public int getId() {
@@ -172,8 +172,8 @@ public class Club extends Model implements Hydratable<Club.Data> {
             return this.addressId;
         }
 
-        public String getGoogleMapsPositionLink() {
-            return this.googleMapsPositionLink;
+        public String getGoogleMapsLink() {
+            return this.googleMapsLink;
         }
 
         public void setId(int id) throws ModelException {
@@ -222,15 +222,15 @@ public class Club extends Model implements Hydratable<Club.Data> {
             this.setAddressId(addressIdAsInt);
         }
 
-        public void setGoogleMapsPositionLink(String googleMapsPositionLink) throws ModelException {
-            if (googleMapsPositionLink == null || googleMapsPositionLink.isEmpty()) {
-                this.googleMapsPositionLink = null;
+        public void setGoogleMapsLink(String googleMapsLink) throws ModelException {
+            if (googleMapsLink == null || googleMapsLink.isEmpty()) {
+                this.googleMapsLink = null;
             } else {
-                if (googleMapsPositionLink.isBlank()) {
+                if (googleMapsLink.isBlank()) {
                     throw new ModelException("Le lien Google Maps d'un club ne peut pas être vide (null accepté)");
                 }
 
-                this.googleMapsPositionLink = googleMapsPositionLink.strip();
+                this.googleMapsLink = googleMapsLink.strip();
             }
         }
 
@@ -257,8 +257,8 @@ public class Club extends Model implements Hydratable<Club.Data> {
                 this.setName(obj.get("name").getAsString());
                 this.setAddressId(obj.get("addressId").getAsString());
 
-                if (obj.has("googleMapsPositionLink") && !obj.get("googleMapsPositionLink").isJsonNull()) {
-                    this.setGoogleMapsPositionLink(obj.get("googleMapsPositionLink").getAsString());
+                if (obj.has("googleMapsLink") && !obj.get("googleMapsLink").isJsonNull()) {
+                    this.setGoogleMapsLink(obj.get("googleMapsLink").getAsString());
                 }
             } catch (ModelException e) {
                 throw new ParserException(e);

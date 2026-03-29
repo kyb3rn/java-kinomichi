@@ -173,7 +173,7 @@ public class AddClubMenu extends MenuStage {
                     return "clubs.manage";
                 }
 
-                clubData.setGoogleMapsPositionLink(input);
+                clubData.setGoogleMapsLink(input);
                 break;
             } catch (ModelException e) {
                 System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
