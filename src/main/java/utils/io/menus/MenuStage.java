@@ -4,6 +4,6 @@ public abstract class MenuStage {
 
     // ─── Utility methods ─── //
 
-    public abstract String use();
+    public abstract MenuLeadTo use();
 
 }

@@ -5,6 +5,7 @@ import app.models.managers.CountryDataManager;
 import app.models.managers.DataManager;
 import app.models.managers.DataManagers;
 import utils.io.helpers.texts.formatting.TextFormatter;
+import utils.io.menus.MenuLeadTo;
 import utils.io.menus.StandardMenu;
 
 import java.util.List;
@@ -22,10 +23,16 @@ public class MainMenu extends StandardMenu {
         List<DataManager<?>> badlyInitializedDataManagers = DataManagers.getBadlyInitializedOnes();
 
         if (!badlyInitializedDataManagers.isEmpty()) {
-            this.addOption3(badlyInitializedDataManagers);
+            this.addOption("Re-initialisation de gestionnaires de données (%s)".formatted(badlyInitializedDataManagers.size()), "data_managers.reinit");
         }
 
-        this.addOption("Quitter", null);
+        List<DataManager<?>> unsavedDataManagers = DataManagers.getUnsavedOnes();
+
+        if (!unsavedDataManagers.isEmpty()) {
+            this.addOption("Sauvegarder des données non enregistrées (%d)".formatted(unsavedDataManagers.size()), "data_managers.save");
+        }
+
+        this.addOption("Quitter");
     }
 
     // ─── Utility methods ─── //
@@ -52,10 +59,6 @@ public class MainMenu extends StandardMenu {
         }
 
         this.addOption(option2, clubsInitialized ? "clubs.manage" : "main");
-    }
-
-    private void addOption3(List<DataManager<?>> badlyInitializedDataManagers) {
-        this.addOption("Re-initialisation de gestionnaires de données (%s)".formatted(badlyInitializedDataManagers.size()), "data_managers.reinit");
     }
 
 }

@@ -141,7 +141,7 @@ public class DataManagers {
     public static boolean hasDependencies(DataManager<?> manager) {
         String managerPackage = manager.getClass().getPackageName();
         String parentPackage = managerPackage.substring(0, managerPackage.lastIndexOf('.'));
-        String modelName = manager.getClass().getSimpleName().replace("DataManager", "");
+        String modelName = manager.getModelSimpleName();
 
         try {
             Class<?> modelClass = Class.forName(parentPackage + "." + modelName);
@@ -153,6 +153,10 @@ public class DataManagers {
         } catch (ClassNotFoundException ignored) {}
 
         return false;
+    }
+
+    public static List<DataManager<?>> getUnsavedOnes() {
+        return DataManagers.instances.values().stream().filter(DataManager::hasUnsavedChanges).toList();
     }
 
     public static List<DataManager<?>> getBadlyInitializedOnes() {

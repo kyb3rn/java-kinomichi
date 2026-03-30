@@ -45,12 +45,13 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
 
         this.clubs.put(club.getId(), club);
 
-        this.unsavedChanges = true;
+        if (this.isInitialized()) {
+            this.unsavedChanges = true;
 
-        try {
-            this.export();
-            this.unsavedChanges = false;
-        } catch (DataManagerException ignored) {
+            try {
+                this.export();
+            } catch (DataManagerException ignored) {
+            }
         }
     }
 
@@ -93,14 +94,19 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
 
     @Override
     public void export() throws DataManagerException, ModelException {
-        Data data = new Data(this);
-        super.export(data);
+        if (this.isInitialized()) {
+            Data data = new Data(this);
+            super.export(data);
+            this.unsavedChanges = false;
+        }
     }
 
     @Override
     public void export(FileType fileType) throws DataManagerException, ModelException {
-        Data data = new Data(this);
-        super.export(fileType, data);
+        if (this.isInitialized()) {
+            Data data = new Data(this);
+            super.export(fileType, data);
+        }
     }
 
     @Override

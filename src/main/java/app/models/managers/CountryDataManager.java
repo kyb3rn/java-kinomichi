@@ -42,12 +42,13 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
 
         this.countries.put(country.getIso3(), country);
 
-        this.unsavedChanges = true;
+        if (this.isInitialized()) {
+            this.unsavedChanges = true;
 
-        try {
-            this.export();
-            this.unsavedChanges = false;
-        } catch (DataManagerException ignored) {
+            try {
+                this.export();
+            } catch (DataManagerException ignored) {
+            }
         }
     }
 
@@ -90,14 +91,19 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
 
     @Override
     public void export() throws DataManagerException {
-        Data data = new Data(this);
-        super.export(data);
+        if (this.isInitialized()) {
+            Data data = new Data(this);
+            super.export(data);
+            this.unsavedChanges = false;
+        }
     }
 
     @Override
     public void export(FileType fileType) throws DataManagerException {
-        Data data = new Data(this);
-        super.export(fileType, data);
+        if (this.isInitialized()) {
+            Data data = new Data(this);
+            super.export(fileType, data);
+        }
     }
 
     @Override

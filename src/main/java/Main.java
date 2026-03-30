@@ -8,7 +8,9 @@ import app.menus.clubs.ListClubsMenu;
 import app.menus.clubs.ManageClubsMenu;
 import app.menus.countries.ListCountriesMenu;
 import app.menus.countries.ManageCountriesMenu;
-import app.menus.data_managers.ReinitDataManagersMenu;
+import app.menus.data_managers.ReInitDataManagersMenu;
+import app.menus.data_managers.SaveDataManagersMenu;
+import utils.io.menus.MenuLeadTo;
 import utils.io.menus.MenuStage;
 
 import java.util.HashMap;
@@ -31,8 +33,10 @@ public class Main {
         menus.put("clubs.manage", ManageClubsMenu::new);
 
         // Static menus (same instance reused)
-        ReinitDataManagersMenu reinitDataManagersMenu = new ReinitDataManagersMenu();
+        ReInitDataManagersMenu reinitDataManagersMenu = new ReInitDataManagersMenu();
         menus.put("data_managers.reinit", () -> reinitDataManagersMenu);
+
+        menus.put("data_managers.save", SaveDataManagersMenu::new);
 
         ListCountriesMenu listCountriesMenu = new ListCountriesMenu();
         ListClubsMenu listClubsMenu = new ListClubsMenu();
@@ -41,19 +45,20 @@ public class Main {
         menus.put("clubs.list", () -> listClubsMenu);
         menus.put("clubs.add", () -> addClubMenu);
 
-        String previousMenu = null;
-        String nextMenu = "main";
+        String previousMenuRoute = null;
+        String nextMenuRoute = "main";
 
-        while (nextMenu != null) {
-            Supplier<MenuStage> menuSupplier = menus.get(nextMenu);
+        while (nextMenuRoute != null) {
+            Supplier<MenuStage> menuSupplier = menus.get(nextMenuRoute);
             MenuStage nextMenuStage = menuSupplier != null ? menuSupplier.get() : null;
 
             if (nextMenuStage != null) {
-                previousMenu = nextMenu;
-                nextMenu = nextMenuStage.use();
+                previousMenuRoute = nextMenuRoute;
+                MenuLeadTo menuLeadTo = nextMenuStage.use();
+                nextMenuRoute = menuLeadTo != null ? menuLeadTo.getLeadTo() : null;
             } else {
                 System.out.printf("%nAucun nouveau menu ou action n'est lié à choix%n%n");
-                nextMenu = previousMenu;
+                nextMenuRoute = previousMenuRoute;
             }
         }
 

@@ -5,13 +5,13 @@ public class MenuOption {
     // ─── Properties ─── //
 
     private String text;
-    private String leadTo;
+    private MenuOptionOutcome outcome;
 
     // ─── Constructors ─── //
 
-    public MenuOption(String text, String leadTo) {
+    public MenuOption(String text, MenuOptionOutcome outcome) {
         this.setText(text);
-        this.setLeadTo(leadTo);
+        this.setOutcome(outcome);
     }
 
     // ─── Getters ─── //
@@ -20,8 +20,8 @@ public class MenuOption {
         return this.text;
     }
 
-    public String getLeadTo() {
-        return this.leadTo;
+    public MenuOptionOutcome getOutcome() {
+        return this.outcome;
     }
 
     // ─── Setters ─── //
@@ -34,16 +34,8 @@ public class MenuOption {
         this.text = text;
     }
 
-    public void setLeadTo(String leadTo) {
-        if (leadTo == null) {
-            this.leadTo = null;
-        } else {
-            if (leadTo.isBlank()) {
-                throw new IllegalArgumentException("Le point suivant d'une option dans un menu ne peut pas être vide");
-            }
-
-            this.leadTo = leadTo;
-        }
+    public void setOutcome(MenuOptionOutcome outcome) {
+        this.outcome = outcome;
     }
 
 }

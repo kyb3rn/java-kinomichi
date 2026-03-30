@@ -8,6 +8,7 @@ import app.utils.ThrowingStringAcceptor;
 import utils.io.helpers.Functions;
 import utils.io.helpers.tables.SimpleBox;
 import utils.io.helpers.texts.formatting.TextFormatter;
+import utils.io.menus.MenuLeadTo;
 import utils.io.menus.MenuStage;
 
 import java.util.Scanner;
@@ -21,7 +22,7 @@ public class AddClubMenu extends MenuStage {
             System.out.print("> ");
             try {
                 String input = scanner.nextLine();
-                if (input.equals("!q")) {
+                if (input.equals("!!q")) {
                     System.out.println();
                     return true;
                 }
@@ -39,7 +40,7 @@ public class AddClubMenu extends MenuStage {
     // ─── Overrides & inheritance ─── //
 
     @Override
-    public String use() {
+    public MenuLeadTo use() {
         Scanner scanner = new Scanner(System.in);
 
         Club.Data clubData = new Club.Data();
@@ -47,11 +48,11 @@ public class AddClubMenu extends MenuStage {
 
         SimpleBox sectionHeaderSimpleBox = new SimpleBox();
         sectionHeaderSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Ajout d'un club")));
-        sectionHeaderSimpleBox.addLine(TextFormatter.italic("Pour annuler à tout moment, entrez la commande " + TextFormatter.bold("!q")));
+        sectionHeaderSimpleBox.addLine(TextFormatter.italic("Pour annuler à tout moment, entrez la commande " + TextFormatter.bold("!!q")));
         sectionHeaderSimpleBox.display();
 
         System.out.println(TextFormatter.bold(TextFormatter.green("1.")) + " Nom");
-        if (this.promptField(scanner, clubData::setName)) return "clubs.manage";
+        if (this.promptField(scanner, clubData::setName)) return new MenuLeadTo("clubs.manage");
 
         System.out.println(TextFormatter.bold(TextFormatter.green("2.")) + " Adresse");
         System.out.println(TextFormatter.bold(TextFormatter.yellow("2.1.")) + " Adresse - Pays (ISO 3)");
@@ -63,25 +64,25 @@ public class AddClubMenu extends MenuStage {
             } catch (LoadDataManagerDataException e) {
                 throw new DataManagerException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3));
             }
-        })) return "clubs.manage";
+        })) return new MenuLeadTo("clubs.manage");
 
         System.out.println(TextFormatter.bold(TextFormatter.yellow("2.2.")) + " Adresse - Code postal");
-        if (this.promptField(scanner, clubAddressData::setZipCode)) return "clubs.manage";
+        if (this.promptField(scanner, clubAddressData::setZipCode)) return new MenuLeadTo("clubs.manage");
 
         System.out.println(TextFormatter.bold(TextFormatter.yellow("2.3.")) + " Adresse - Ville");
-        if (this.promptField(scanner, clubAddressData::setCity)) return "clubs.manage";
+        if (this.promptField(scanner, clubAddressData::setCity)) return new MenuLeadTo("clubs.manage");
 
         System.out.println(TextFormatter.bold(TextFormatter.yellow("2.4.")) + " Adresse - Rue");
-        if (this.promptField(scanner, clubAddressData::setStreet)) return "clubs.manage";
+        if (this.promptField(scanner, clubAddressData::setStreet)) return new MenuLeadTo("clubs.manage");
 
         System.out.println(TextFormatter.bold(TextFormatter.yellow("2.5.")) + " Adresse - Numéro");
-        if (this.promptField(scanner, clubAddressData::setNumber)) return "clubs.manage";
+        if (this.promptField(scanner, clubAddressData::setNumber)) return new MenuLeadTo("clubs.manage");
 
         System.out.println(TextFormatter.bold(TextFormatter.yellow("2.6.")) + " Adresse - Numéro de bôite " + TextFormatter.italic("(optionnel)"));
-        if (this.promptField(scanner, clubAddressData::setBoxNumber)) return "clubs.manage";
+        if (this.promptField(scanner, clubAddressData::setBoxNumber)) return new MenuLeadTo("clubs.manage");
 
         System.out.println(TextFormatter.bold(TextFormatter.green("3.")) + " Lien Google Maps " + TextFormatter.italic("(optionnel)"));
-        if (this.promptField(scanner, clubData::setGoogleMapsLink)) return "clubs.manage";
+        if (this.promptField(scanner, clubData::setGoogleMapsLink)) return new MenuLeadTo("clubs.manage");
 
         Club club;
         try {
@@ -90,7 +91,7 @@ public class AddClubMenu extends MenuStage {
             club = DataManagers.initAndGet(ClubDataManager.class).addClub(clubData);
         } catch (LoadDataManagerDataException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
-            return "clubs.manage";
+            return new MenuLeadTo("clubs.manage");
         }
 
         SimpleBox clubAddedSimpleBox = new SimpleBox();
@@ -98,7 +99,7 @@ public class AddClubMenu extends MenuStage {
         clubAddedSimpleBox.addLine(TextFormatter.italic("Le club a bien été enregistré sous l'identifiant " + TextFormatter.bold("#" + club.getId())));
         clubAddedSimpleBox.display();
 
-        return "clubs.manage";
+        return new MenuLeadTo("clubs.manage");
     }
 
 }

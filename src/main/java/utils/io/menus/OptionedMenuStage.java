@@ -12,13 +12,36 @@ public abstract class OptionedMenuStage extends MenuStage {
 
     // ─── Utility methods ─── //
 
-    public void addOption(MenuOption option) {
-        this.options.add(option);
+    public void addOption(String text) {
+        this.options.add(new MenuOption(text, null));
     }
 
     public void addOption(String text, String leadTo) {
-        MenuOption option = new MenuOption(text, leadTo);
-        this.options.add(option);
+        if (leadTo != null) {
+            if (leadTo.isBlank()) {
+                throw new IllegalArgumentException("Le point suivant d'une option dans un menu ne peut pas être vide");
+            } else {
+                leadTo = leadTo.strip();
+            }
+        }
+
+        this.options.add(new MenuOption(text, new MenuOptionOutcomeLeading(new MenuLeadTo(leadTo))));
+    }
+
+    public void addOption(String text, Runnable action, String leadTo) {
+        if (leadTo != null) {
+            if (leadTo.isBlank()) {
+                throw new IllegalArgumentException("Le point suivant d'une option dans un menu ne peut pas être vide");
+            } else {
+                leadTo = leadTo.strip();
+            }
+        }
+
+        this.options.add(new MenuOption(text, new MenuOptionOutcomeLeadingAction(action, new MenuLeadTo(leadTo))));
+    }
+
+    public void addOption(String text, MenuOptionOutcome menuOptionOutcome) {
+        this.options.add(new MenuOption(text, menuOptionOutcome));
     }
 
     private boolean isChoiceValid(String input) {
@@ -36,7 +59,7 @@ public abstract class OptionedMenuStage extends MenuStage {
     public abstract void display();
 
     @Override
-    public String use() {
+    public OptionedMenuMenuLeadTo use() {
         int optionsSize = this.options.size();
 
         this.display();
@@ -45,13 +68,13 @@ public abstract class OptionedMenuStage extends MenuStage {
             Scanner scanner = new Scanner(System.in);
             boolean isValidChoice = false;
             MenuOption selectedOption = null;
+            int choice = -1;
 
             do {
                 System.out.print("> ");
                 String input = scanner.nextLine();
                 System.out.println();
 
-                int choice;
                 try {
                     choice = Integer.parseInt(input);
                 } catch (NumberFormatException e) {
@@ -74,12 +97,20 @@ public abstract class OptionedMenuStage extends MenuStage {
                 }
             } while (!isValidChoice);
 
-            return selectedOption.getLeadTo();
+            if (selectedOption.getOutcome() instanceof MenuOptionOutcomeAction menuOptionOutcomeAction) {
+                menuOptionOutcomeAction.execute();
+            }
+
+            if (selectedOption.getOutcome() instanceof LeadableMenuOptionOutcome leadableMenuOptionOutcome) {
+                return new OptionedMenuMenuLeadTo(choice, leadableMenuOptionOutcome.getLeadingChoice());
+            }
+
+            return new OptionedMenuMenuLeadTo(choice);
         } else {
             System.out.printf("%nAucune option attribuée à ce menu à choix%n%n");
         }
 
-        return null;
+        return new OptionedMenuMenuLeadTo(-1);
     }
 
 }

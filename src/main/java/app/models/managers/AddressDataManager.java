@@ -50,12 +50,13 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
 
         this.addresses.put(address.getId(), address);
 
-        this.unsavedChanges = true;
+        if (this.isInitialized()) {
+            this.unsavedChanges = true;
 
-        try {
-            this.export();
-            this.unsavedChanges = false;
-        } catch (DataManagerException ignored) {
+            try {
+                this.export();
+            } catch (DataManagerException ignored) {
+            }
         }
     }
 
@@ -98,14 +99,19 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
 
     @Override
     public void export() throws DataManagerException, ModelException {
-        Data data = new Data(this);
-        super.export(data);
+        if (this.isInitialized()) {
+            Data data = new Data(this);
+            super.export(data);
+            this.unsavedChanges = false;
+        }
     }
 
     @Override
     public void export(FileType fileType) throws DataManagerException, ModelException {
-        Data data = new Data(this);
-        super.export(fileType, data);
+        if (this.isInitialized()) {
+            Data data = new Data(this);
+            super.export(fileType, data);
+        }
     }
 
     @Override
