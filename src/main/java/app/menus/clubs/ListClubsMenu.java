@@ -24,9 +24,7 @@ public class ListClubsMenu extends MenuStage {
             return "clubs.manage";
         }
 
-        List<Club> sorted = clubs.stream()
-                .sorted(Comparator.comparingInt(Club::getId))
-                .collect(Collectors.toList());
+        List<Club> sorted = clubs.stream().sorted(Comparator.comparingInt(Club::getId)).toList();
 
         ModelTableFormatter.forList(sorted).display();
 

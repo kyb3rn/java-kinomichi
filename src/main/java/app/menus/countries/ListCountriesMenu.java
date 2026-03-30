@@ -26,9 +26,7 @@ public class ListCountriesMenu extends MenuStage {
             return "countries.manage";
         }
 
-        List<Country> sorted = countries.stream()
-                .sorted(Comparator.comparing(Country::getName))
-                .collect(Collectors.toList());
+        List<Country> sorted = countries.stream().sorted(Comparator.comparing(Country::getName)).toList();
 
         ModelTableFormatter.forList(sorted).display();
 

@@ -136,12 +136,16 @@ public class Address extends Model implements Hydratable<Address.Data> {
     // ─── Special setters ─── //
 
     public void setCountryFromPk(String iso3) throws ModelException {
-        this.country = getCountryFromIso3(iso3);
+        iso3 = verifyCountryIso3(iso3);
+
+        try {
+            this.country = DataManagers.initAndGet(CountryDataManager.class).getCountryWithExceptions(iso3);
+        } catch (LoadDataManagerDataException e) {
+            throw new ModelException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3));
+        }
     }
 
-    // ─── Utility methods ─── //
-
-    public static Country getCountryFromIso3(String iso3) throws ModelException {
+    private static String verifyCountryIso3(String iso3) throws ModelException {
         if (iso3 == null || iso3.isBlank()) {
             throw new ModelException("L'ISO3 ne peut pas être vide");
         }
@@ -158,20 +162,10 @@ public class Address extends Model implements Hydratable<Address.Data> {
         if (!iso3Pattern.matcher(iso3).matches()) {
             throw new ModelException("L'ISO3 d'un pays doit être composé uniquement de lettres");
         }
-
-        Country country;
-        try {
-            country = DataManagers.initAndGet(CountryDataManager.class).getCountry(iso3);
-        } catch (LoadDataManagerDataException e) {
-            throw new ModelException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3));
-        }
-
-        if (country == null) {
-            throw new ModelException("Aucun des pays enregistrés ne porte l'ISO3 '%s'".formatted(iso3));
-        }
-
-        return country;
+        return iso3;
     }
+
+    // ─── Utility methods ─── //
 
     // ─── Overrides & inheritance ─── //
 
@@ -286,22 +280,7 @@ public class Address extends Model implements Hydratable<Address.Data> {
         }
 
         public void setCountryIso3(String countryIso3) throws ModelException {
-            if (countryIso3 == null || countryIso3.isBlank()) {
-                throw new ModelException("L'ISO3 ne peut pas être vide");
-            }
-
-            countryIso3 = countryIso3.strip();
-
-            if (countryIso3.length() != 3) {
-                throw new ModelException("L'ISO3 d'un pays doit être long de 3 caractères");
-            }
-
-            countryIso3 = countryIso3.toUpperCase();
-
-            Pattern countryIso3Pattern = Pattern.compile("^[A-Z]{3}$");
-            if (!countryIso3Pattern.matcher(countryIso3).matches()) {
-                throw new ModelException("L'ISO3 d'un pays doit être composé uniquement de lettres");
-            }
+            countryIso3 = verifyCountryIso3(countryIso3);
 
             this.countryIso3 = countryIso3.strip();
         }

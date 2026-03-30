@@ -2,11 +2,9 @@ package app.menus.clubs;
 
 import app.models.Address;
 import app.models.Club;
+import app.models.Country;
 import app.models.ModelException;
-import app.models.managers.AddressDataManager;
-import app.models.managers.ClubDataManager;
-import app.models.managers.DataManagers;
-import app.models.managers.LoadDataManagerDataException;
+import app.models.managers.*;
 import utils.io.helpers.Functions;
 import utils.io.helpers.tables.SimpleBox;
 import utils.io.helpers.texts.formatting.TextFormatter;
@@ -62,7 +60,14 @@ public class AddClubMenu extends MenuStage {
                 }
 
                 clubAddressData.setCountryIso3(input);
-                Address.getCountryFromIso3(clubAddressData.getCountryIso3());
+
+                String iso3 = clubAddressData.getCountryIso3();
+
+                try {
+                    DataManagers.initAndGet(CountryDataManager.class).getCountryWithExceptions(iso3);
+                } catch (LoadDataManagerDataException e) {
+                    throw new ModelException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3));
+                }
                 break;
             } catch (ModelException e) {
                 System.out.println(Functions.styleAsErrorMessage(e.getMessage()));

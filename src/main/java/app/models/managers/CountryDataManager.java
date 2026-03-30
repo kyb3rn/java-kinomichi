@@ -43,6 +43,17 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
         this.countries.put(country.getIso3(), country);
     }
 
+    public Country getCountryWithExceptions(String iso3) throws ModelException {
+        Country country;
+        country = this.getCountry(iso3);
+
+        if (country == null) {
+            throw new ModelException("Aucun des pays enregistrés ne porte l'ISO3 '%s'".formatted(iso3));
+        }
+
+        return country;
+    }
+
     // ─── Overrides & inheritance ─── //
 
     @Override
