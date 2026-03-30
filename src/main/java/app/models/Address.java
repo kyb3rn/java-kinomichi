@@ -17,7 +17,6 @@ import app.models.formatting.ModelPrimaryKeyTextFormattingPreset;
 import utils.io.helpers.tables.TableDisplay;
 import utils.io.helpers.tables.TableDisplayFormattingOptions;
 import utils.io.helpers.texts.formatting.TextAlignement;
-import utils.io.helpers.texts.formatting.TextStyle;
 
 import java.util.regex.Pattern;
 
@@ -162,7 +161,7 @@ public class Address extends Model implements Hydratable<Address.Data> {
 
         Country country;
         try {
-            country = DataManagers.get(CountryDataManager.class).getCountry(iso3);
+            country = DataManagers.initAndGet(CountryDataManager.class).getCountry(iso3);
         } catch (LoadDataManagerDataException e) {
             throw new ModelException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3));
         }

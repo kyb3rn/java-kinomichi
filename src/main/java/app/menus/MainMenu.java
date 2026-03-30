@@ -1,9 +1,10 @@
 package app.menus;
 
-import app.data_management.managers.ClubDataManager;
-import app.data_management.managers.CountryDataManager;
-import app.data_management.managers.DataManagers;
+import app.data_management.managers.*;
+import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.menus.StandardMenu;
+
+import java.util.List;
 
 public class MainMenu extends StandardMenu {
 
@@ -12,12 +13,46 @@ public class MainMenu extends StandardMenu {
     public MainMenu() {
         super("Kinomichi - Menu d'administration");
 
-        int countriesCount = DataManagers.getCountOf(CountryDataManager.class);
-        int clubsCount = DataManagers.getCountOf(ClubDataManager.class);
+        this.addOption1();
+        this.addOption2();
 
-        this.addOption("Parcourir les pays (%d)".formatted(countriesCount), "countries.manage");
-        this.addOption("Gestion des clubs (%d)".formatted(clubsCount), "clubs.manage");
+        List<DataManager<?>> badlyInitializedDataManagers = DataManagers.getBadlyInitializedOnes();
+
+        if (!badlyInitializedDataManagers.isEmpty()) {
+            this.addOption3(badlyInitializedDataManagers);
+        }
+
         this.addOption("Quitter", null);
+    }
+
+    // ─── Utility methods ─── //
+
+    private void addOption1() {
+        String option1 = "Parcourir les pays (%d)".formatted(DataManagers.getCountOf(CountryDataManager.class));
+
+        boolean countriesInitialized = DataManagers.isInitialized(CountryDataManager.class);
+
+        if (!countriesInitialized) {
+            option1 = TextFormatter.strikethrough(option1) + " " + TextFormatter.red(TextFormatter.italic("(pays non chargés)"));
+        }
+
+        this.addOption(option1, countriesInitialized ? "countries.manage" : "main");
+    }
+
+    private void addOption2() {
+        String option2 = "Gestion des clubs (%d)".formatted(DataManagers.getCountOf(ClubDataManager.class));
+
+        boolean clubsInitialized = DataManagers.isInitialized(ClubDataManager.class);
+
+        if (!clubsInitialized) {
+            option2 = TextFormatter.strikethrough(option2) + " " + TextFormatter.red(TextFormatter.italic("(clubs non chargés)"));
+        }
+
+        this.addOption(option2, clubsInitialized ? "clubs.manage" : "main");
+    }
+
+    private void addOption3(List<DataManager<?>> badlyInitializedDataManagers) {
+        this.addOption("Re-initialisation de gestionnaires de données (%s)".formatted(badlyInitializedDataManagers.size()), "data_managers.reinit");
     }
 
 }

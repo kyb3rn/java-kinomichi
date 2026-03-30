@@ -20,7 +20,7 @@ public class ListCountriesMenu extends MenuStage {
     public String use() {
         Collection<Country> countries;
         try {
-            countries = DataManagers.get(CountryDataManager.class).getCountries().values();
+            countries = DataManagers.initAndGet(CountryDataManager.class).getCountries().values();
         } catch (LoadDataManagerDataException e) {
             System.out.printf("%nLes pays n'ont pas pu être chargés dans l'application.%n%n");
             return "countries.manage";

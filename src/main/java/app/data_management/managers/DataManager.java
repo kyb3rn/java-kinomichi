@@ -30,7 +30,7 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
     protected FileType defaultFileType = FileType.JSON;
     protected final String fileName = Functions.toSnakeCase(this.getClass().getSimpleName().replace("DataManager", ""));
     protected List<Model> pendingModels;
-    private boolean initialized = false;
+    boolean initialized = false;
 
     // ─── Getters ─── //
 
@@ -45,6 +45,8 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
     }
 
     // ─── Utility methods ─── //
+
+    public abstract void init() throws LoadDataManagerDataException;
 
     protected abstract void export(FileType fileType) throws DataManagerException, ModelException;
 
@@ -98,7 +100,7 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
             ModelReference ref = field.getAnnotation(ModelReference.class);
             if (ref != null) {
                 try {
-                    DataManager<?> depManager = DataManagers.get(ref.manager());
+                    DataManager<?> depManager = DataManagers.initAndGet(ref.manager());
                     depManager.resolveReferences();
                 } catch (LoadDataManagerDataException e) {
                     throw new ModelException("Impossible de charger le manager dépendant '%s'".formatted(ref.manager().getSimpleName()));

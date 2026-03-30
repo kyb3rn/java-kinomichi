@@ -183,9 +183,9 @@ public class AddClubMenu extends MenuStage {
 
         Club club;
         try {
-            Address address = DataManagers.get(AddressDataManager.class).addAddress(clubAddressData);
+            Address address = DataManagers.initAndGet(AddressDataManager.class).addAddress(clubAddressData);
             clubData.setAddressId(address.getId());
-            club = DataManagers.get(ClubDataManager.class).addClub(clubData);
+            club = DataManagers.initAndGet(ClubDataManager.class).addClub(clubData);
         } catch (LoadDataManagerDataException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
             return "clubs.manage";

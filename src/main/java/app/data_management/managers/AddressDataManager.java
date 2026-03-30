@@ -18,39 +18,18 @@ import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.List;
 
 public class AddressDataManager extends DataManager<AddressDataManager.Data> {
 
     // ─── Properties ─── //
 
-    private final HashMap<Integer, Address> addresses = new HashMap<>();
-
-    // ─── Constructors ─── //
-
-    private AddressDataManager() throws LoadDataManagerDataException {
-        DataWriter<AddressDataManager.Data> dataWriter = new DataWriter<>();
-        JsonReader<AddressDataManager.Data> csvReader = new JsonReader<>(dataWriter);
-
-        AddressDataManager.Data modelData = new AddressDataManager.Data();
-        String filePath = this.getFilePath().toString();
-        try {
-            csvReader.readFile(filePath, modelData);
-        } catch (Exception e) {
-            throw new LoadDataManagerDataException("Les données du manager '%s' n'ont pas pu être lues dans le fichier '%s'".formatted(this.getClass().getSimpleName(), filePath));
-        }
-
-        try {
-            dataWriter.write(modelData, this);
-        } catch (Exception e) {
-            throw new LoadDataManagerDataException("Les données lues du manager '%s' dans le fichier '%s' n'ont pas pu être enregistrées dans le manager '%s'".formatted(this.getClass().getSimpleName(), filePath, e));
-        }
-    }
+    private final TreeMap<Integer, Address> addresses = new TreeMap<>();
 
     // ─── Getters ─── //
 
-    public HashMap<Integer, Address> getAddresses() {
+    public TreeMap<Integer, Address> getAddresses() {
         return this.addresses;
     }
 
@@ -86,6 +65,28 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
     }
 
     // ─── Overrides & inheritance ─── //
+
+    @Override
+    public void init() throws LoadDataManagerDataException {
+        if (!this.isInitialized()) {
+            DataWriter<AddressDataManager.Data> dataWriter = new DataWriter<>();
+            JsonReader<AddressDataManager.Data> csvReader = new JsonReader<>(dataWriter);
+
+            AddressDataManager.Data modelData = new AddressDataManager.Data();
+            String filePath = this.getFilePath().toString();
+            try {
+                csvReader.readFile(filePath, modelData);
+            } catch (Exception e) {
+                throw new LoadDataManagerDataException("Les données du manager '%s' n'ont pas pu être lues dans le fichier '%s'".formatted(this.getClass().getSimpleName(), filePath));
+            }
+
+            try {
+                dataWriter.write(modelData, this);
+            } catch (Exception e) {
+                throw new LoadDataManagerDataException("Les données lues du manager '%s' dans le fichier '%s' n'ont pas pu être enregistrées dans le manager '%s'".formatted(this.getClass().getSimpleName(), filePath, e));
+            }
+        }
+    }
 
     @Override
     public void export(FileType fileType) throws DataManagerException, ModelException {

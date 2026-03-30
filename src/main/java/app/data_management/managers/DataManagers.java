@@ -22,7 +22,7 @@ public class DataManagers {
     // ─── Utility methods ─── //
 
     @SuppressWarnings("unchecked")
-    public static <M extends DataManager<?>> M get(Class<M> clazz) throws LoadDataManagerDataException {
+    public static <M extends DataManager<?>> M initAndGet(Class<M> clazz) throws LoadDataManagerDataException {
         if (!instances.containsKey(clazz)) {
             try {
                 Constructor<M> constructor = clazz.getDeclaredConstructor();
@@ -39,7 +39,20 @@ public class DataManagers {
                 );
             }
         }
-        return (M) instances.get(clazz);
+        M instance = (M) instances.get(clazz);
+        instance.init();
+        return instance;
+    }
+
+    public static void init(Class<? extends DataManager<?>> clazz) {
+        try {
+            DataManager<?> manager = initAndGet(clazz);
+            manager.resolveReferences();
+        } catch (LoadDataManagerDataException e) {
+            System.out.printf(Functions.styleAsErrorMessage("Le pré-chargement du manager '%s' n'a pas pu être effectué.%n"), clazz.getSimpleName());
+        } catch (ModelException e) {
+            System.out.printf(Functions.styleAsErrorMessage("La résolution des références du manager '%s' a échoué: %s%n"), clazz.getSimpleName(), e.getMessage());
+        }
     }
 
     @SafeVarargs
@@ -48,7 +61,7 @@ public class DataManagers {
         List<DataManager<?>> loadedManagers = new ArrayList<>();
         for (var clazz : classes) {
             try {
-                DataManager<?> manager = get(clazz);
+                DataManager<?> manager = initAndGet(clazz);
                 loadedManagers.add(manager);
             } catch (LoadDataManagerDataException e) {
                 System.out.printf(Functions.styleAsErrorMessage("Le pré-chargement du manager '%s' n'a pas pu être effectué.%n"), clazz.getSimpleName());
@@ -109,24 +122,31 @@ public class DataManagers {
         }
     }
 
-    public static void init(Class<? extends DataManager<?>> clazz) {
-        try {
-            DataManager<?> manager = get(clazz);
-            manager.resolveReferences();
-        } catch (LoadDataManagerDataException e) {
-            System.out.printf(Functions.styleAsErrorMessage("Le pré-chargement du manager '%s' n'a pas pu être effectué.%n"), clazz.getSimpleName());
-        } catch (ModelException e) {
-            System.out.printf(Functions.styleAsErrorMessage("La résolution des références du manager '%s' a échoué: %s%n"), clazz.getSimpleName(), e.getMessage());
-        }
-    }
-
     public static int getCountOf(Class<? extends DataManager<?>> clazz) {
-        init(clazz);
         try {
-            return get(clazz).count();
+            return initAndGet(clazz).count();
         } catch (LoadDataManagerDataException e) {
             return 0;
         }
     }
 
+    public static boolean isInitialized(Class<? extends DataManager<?>> clazz) {
+        try {
+            return initAndGet(clazz).isInitialized();
+        } catch (LoadDataManagerDataException e) {
+            return false;
+        }
+    }
+
+    public static List<DataManager<?>> getBadlyInitializedOnes() {
+        List<DataManager<?>> badlyInitializedOnes = new ArrayList<>();
+
+        for (DataManager<?> manager : DataManagers.instances.values()) {
+            if (!manager.isInitialized()) {
+                badlyInitializedOnes.add(manager);
+            }
+        }
+
+        return badlyInitializedOnes;
+    }
 }

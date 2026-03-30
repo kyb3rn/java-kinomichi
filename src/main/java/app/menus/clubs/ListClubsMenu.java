@@ -18,7 +18,7 @@ public class ListClubsMenu extends MenuStage {
     public String use() {
         Collection<Club> clubs;
         try {
-            clubs = DataManagers.get(ClubDataManager.class).getClubs().values();
+            clubs = DataManagers.initAndGet(ClubDataManager.class).getClubs().values();
         } catch (LoadDataManagerDataException e) {
             System.out.printf("%nLes clubs n'ont pas pu être chargés dans l'application.%n%n");
             return "clubs.manage";

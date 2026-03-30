@@ -12,40 +12,17 @@ import utils.data_management.parsing.ParserException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.HashMap;
+import java.util.TreeMap;
 
 public class CountryDataManager extends DataManager<CountryDataManager.Data> {
 
     // ─── Properties ─── //
 
-    private final HashMap<String, Country> countries = new HashMap<>();
-
-    // ─── Constructors ─── //
-
-    private CountryDataManager() throws LoadDataManagerDataException {
-        this.defaultFileType = FileType.CSV;
-
-        DataWriter<CountryDataManager.Data> dataWriter = new DataWriter<>();
-        CsvReader<CountryDataManager.Data> csvReader = new CsvReader<>(dataWriter);
-
-        CountryDataManager.Data modelData = new CountryDataManager.Data();
-        String filePath = this.getFilePath().toString();
-        try {
-            csvReader.readFile(filePath, modelData, true);
-        } catch (Exception e) {
-            throw new LoadDataManagerDataException("Les données du manager '%s' n'ont pas pu être lues dans le fichier '%s'".formatted(this.getClass().getSimpleName(), filePath));
-        }
-
-        try {
-            dataWriter.write(modelData, this);
-        } catch (Exception e) {
-            throw new LoadDataManagerDataException("Les données lues du manager '%s' dans le fichier '%s' n'ont pas pu être enregistrées dans le manager '%s'".formatted(this.getClass().getSimpleName(), filePath, e));
-        }
-    }
+    private final TreeMap<String, Country> countries = new TreeMap<>();
 
     // ─── Getters ─── //
 
-    public HashMap<String, Country> getCountries() {
+    public TreeMap<String, Country> getCountries() {
         return this.countries;
     }
 
@@ -70,6 +47,30 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
     // ─── Overrides & inheritance ─── //
 
     @Override
+    public void init() throws LoadDataManagerDataException {
+        if (!this.isInitialized()) {
+            this.defaultFileType = FileType.CSV;
+
+            DataWriter<CountryDataManager.Data> dataWriter = new DataWriter<>();
+            CsvReader<CountryDataManager.Data> csvReader = new CsvReader<>(dataWriter);
+
+            CountryDataManager.Data modelData = new CountryDataManager.Data();
+            String filePath = this.getFilePath().toString();
+            try {
+                csvReader.readFile(filePath, modelData, true);
+            } catch (Exception e) {
+                throw new LoadDataManagerDataException("Les données du manager '%s' n'ont pas pu être lues dans le fichier '%s'".formatted(this.getClass().getSimpleName(), filePath));
+            }
+
+            try {
+                dataWriter.write(modelData, this);
+            } catch (Exception e) {
+                throw new LoadDataManagerDataException("Les données lues du manager '%s' dans le fichier '%s' n'ont pas pu être enregistrées dans le manager '%s'".formatted(this.getClass().getSimpleName(), filePath, e));
+            }
+        }
+    }
+
+    @Override
     public void export(FileType fileType) throws DataManagerException {
         CountryDataManager.Data data = new Data(this);
         super.export(fileType, data);
@@ -85,6 +86,8 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
         for (Country country : dataObject.countries) {
             this.addCountry(country);
         }
+
+        this.initialized = true;
     }
 
     @Override
