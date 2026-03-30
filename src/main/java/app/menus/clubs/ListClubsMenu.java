@@ -1,8 +1,8 @@
 package app.menus.clubs;
 
-import app.data_management.managers.ClubDataManager;
-import app.data_management.managers.DataManagers;
-import app.data_management.managers.LoadDataManagerDataException;
+import app.models.managers.ClubDataManager;
+import app.models.managers.DataManagers;
+import app.models.managers.LoadDataManagerDataException;
 import app.models.Club;
 import app.models.formatting.ModelTableFormatter;
 import utils.io.menus.MenuStage;

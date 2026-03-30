@@ -1,4 +1,4 @@
-package app.data_management.managers;
+package app.models.managers;
 
 import app.models.Model;
 import app.models.ModelException;
@@ -136,6 +136,23 @@ public class DataManagers {
         } catch (LoadDataManagerDataException e) {
             return false;
         }
+    }
+
+    public static boolean hasDependencies(DataManager<?> manager) {
+        String managerPackage = manager.getClass().getPackageName();
+        String parentPackage = managerPackage.substring(0, managerPackage.lastIndexOf('.'));
+        String modelName = manager.getClass().getSimpleName().replace("DataManager", "");
+
+        try {
+            Class<?> modelClass = Class.forName(parentPackage + "." + modelName);
+            for (Field field : modelClass.getDeclaredFields()) {
+                if (field.isAnnotationPresent(ModelReference.class)) {
+                    return true;
+                }
+            }
+        } catch (ClassNotFoundException ignored) {}
+
+        return false;
     }
 
     public static List<DataManager<?>> getBadlyInitializedOnes() {

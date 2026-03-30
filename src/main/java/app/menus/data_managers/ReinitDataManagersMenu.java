@@ -1,14 +1,11 @@
 package app.menus.data_managers;
 
-import app.data_management.managers.DataManager;
-import app.data_management.managers.DataManagers;
+import app.models.managers.DataManager;
+import app.models.managers.DataManagers;
 import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.menus.MenuStage;
 import utils.io.menus.StandardMenu;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 public class ReinitDataManagersMenu extends MenuStage {
@@ -27,7 +24,8 @@ public class ReinitDataManagersMenu extends MenuStage {
 
         for (DataManager<?> manager : badlyInitialized) {
             String name = manager.getClass().getSimpleName().replace("DataManager", "");
-            menu.addOption(name, name);
+            String label = DataManagers.hasDependencies(manager) ? name + " et ses dépendances" : name;
+            menu.addOption(label, name);
         }
 
         menu.addOption("Retour", "main");
@@ -46,7 +44,10 @@ public class ReinitDataManagersMenu extends MenuStage {
                 DataManagers.init(clazz);
 
                 if (manager.isInitialized()) {
-                    System.out.printf("%s%n%n", TextFormatter.green("Le gestionnaire '%s' a été ré-initialisé avec succès !".formatted(name)));
+                    String successMessage = DataManagers.hasDependencies(manager)
+                            ? "Le gestionnaire '%s' et ses dépendances ont été ré-initialisés avec succès !".formatted(name)
+                            : "Le gestionnaire '%s' a été ré-initialisé avec succès !".formatted(name);
+                    System.out.printf("%s%n%n", TextFormatter.green(successMessage));
                 }
 
                 break;

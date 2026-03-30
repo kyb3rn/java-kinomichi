@@ -1,6 +1,6 @@
 package app.models;
 
-import app.data_management.managers.DataManager;
+import app.models.managers.DataManager;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

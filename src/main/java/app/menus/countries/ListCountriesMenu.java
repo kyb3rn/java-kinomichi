@@ -1,8 +1,8 @@
 package app.menus.countries;
 
-import app.data_management.managers.CountryDataManager;
-import app.data_management.managers.DataManagers;
-import app.data_management.managers.LoadDataManagerDataException;
+import app.models.managers.CountryDataManager;
+import app.models.managers.DataManagers;
+import app.models.managers.LoadDataManagerDataException;
 import app.models.Country;
 import app.models.formatting.ModelTableFormatter;
 import utils.io.menus.MenuStage;

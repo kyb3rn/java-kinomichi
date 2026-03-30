@@ -1,6 +1,9 @@
 package app.menus;
 
-import app.data_management.managers.*;
+import app.models.managers.ClubDataManager;
+import app.models.managers.CountryDataManager;
+import app.models.managers.DataManager;
+import app.models.managers.DataManagers;
 import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.menus.StandardMenu;
 

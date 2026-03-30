@@ -1,7 +1,7 @@
 package app.menus.clubs;
 
-import app.data_management.managers.ClubDataManager;
-import app.data_management.managers.DataManagers;
+import app.models.managers.ClubDataManager;
+import app.models.managers.DataManagers;
 import utils.io.menus.StandardMenu;
 
 public class ManageClubsMenu extends StandardMenu {

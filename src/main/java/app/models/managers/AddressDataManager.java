@@ -1,4 +1,4 @@
-package app.data_management.managers;
+package app.models.managers;
 
 import app.models.Address;
 import app.models.Model;

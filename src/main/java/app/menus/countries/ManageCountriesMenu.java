@@ -1,7 +1,7 @@
 package app.menus.countries;
 
-import app.data_management.managers.CountryDataManager;
-import app.data_management.managers.DataManagers;
+import app.models.managers.CountryDataManager;
+import app.models.managers.DataManagers;
 import utils.io.menus.StandardMenu;
 
 public class ManageCountriesMenu extends StandardMenu {

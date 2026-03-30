@@ -1,7 +1,7 @@
-import app.data_management.managers.AddressDataManager;
-import app.data_management.managers.ClubDataManager;
-import app.data_management.managers.CountryDataManager;
-import app.data_management.managers.DataManagers;
+import app.models.managers.AddressDataManager;
+import app.models.managers.ClubDataManager;
+import app.models.managers.CountryDataManager;
+import app.models.managers.DataManagers;
 import app.menus.MainMenu;
 import app.menus.clubs.AddClubMenu;
 import app.menus.clubs.ListClubsMenu;

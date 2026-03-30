@@ -1,8 +1,8 @@
 package app.models;
 
-import app.data_management.managers.CountryDataManager;
-import app.data_management.managers.DataManagers;
-import app.data_management.managers.LoadDataManagerDataException;
+import app.models.managers.CountryDataManager;
+import app.models.managers.DataManagers;
+import app.models.managers.LoadDataManagerDataException;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
