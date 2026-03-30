@@ -30,7 +30,8 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
     protected FileType defaultFileType = FileType.JSON;
     protected final String fileName = Functions.toSnakeCase(this.getClass().getSimpleName().replace("DataManager", ""));
     protected List<Model> pendingModels;
-    boolean initialized = false;
+    protected boolean initialized = false;
+    protected boolean unsavedChanges = false;
 
     // ─── Getters ─── //
 
@@ -48,7 +49,13 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
 
     public abstract void init() throws LoadDataManagerDataException;
 
-    protected abstract void export(FileType fileType) throws DataManagerException, ModelException;
+    public abstract void export() throws DataManagerException, ModelException;
+
+    public abstract void export(FileType fileType) throws DataManagerException, ModelException;
+
+    protected void export(T data) throws DataManagerException {
+        this.export(this.defaultFileType, data);
+    }
 
     @SuppressWarnings("unchecked")
     protected void export(FileType fileType, T data) throws DataManagerException {

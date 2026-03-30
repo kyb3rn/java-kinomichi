@@ -41,6 +41,14 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
         }
 
         this.countries.put(country.getIso3(), country);
+
+        this.unsavedChanges = true;
+
+        try {
+            this.export();
+            this.unsavedChanges = false;
+        } catch (DataManagerException ignored) {
+        }
     }
 
     public Country getCountryWithExceptions(String iso3) throws ModelException {
@@ -61,10 +69,10 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
         if (!this.isInitialized()) {
             this.defaultFileType = FileType.CSV;
 
-            DataWriter<CountryDataManager.Data> dataWriter = new DataWriter<>();
-            CsvReader<CountryDataManager.Data> csvReader = new CsvReader<>(dataWriter);
+            DataWriter<Data> dataWriter = new DataWriter<>();
+            CsvReader<Data> csvReader = new CsvReader<>(dataWriter);
 
-            CountryDataManager.Data modelData = new CountryDataManager.Data();
+            Data modelData = new Data();
             String filePath = this.getFilePath().toString();
             try {
                 csvReader.readFile(filePath, modelData, true);
@@ -81,8 +89,14 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
     }
 
     @Override
+    public void export() throws DataManagerException {
+        Data data = new Data(this);
+        super.export(data);
+    }
+
+    @Override
     public void export(FileType fileType) throws DataManagerException {
-        CountryDataManager.Data data = new Data(this);
+        Data data = new Data(this);
         super.export(fileType, data);
     }
 

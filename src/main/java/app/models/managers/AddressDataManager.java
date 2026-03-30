@@ -49,6 +49,14 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
         }
 
         this.addresses.put(address.getId(), address);
+
+        this.unsavedChanges = true;
+
+        try {
+            this.export();
+            this.unsavedChanges = false;
+        } catch (DataManagerException ignored) {
+        }
     }
 
     public Address addAddress(Address.Data addressData) throws ModelException {
@@ -69,10 +77,10 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
     @Override
     public void init() throws LoadDataManagerDataException {
         if (!this.isInitialized()) {
-            DataWriter<AddressDataManager.Data> dataWriter = new DataWriter<>();
-            JsonReader<AddressDataManager.Data> csvReader = new JsonReader<>(dataWriter);
+            DataWriter<Data> dataWriter = new DataWriter<>();
+            JsonReader<Data> csvReader = new JsonReader<>(dataWriter);
 
-            AddressDataManager.Data modelData = new AddressDataManager.Data();
+            Data modelData = new Data();
             String filePath = this.getFilePath().toString();
             try {
                 csvReader.readFile(filePath, modelData);
@@ -89,8 +97,14 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
     }
 
     @Override
+    public void export() throws DataManagerException, ModelException {
+        Data data = new Data(this);
+        super.export(data);
+    }
+
+    @Override
     public void export(FileType fileType) throws DataManagerException, ModelException {
-        AddressDataManager.Data data = new Data(this);
+        Data data = new Data(this);
         super.export(fileType, data);
     }
 

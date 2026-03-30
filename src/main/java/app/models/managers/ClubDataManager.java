@@ -13,8 +13,8 @@ import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 
 import java.util.ArrayList;
-import java.util.TreeMap;
 import java.util.List;
+import java.util.TreeMap;
 
 public class ClubDataManager extends DataManager<ClubDataManager.Data> {
 
@@ -44,6 +44,14 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
         }
 
         this.clubs.put(club.getId(), club);
+
+        this.unsavedChanges = true;
+
+        try {
+            this.export();
+            this.unsavedChanges = false;
+        } catch (DataManagerException ignored) {
+        }
     }
 
     public Club addClub(Club.Data clubData) throws ModelException {
@@ -64,10 +72,10 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
     @Override
     public void init() throws LoadDataManagerDataException {
         if (!this.isInitialized()) {
-            DataWriter<ClubDataManager.Data> dataWriter = new DataWriter<>();
-            JsonReader<ClubDataManager.Data> csvReader = new JsonReader<>(dataWriter);
+            DataWriter<Data> dataWriter = new DataWriter<>();
+            JsonReader<Data> csvReader = new JsonReader<>(dataWriter);
 
-            ClubDataManager.Data modelData = new ClubDataManager.Data();
+            Data modelData = new Data();
             String filePath = this.getFilePath().toString();
             try {
                 csvReader.readFile(filePath, modelData);
@@ -84,8 +92,14 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
     }
 
     @Override
+    public void export() throws DataManagerException, ModelException {
+        Data data = new Data(this);
+        super.export(data);
+    }
+
+    @Override
     public void export(FileType fileType) throws DataManagerException, ModelException {
-        ClubDataManager.Data data = new Data(this);
+        Data data = new Data(this);
         super.export(fileType, data);
     }
 
