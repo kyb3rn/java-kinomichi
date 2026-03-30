@@ -1,6 +1,7 @@
 package app.data_management.managers;
 
 import app.models.Address;
+import app.models.Model;
 import app.models.ModelException;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -74,6 +75,7 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
     public Address addAddress(Address.Data addressData) throws ModelException {
         Address address = new Address();
         address.hydrate(addressData);
+        DataManagers.resolveModelReferences(address);
 
         int maxId = this.addresses.values().stream().mapToInt(Address::getId).max().orElse(0);
         address.setId(maxId + 1);
@@ -98,16 +100,22 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
 
     @Override
     public void hydrate(Data dataObject) throws ModelException {
+        this.pendingModels = new ArrayList<>();
+
         for (Address.Data addressData : dataObject.addresses) {
             Address address = new Address();
             address.hydrate(addressData);
-
-            if (!address.isValid()) {
-                throw new ModelException("Un des objets Address.Data reçu, transformé en Address, n'est pas valide");
-            }
-
-            this.addresses.put(address.getId(), address);
+            this.pendingModels.add(address);
         }
+    }
+
+    @Override
+    protected void addResolvedModel(Model model) throws ModelException {
+        if (!(model instanceof Address address)) {
+            throw new ModelException("Le manager '%s' attend un objet de type Address, mais a reçu '%s'".formatted(this.getClass().getSimpleName(), model.getClass().getSimpleName()));
+        }
+
+        this.addresses.put(address.getId(), address);
     }
 
     @Override

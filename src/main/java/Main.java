@@ -2,7 +2,6 @@ import app.data_management.managers.*;
 import app.menus.clubs.AddClubMenu;
 import app.menus.clubs.ListClubsMenu;
 import app.menus.countries.ListCountriesMenu;
-import utils.io.helpers.Functions;
 import utils.io.menus.StandardMenu;
 import utils.io.menus.MenuStage;
 
@@ -12,9 +11,7 @@ import java.util.function.Supplier;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        initDataManager(CountryDataManager.class);
-        initDataManager(AddressDataManager.class);
-        initDataManager(ClubDataManager.class);
+//        DataManagers.initAll(ClubDataManager.class);
 
         HashMap<String, Supplier<MenuStage>> menus = new HashMap<>();
 
@@ -48,14 +45,6 @@ public class Main {
         }
 
         System.out.printf("%nAu revoir !%n");
-    }
-
-    private static void initDataManager(Class<? extends DataManager<?>> dataManagerClass) {
-        try {
-            DataManagers.init(dataManagerClass);
-        } catch (LoadDataManagerDataException ignored) {
-            System.out.printf(Functions.styleAsErrorMessage("Le pré-chargement du manager '%s' n'a pas pu être éffectué.%n"), dataManagerClass.getSimpleName());
-        }
     }
 
     private static StandardMenu getMainMenu() {

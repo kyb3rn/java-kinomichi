@@ -1,6 +1,8 @@
 package app.data_management.managers;
 
+import app.models.Model;
 import app.models.ModelException;
+import app.models.ModelReference;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
 import utils.data_management.converters.Hydratable;
@@ -15,7 +17,9 @@ import utils.io.helpers.Functions;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Path;
+import java.util.List;
 
 public abstract class DataManager<T extends CustomSerializable> implements Hydratable<T> {
 
@@ -25,6 +29,7 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
 
     protected FileType defaultFileType = FileType.JSON;
     protected final String fileName = Functions.toSnakeCase(this.getClass().getSimpleName().replace("DataManager", ""));
+    protected List<Model> pendingModels;
 
     // ─── Special getters ─── //
 
@@ -73,5 +78,41 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
     }
 
     public abstract int count();
+
+    public void resolveReferences() throws ModelException {
+        if (this.pendingModels == null || this.pendingModels.isEmpty()) {
+            return;
+        }
+
+        // Cascade : charger et résoudre les managers dépendants d'abord
+        Class<?> modelClass = this.pendingModels.getFirst().getClass();
+        for (Field field : modelClass.getDeclaredFields()) {
+            ModelReference ref = field.getAnnotation(ModelReference.class);
+            if (ref != null) {
+                try {
+                    DataManager<?> depManager = DataManagers.get(ref.manager());
+                    depManager.resolveReferences();
+                } catch (LoadDataManagerDataException e) {
+                    throw new ModelException("Impossible de charger le manager dépendant '%s'".formatted(ref.manager().getSimpleName()));
+                }
+            }
+        }
+
+        try {
+            for (Model model : this.pendingModels) {
+                DataManagers.resolveModelReferences(model);
+
+                if (!model.isValid()) {
+                    throw new ModelException("Un des objets %s résolus n'est pas valide".formatted(model.getClass().getSimpleName()));
+                }
+
+                this.addResolvedModel(model);
+            }
+        } finally {
+            this.pendingModels = null;
+        }
+    }
+
+    protected void addResolvedModel(Model model) throws ModelException {}
 
 }

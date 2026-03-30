@@ -26,7 +26,8 @@ public class Address extends Model implements Hydratable<Address.Data> {
     // ─── Properties ─── //
 
     private int id = -1;
-    private Country country;
+    @ModelReference(manager = CountryDataManager.class) private Country country;
+    private String pendingCountryPk;
     private int zipCode;
     private String city;
     private String street;
@@ -84,7 +85,7 @@ public class Address extends Model implements Hydratable<Address.Data> {
             throw new ModelException("Le pays est requis pour une adresse (valeur null reçue)");
         }
 
-        this.setCountryFromIso3(country.getIso3());
+        this.setCountryFromPk(country.getIso3());
     }
 
     public void setZipCode(int zipCode) throws ModelException {
@@ -135,7 +136,7 @@ public class Address extends Model implements Hydratable<Address.Data> {
 
     // ─── Special setters ─── //
 
-    public void setCountryFromIso3(String iso3) throws ModelException {
+    public void setCountryFromPk(String iso3) throws ModelException {
         this.country = getCountryFromIso3(iso3);
     }
 
@@ -188,7 +189,7 @@ public class Address extends Model implements Hydratable<Address.Data> {
     @Override
     public void hydrate(Data dataObject) throws ModelException {
         this.setId(dataObject.getId());
-        this.setCountryFromIso3(dataObject.getCountryIso3());
+        this.pendingCountryPk = dataObject.getCountryIso3();
         this.setZipCode(dataObject.getZipCode());
         this.setCity(dataObject.getCity());
         this.setStreet(dataObject.getStreet());

@@ -28,7 +28,8 @@ public class Club extends Model implements Hydratable<Club.Data> {
 
     private int id = -1;
     private String name;
-    private Address address;
+    @ModelReference(manager = AddressDataManager.class) private Address address;
+    private int pendingAddressPk = -1;
     private String googleMapsLink;
 
     // ─── Getters ─── //
@@ -82,7 +83,7 @@ public class Club extends Model implements Hydratable<Club.Data> {
             throw new ModelException("L'adresse est requise pour un club (valeur null reçue)");
         }
 
-        this.setAddressFromId(address.getId());
+        this.setAddressFromPk(address.getId());
     }
 
     public void setGoogleMapsLink(String googleMapsLink) throws ModelException {
@@ -106,7 +107,7 @@ public class Club extends Model implements Hydratable<Club.Data> {
 
     // ─── Special setters ─── //
 
-    public void setAddressFromId(int addressId) throws ModelException {
+    public void setAddressFromPk(int addressId) throws ModelException {
         Address address;
         try {
             address = DataManagers.get(AddressDataManager.class).getAddress(addressId);
@@ -127,7 +128,7 @@ public class Club extends Model implements Hydratable<Club.Data> {
     public void hydrate(Data dataObject) throws ModelException {
         this.setId(dataObject.getId());
         this.setName(dataObject.getName());
-        this.setAddressFromId(dataObject.getAddressId());
+        this.pendingAddressPk = dataObject.getAddressId();
         this.setGoogleMapsLink(dataObject.getGoogleMapsLink());
     }
 

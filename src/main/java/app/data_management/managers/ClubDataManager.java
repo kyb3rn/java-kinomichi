@@ -1,6 +1,7 @@
 package app.data_management.managers;
 
 import app.models.Club;
+import app.models.Model;
 import app.models.ModelException;
 import com.google.gson.*;
 import utils.data_management.FileType;
@@ -69,6 +70,7 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
     public Club addClub(Club.Data clubData) throws ModelException {
         Club club = new Club();
         club.hydrate(clubData);
+        DataManagers.resolveModelReferences(club);
 
         int maxId = this.clubs.values().stream().mapToInt(Club::getId).max().orElse(0);
         club.setId(maxId + 1);
@@ -93,9 +95,22 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
 
     @Override
     public void hydrate(Data dataObject) throws ModelException {
+        this.pendingModels = new ArrayList<>();
+
         for (Club.Data clubData : dataObject.clubs) {
-            this.addClub(clubData);
+            Club club = new Club();
+            club.hydrate(clubData);
+            this.pendingModels.add(club);
         }
+    }
+
+    @Override
+    protected void addResolvedModel(Model model) throws ModelException {
+        if (!(model instanceof Club club)) {
+            throw new ModelException("Le manager '%s' attend un objet de type Club, mais a reçu '%s'".formatted(this.getClass().getSimpleName(), model.getClass().getSimpleName()));
+        }
+
+        this.clubs.put(club.getId(), club);
     }
 
     @Override

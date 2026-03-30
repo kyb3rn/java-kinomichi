@@ -16,3 +16,4 @@
 - Stream: IntStream, mapToObj, map, collect - TableFormatter : display() (rows)
 - Condition ternaire - TableFormatter : display() (separationWidth)
 - Librairie externe - Gson (DataManager, méthodes parseJson())
+- try ... finally - ClubDataManager (resolveReferences)
