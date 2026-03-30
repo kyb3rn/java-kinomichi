@@ -1,7 +1,3 @@
-import app.models.managers.AddressDataManager;
-import app.models.managers.ClubDataManager;
-import app.models.managers.CountryDataManager;
-import app.models.managers.DataManagers;
 import app.menus.MainMenu;
 import app.menus.clubs.AddClubMenu;
 import app.menus.clubs.ListClubsMenu;
@@ -10,59 +6,54 @@ import app.menus.countries.ListCountriesMenu;
 import app.menus.countries.ManageCountriesMenu;
 import app.menus.data_managers.ReInitDataManagersMenu;
 import app.menus.data_managers.SaveDataManagersMenu;
+import app.models.ModelException;
+import app.models.managers.*;
 import utils.io.menus.MenuLeadTo;
 import utils.io.menus.MenuStage;
 
-import java.util.HashMap;
-import java.util.function.Supplier;
+void main() {
+    DataManagers.initAll(
+        CountryDataManager.class,
+        AddressDataManager.class,
+        ClubDataManager.class
+    );
 
-public class Main {
+    HashMap<String, Supplier<MenuStage>> menus = new HashMap<>();
 
-    public static void main(String[] args) throws Exception {
-        DataManagers.initAll(
-            CountryDataManager.class,
-            AddressDataManager.class,
-            ClubDataManager.class
-        );
+    // Dynamic menus (rebuilt each time to refresh counts)
+    menus.put("main", MainMenu::new);
+    menus.put("countries.manage", ManageCountriesMenu::new);
+    menus.put("clubs.manage", ManageClubsMenu::new);
 
-        HashMap<String, Supplier<MenuStage>> menus = new HashMap<>();
+    // Static menus (same instance reused)
+    ReInitDataManagersMenu reinitDataManagersMenu = new ReInitDataManagersMenu();
+    menus.put("data_managers.reinit", () -> reinitDataManagersMenu);
 
-        // Dynamic menus (rebuilt each time to refresh counts)
-        menus.put("main", MainMenu::new);
-        menus.put("countries.manage", ManageCountriesMenu::new);
-        menus.put("clubs.manage", ManageClubsMenu::new);
+    menus.put("data_managers.save", SaveDataManagersMenu::new);
 
-        // Static menus (same instance reused)
-        ReInitDataManagersMenu reinitDataManagersMenu = new ReInitDataManagersMenu();
-        menus.put("data_managers.reinit", () -> reinitDataManagersMenu);
+    ListCountriesMenu listCountriesMenu = new ListCountriesMenu();
+    ListClubsMenu listClubsMenu = new ListClubsMenu();
+    AddClubMenu addClubMenu = new AddClubMenu();
+    menus.put("countries.list", () -> listCountriesMenu);
+    menus.put("clubs.list", () -> listClubsMenu);
+    menus.put("clubs.add", () -> addClubMenu);
 
-        menus.put("data_managers.save", SaveDataManagersMenu::new);
+    String previousMenuRoute = null;
+    String nextMenuRoute = "main";
 
-        ListCountriesMenu listCountriesMenu = new ListCountriesMenu();
-        ListClubsMenu listClubsMenu = new ListClubsMenu();
-        AddClubMenu addClubMenu = new AddClubMenu();
-        menus.put("countries.list", () -> listCountriesMenu);
-        menus.put("clubs.list", () -> listClubsMenu);
-        menus.put("clubs.add", () -> addClubMenu);
+    while (nextMenuRoute != null) {
+        Supplier<MenuStage> menuSupplier = menus.get(nextMenuRoute);
+        MenuStage nextMenuStage = menuSupplier != null ? menuSupplier.get() : null;
 
-        String previousMenuRoute = null;
-        String nextMenuRoute = "main";
-
-        while (nextMenuRoute != null) {
-            Supplier<MenuStage> menuSupplier = menus.get(nextMenuRoute);
-            MenuStage nextMenuStage = menuSupplier != null ? menuSupplier.get() : null;
-
-            if (nextMenuStage != null) {
-                previousMenuRoute = nextMenuRoute;
-                MenuLeadTo menuLeadTo = nextMenuStage.use();
-                nextMenuRoute = menuLeadTo != null ? menuLeadTo.getLeadTo() : null;
-            } else {
-                System.out.printf("%nAucun nouveau menu ou action n'est lié à choix%n%n");
-                nextMenuRoute = previousMenuRoute;
-            }
+        if (nextMenuStage != null) {
+            previousMenuRoute = nextMenuRoute;
+            MenuLeadTo menuLeadTo = nextMenuStage.use();
+            nextMenuRoute = menuLeadTo != null ? menuLeadTo.getLeadTo() : null;
+        } else {
+            System.out.printf("%nAucun nouveau menu ou action n'est lié à choix%n%n");
+            nextMenuRoute = previousMenuRoute;
         }
-
-        System.out.printf("%nAu revoir !%n");
     }
 
+    System.out.printf("%nAu revoir !%n");
 }
