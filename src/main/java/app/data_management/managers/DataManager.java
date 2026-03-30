@@ -30,6 +30,13 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
     protected FileType defaultFileType = FileType.JSON;
     protected final String fileName = Functions.toSnakeCase(this.getClass().getSimpleName().replace("DataManager", ""));
     protected List<Model> pendingModels;
+    private boolean initialized = false;
+
+    // ─── Getters ─── //
+
+    public boolean isInitialized() {
+        return this.initialized;
+    }
 
     // ─── Special getters ─── //
 
@@ -81,6 +88,7 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
 
     public void resolveReferences() throws ModelException {
         if (this.pendingModels == null || this.pendingModels.isEmpty()) {
+            this.initialized = true;
             return;
         }
 
@@ -105,9 +113,13 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
                 if (!model.isValid()) {
                     throw new ModelException("Un des objets %s résolus n'est pas valide".formatted(model.getClass().getSimpleName()));
                 }
+            }
 
+            for (Model model : this.pendingModels) {
                 this.addResolvedModel(model);
             }
+
+            this.initialized = true;
         } finally {
             this.pendingModels = null;
         }

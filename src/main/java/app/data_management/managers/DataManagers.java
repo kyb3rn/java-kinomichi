@@ -74,7 +74,6 @@ public class DataManagers {
             }
 
             String fieldName = field.getName();
-            String typeName = field.getType().getSimpleName();
             String capitalizedFieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
 
             // Trouver le champ pendingXxxPk
