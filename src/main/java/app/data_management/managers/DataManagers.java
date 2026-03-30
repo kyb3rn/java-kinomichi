@@ -44,7 +44,7 @@ public class DataManagers {
 
     @SafeVarargs
     public static void initAll(Class<? extends DataManager<?>>... classes) {
-        // Passe 1: instancier les managers (données primitives uniquement)
+        // Pass 1: instantiate managers (primitive data only)
         List<DataManager<?>> loadedManagers = new ArrayList<>();
         for (var clazz : classes) {
             try {
@@ -55,7 +55,7 @@ public class DataManagers {
             }
         }
 
-        // Passe 2: résoudre les références par réflexion
+        // Pass 2: resolve references via reflection
         for (DataManager<?> manager : loadedManagers) {
             try {
                 manager.resolveReferences();
@@ -76,7 +76,7 @@ public class DataManagers {
             String fieldName = field.getName();
             String capitalizedFieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
 
-            // Trouver le champ pendingXxxPk
+            // Find the pendingXxxPk field
             String pendingFieldName = "pending" + capitalizedFieldName + "Pk";
             Field pendingField;
             try {
@@ -86,7 +86,7 @@ public class DataManagers {
                 throw new ModelException("Champ '%s' introuvable sur '%s'".formatted(pendingFieldName, modelClass.getSimpleName()));
             }
 
-            // Lire la valeur du pending
+            // Read the pending value
             Object pendingValue;
             try {
                 pendingValue = pendingField.get(model);
@@ -94,7 +94,7 @@ public class DataManagers {
                 throw new ModelException("Impossible de lire '%s' sur '%s'".formatted(pendingFieldName, modelClass.getSimpleName()));
             }
 
-            // Trouver et appeler setXxxFromPk(pendingValue)
+            // Find and call setXxxFromPk(pendingValue)
             String setterName = "set" + capitalizedFieldName + "FromPk";
             try {
                 Method setter = modelClass.getMethod(setterName, pendingField.getType());

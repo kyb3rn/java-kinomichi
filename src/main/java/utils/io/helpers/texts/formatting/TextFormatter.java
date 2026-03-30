@@ -11,7 +11,7 @@ public class TextFormatter {
 
     // ─── Utility methods ─── //
 
-    // Couleurs de texte
+    // Text colors
 
     public static String black(String text) {
         return ESCAPE + TextColor.BLACK.getCode() + "m" + text + RESET;
@@ -77,7 +77,7 @@ public class TextFormatter {
         return ESCAPE + TextColor.BRIGHT_WHITE.getCode() + "m" + text + RESET;
     }
 
-    // Couleurs de fond
+    // Background colors
 
     public static String bgBlack(String text) {
         return ESCAPE + TextBackgroundColor.BLACK.getCode() + "m" + text + RESET;
@@ -177,7 +177,7 @@ public class TextFormatter {
         return ESCAPE + TextStyle.STRIKETHROUGH.getCode() + "m" + text + RESET;
     }
 
-    // Format via options
+    // Formatting via options
 
     public static String format(String text, TextFormattingOptions options) {
         String escapeSequence = options.buildEscapeSequence();
@@ -193,7 +193,7 @@ public class TextFormatter {
         return text;
     }
 
-    // Alignement
+    // Alignment
 
     public static String align(int lineLength, String text, TextAlignement alignement) {
         if (text == null) {

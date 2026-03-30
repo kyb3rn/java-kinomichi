@@ -17,3 +17,8 @@ Les classes doivent être organisées avec des commentaires de section `// ─�
 ## Style de code Java
 
 - Toujours utiliser `this.` pour accéder aux propriétés et méthodes de l'instance (pas d'écriture simplifiée).
+
+## Langue
+
+- Tout le code doit être en anglais : noms de variables, méthodes, classes, commentaires, JavaDoc, etc.
+- Seuls les textes affichés à l'utilisateur (messages d'erreur, labels de menu, etc.) sont en français.

@@ -92,7 +92,7 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
             return;
         }
 
-        // Cascade : charger et résoudre les managers dépendants d'abord
+        // Cascade: load and resolve dependent managers first
         Class<?> modelClass = this.pendingModels.getFirst().getClass();
         for (Field field : modelClass.getDeclaredFields()) {
             ModelReference ref = field.getAnnotation(ModelReference.class);
