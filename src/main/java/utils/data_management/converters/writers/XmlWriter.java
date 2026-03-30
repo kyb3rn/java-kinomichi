@@ -10,6 +10,7 @@ public class XmlWriter<T extends XmlConvertible> extends FileWriter<T> {
 
     // ─── Overrides & inheritance ─── //
 
+    @Override
     public void writeFile(String filePath) throws IOException {
         String xml = this.data.toXml();
         Files.writeString(Path.of(filePath), xml);

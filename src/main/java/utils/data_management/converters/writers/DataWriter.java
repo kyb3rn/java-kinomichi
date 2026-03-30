@@ -5,7 +5,7 @@ import utils.data_management.converters.Hydratable;
 
 public class DataWriter<T extends CustomSerializable> extends Writer<T> {
 
-    // ─── Overrides & inheritance ─── //
+    // ─── Utility methods ─── //
 
     public void write(T dataObject, Hydratable<T> hydratable) throws Exception {
         hydratable.hydrate(dataObject);

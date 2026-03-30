@@ -34,6 +34,8 @@ public class MenuLeadTo {
         return this.leadTo;
     }
 
+    // ─── Overrides & inheritance ─── //
+
     @Override
     public String toString() {
         return this.leadTo;

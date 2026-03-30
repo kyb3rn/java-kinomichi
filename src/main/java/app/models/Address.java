@@ -165,8 +165,6 @@ public class Address extends Model implements Hydratable<Address.Data> {
         return iso3;
     }
 
-    // ─── Utility methods ─── //
-
     // ─── Overrides & inheritance ─── //
 
     @Override
