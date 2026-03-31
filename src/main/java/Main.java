@@ -1,4 +1,6 @@
 import app.menus.MainMenu;
+import app.menus.addresses.ListAddressesMenu;
+import app.menus.addresses.ManageAddressesMenu;
 import app.menus.clubs.AddClubMenu;
 import app.menus.clubs.ListClubsMenu;
 import app.menus.clubs.ManageClubsMenu;
@@ -10,6 +12,7 @@ import app.models.managers.AddressDataManager;
 import app.models.managers.ClubDataManager;
 import app.models.managers.CountryDataManager;
 import app.models.managers.DataManagers;
+import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.menus.MenuLeadTo;
 import utils.io.menus.MenuStage;
 
@@ -25,6 +28,7 @@ void main() {
     // Dynamic menus (rebuilt each time to refresh counts)
     menus.put("main", MainMenu::new);
     menus.put("countries.manage", ManageCountriesMenu::new);
+    menus.put("addresses.manage", ManageAddressesMenu::new);
     menus.put("clubs.manage", ManageClubsMenu::new);
 
     // Static menus (same instance reused)
@@ -34,9 +38,11 @@ void main() {
     menus.put("data_managers.save", SaveDataManagersMenu::new);
 
     ListCountriesMenu listCountriesMenu = new ListCountriesMenu();
+    ListAddressesMenu listAddressesMenu = new ListAddressesMenu();
     ListClubsMenu listClubsMenu = new ListClubsMenu();
     AddClubMenu addClubMenu = new AddClubMenu();
     menus.put("countries.list", () -> listCountriesMenu);
+    menus.put("addresses.list", () -> listAddressesMenu);
     menus.put("clubs.list", () -> listClubsMenu);
     menus.put("clubs.add", () -> addClubMenu);
 
@@ -57,5 +63,5 @@ void main() {
         }
     }
 
-    System.out.printf("%nAu revoir !%n");
+    System.out.println(TextFormatter.bold(TextFormatter.italic("Au revoir !")));
 }

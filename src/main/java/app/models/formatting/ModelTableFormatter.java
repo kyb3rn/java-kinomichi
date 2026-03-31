@@ -22,10 +22,10 @@ public class ModelTableFormatter {
             return new Table();
         }
 
-        List<AnnotatedMethod> annotatedMethods = getAnnotatedMethods(items.getFirst().getClass());
+        List<AnnotatedMethod> tableDisplayAnnotatedMethods = getTableDisplayAnnotatedMethods(items.getFirst().getClass());
         Table formatter = new Table();
 
-        for (AnnotatedMethod am : annotatedMethods) {
+        for (AnnotatedMethod am : tableDisplayAnnotatedMethods) {
             Table.Column column = new Table.Column(am.annotation().name(), toFormattingOptions(am.annotation().format()));
             for (T item : items) {
                 try {
@@ -42,7 +42,7 @@ public class ModelTableFormatter {
     }
 
     public static <T extends Model> Table forDetail(T item) {
-        List<AnnotatedMethod> annotatedMethods = getAnnotatedMethods(item.getClass());
+        List<AnnotatedMethod> tableDisplayAnnotatedMethods = getTableDisplayAnnotatedMethods(item.getClass());
 
         EnumSet<TableOptions> options = EnumSet.of(
                 TableOptions.SEPARATE_COLUMNS,
@@ -52,13 +52,13 @@ public class ModelTableFormatter {
 
         Table.Column keyColumn = new Table.Column(TextAlignement.RIGHT);
 
-        for (AnnotatedMethod am : annotatedMethods) {
+        for (AnnotatedMethod am : tableDisplayAnnotatedMethods) {
             keyColumn.addValue(am.annotation().name());
         }
 
         Table.Column valueColumn = new Table.Column(new TextFormattingOptions());
 
-        for (AnnotatedMethod am : annotatedMethods) {
+        for (AnnotatedMethod am : tableDisplayAnnotatedMethods) {
             try {
                 Object value = am.method().invoke(item);
                 valueColumn.addValue(Objects.toString(value, ""));
@@ -73,7 +73,36 @@ public class ModelTableFormatter {
         return formatter;
     }
 
-    private static List<AnnotatedMethod> getAnnotatedMethods(Class<?> clazz) {
+    public static int getColumnCount(Class<? extends Model> clazz) {
+        return getTableDisplayAnnotatedMethods(clazz).size();
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static <T extends Model> Comparator<T> comparatorForColumn(Class<T> clazz, int columnIndex) {
+        List<AnnotatedMethod> tableDisplayAnnotatedMethods = getTableDisplayAnnotatedMethods(clazz);
+        Method method = tableDisplayAnnotatedMethods.get(columnIndex).method();
+
+        return (item1, item2) -> {
+            try {
+                Object value1 = method.invoke(item1);
+                Object value2 = method.invoke(item2);
+
+                if (value1 == null && value2 == null) return 0;
+                if (value1 == null) return 1;
+                if (value2 == null) return -1;
+
+                if (value1 instanceof Comparable comparable1) {
+                    return comparable1.compareTo(value2);
+                }
+
+                return value1.toString().compareTo(value2.toString());
+            } catch (Exception e) {
+                return 0;
+            }
+        };
+    }
+
+    private static List<AnnotatedMethod> getTableDisplayAnnotatedMethods(Class<?> clazz) {
         List<AnnotatedMethod> result = new ArrayList<>();
 
         for (Method method : clazz.getMethods()) {

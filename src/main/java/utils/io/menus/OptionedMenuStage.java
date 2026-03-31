@@ -1,5 +1,7 @@
 package utils.io.menus;
 
+import app.utils.ExitProgramException;
+import utils.io.commands.*;
 import utils.io.helpers.Functions;
 
 import java.util.ArrayList;
@@ -76,6 +78,27 @@ public abstract class OptionedMenuStage extends MenuStage {
                 System.out.print("> ");
                 String input = scanner.nextLine();
                 System.out.println();
+
+                try {
+                    Command command = CommandManager.convertInput(input);
+                    switch (command.getCommand()) {
+                        case QUIT -> {
+                            return null;
+                        }
+                        default -> throw new UnhandledCommandException(command);
+                    }
+                } catch (NotACommandException _) {
+                    // Continue the process
+                } catch (UnknownCommandException e) {
+                    System.out.printf(Functions.styleAsErrorMessage("Cette commande n'existe pas.%n%n"));
+                    continue;
+                } catch (CommandArgumentException e) {
+                    System.out.printf(Functions.styleAsErrorMessage("Les arguments de cette commande sont invalides.%n%n"));
+                    continue;
+                } catch (UnhandledCommandException e) {
+                    System.out.printf(Functions.styleAsErrorMessage("Cette commande n'est pas prise en charge ici.%n%n"));
+                    continue;
+                }
 
                 try {
                     choice = Integer.parseInt(input);

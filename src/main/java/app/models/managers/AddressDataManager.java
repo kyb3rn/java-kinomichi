@@ -55,7 +55,7 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
 
             try {
                 this.export();
-            } catch (DataManagerException ignored) {
+            } catch (DataManagerException _) {
             }
         }
     }

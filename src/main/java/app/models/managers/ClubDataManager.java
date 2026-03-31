@@ -50,7 +50,7 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
 
             try {
                 this.export();
-            } catch (DataManagerException ignored) {
+            } catch (DataManagerException _) {
             }
         }
     }

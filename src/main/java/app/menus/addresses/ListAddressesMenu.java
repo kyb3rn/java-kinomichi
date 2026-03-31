@@ -1,8 +1,8 @@
-package app.menus.countries;
+package app.menus.addresses;
 
-import app.models.Country;
+import app.models.Address;
 import app.models.formatting.ModelTableFormatter;
-import app.models.managers.CountryDataManager;
+import app.models.managers.AddressDataManager;
 import app.models.managers.DataManagers;
 import app.models.managers.LoadDataManagerDataException;
 import utils.io.commands.*;
@@ -15,32 +15,32 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
-public class ListCountriesMenu extends MenuStage {
+public class ListAddressesMenu extends MenuStage {
 
     // ─── Overrides & inheritance ─── //
 
     @Override
     public MenuLeadTo use() {
-        CountryDataManager countryDataManager;
+        AddressDataManager addressDataManager;
         try {
-            countryDataManager = DataManagers.initAndGet(CountryDataManager.class);
+            addressDataManager = DataManagers.initAndGet(AddressDataManager.class);
         } catch (LoadDataManagerDataException e) {
-            System.out.printf(Functions.styleAsErrorMessage("%nLes pays n'ont pas pu être chargés dans l'application.%n%n"));
+            System.out.printf(Functions.styleAsErrorMessage("%nLes adresses n'ont pas pu être chargées dans l'application.%n%n"));
             return new MenuLeadTo("main");
         }
 
-        int columnCount = ModelTableFormatter.getColumnCount(Country.class);
+        int columnCount = ModelTableFormatter.getColumnCount(Address.class);
         int sortColumnIndex = 0;
         Scanner scanner = new Scanner(System.in);
         boolean quitLoop = false;
 
         do {
-            Comparator<Country> comparator = ModelTableFormatter.comparatorForColumn(Country.class, sortColumnIndex);
-            List<Country> sorted = countryDataManager.getCountries().values().stream().sorted(comparator).toList();
+            Comparator<Address> comparator = ModelTableFormatter.comparatorForColumn(Address.class, sortColumnIndex);
+            List<Address> sorted = addressDataManager.getAddresses().values().stream().sorted(comparator).toList();
 
             ModelTableFormatter.forList(sorted).display();
 
-            if (countryDataManager.hasUnsavedChanges()) {
+            if (addressDataManager.hasUnsavedChanges()) {
                 System.out.printf("%s%n%n", TextFormatter.italic(TextFormatter.yellow(TextFormatter.bold("ATTENTION !"), " Des modifications dans cette liste n'ont pas encore été sauvegardées. Rendez-vous dans le menu principal pour résoudre ce problème.")));
             }
 
@@ -83,7 +83,7 @@ public class ListCountriesMenu extends MenuStage {
             }
         } while (!quitLoop);
 
-        return new MenuLeadTo("countries.manage");
+        return new MenuLeadTo("addresses.manage");
     }
 
 }

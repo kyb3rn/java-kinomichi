@@ -1,5 +1,6 @@
 package app.menus;
 
+import app.models.managers.AddressDataManager;
 import app.models.managers.ClubDataManager;
 import app.models.managers.CountryDataManager;
 import app.models.managers.DataManager;
@@ -19,6 +20,7 @@ public class MainMenu extends StandardMenu {
 
         this.addOption1();
         this.addOption2();
+        this.addOption3();
 
         List<DataManager<?>> badlyInitializedDataManagers = DataManagers.getBadlyInitializedOnes();
 
@@ -50,15 +52,27 @@ public class MainMenu extends StandardMenu {
     }
 
     private void addOption2() {
-        String option2 = "Gestion des clubs (%d)".formatted(DataManagers.getCountOf(ClubDataManager.class));
+        String option2 = "Parcourir les adresses (%d)".formatted(DataManagers.getCountOf(AddressDataManager.class));
+
+        boolean addressesInitialized = DataManagers.isInitialized(AddressDataManager.class);
+
+        if (!addressesInitialized) {
+            option2 = TextFormatter.strikethrough(option2) + " " + TextFormatter.red(TextFormatter.italic("(adresses non chargées)"));
+        }
+
+        this.addOption(option2, addressesInitialized ? "addresses.manage" : "main");
+    }
+
+    private void addOption3() {
+        String option3 = "Gestion des clubs (%d)".formatted(DataManagers.getCountOf(ClubDataManager.class));
 
         boolean clubsInitialized = DataManagers.isInitialized(ClubDataManager.class);
 
         if (!clubsInitialized) {
-            option2 = TextFormatter.strikethrough(option2) + " " + TextFormatter.red(TextFormatter.italic("(clubs non chargés)"));
+            option3 = TextFormatter.strikethrough(option3) + " " + TextFormatter.red(TextFormatter.italic("(clubs non chargés)"));
         }
 
-        this.addOption(option2, clubsInitialized ? "clubs.manage" : "main");
+        this.addOption(option3, clubsInitialized ? "clubs.manage" : "main");
     }
 
 }

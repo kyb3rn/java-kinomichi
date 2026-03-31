@@ -1,15 +1,19 @@
 package app.menus.clubs;
 
+import app.models.Club;
+import app.models.formatting.ModelTableFormatter;
 import app.models.managers.ClubDataManager;
 import app.models.managers.DataManagers;
 import app.models.managers.LoadDataManagerDataException;
-import app.models.Club;
-import app.models.formatting.ModelTableFormatter;
+import utils.io.commands.*;
+import utils.io.helpers.Functions;
 import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.menus.MenuLeadTo;
 import utils.io.menus.MenuStage;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Scanner;
 
 public class ListClubsMenu extends MenuStage {
 
@@ -17,23 +21,67 @@ public class ListClubsMenu extends MenuStage {
 
     @Override
     public MenuLeadTo use() {
-        Collection<Club> clubs;
         ClubDataManager clubDataManager;
         try {
             clubDataManager = DataManagers.initAndGet(ClubDataManager.class);
-            clubs = clubDataManager.getClubs().values();
         } catch (LoadDataManagerDataException e) {
-            System.out.printf("%nLes clubs n'ont pas pu être chargés dans l'application.%n%n");
-            return new MenuLeadTo("clubs.manage");
+            System.out.printf(Functions.styleAsErrorMessage("%nLes clubs n'ont pas pu être chargés dans l'application.%n%n"));
+            return new MenuLeadTo("main");
         }
 
-        List<Club> sorted = clubs.stream().sorted(Comparator.comparingInt(Club::getId)).toList();
+        int columnCount = ModelTableFormatter.getColumnCount(Club.class);
+        int sortColumnIndex = 0;
+        Scanner scanner = new Scanner(System.in);
+        boolean quitLoop = false;
 
-        ModelTableFormatter.forList(sorted).display();
+        do {
+            Comparator<Club> comparator = ModelTableFormatter.comparatorForColumn(Club.class, sortColumnIndex);
+            List<Club> sorted = clubDataManager.getClubs().values().stream().sorted(comparator).toList();
 
-        if (clubDataManager.hasUnsavedChanges()) {
-            System.out.printf("%s%n%n", TextFormatter.italic(TextFormatter.yellow(TextFormatter.bold("ATTENTION !"), " Des modifications dans cette liste n'ont pas encore été sauvegardées. Rendez-vous dans le menu principal pour résoudre ce problème.")));
-        }
+            ModelTableFormatter.forList(sorted).display();
+
+            if (clubDataManager.hasUnsavedChanges()) {
+                System.out.printf("%s%n%n", TextFormatter.italic(TextFormatter.yellow(TextFormatter.bold("ATTENTION !"), " Des modifications dans cette liste n'ont pas encore été sauvegardées. Rendez-vous dans le menu principal pour résoudre ce problème.")));
+            }
+
+            System.out.print("Commande : ");
+            String input = scanner.nextLine().strip();
+            System.out.println();
+
+            try {
+                Command command = CommandManager.convertInput(input);
+
+                switch (command.getCommand()) {
+                    case BACK -> quitLoop = true;
+                    case QUIT -> {
+                        return null;
+                    }
+                    case SORT -> {
+                        int columnChoice;
+                        try {
+                            columnChoice = Integer.parseInt(command.getArguments().getFirst().getValue());
+                        } catch (NumberFormatException e) {
+                            System.out.printf(Functions.styleAsErrorMessage("L'entrée '%s' est invalide. Veuillez entrer un nombre entre 1 et %d.%n%n"), input, columnCount);
+                            continue;
+                        }
+
+                        if (columnChoice < 1 || columnChoice > columnCount) {
+                            System.out.printf(Functions.styleAsErrorMessage("La colonne '%d' est invalide. Veuillez entrer un nombre entre 1 et %d.%n%n"), columnChoice, columnCount);
+                            continue;
+                        }
+
+                        sortColumnIndex = columnChoice - 1;
+                    }
+                    default -> System.out.printf(Functions.styleAsErrorMessage("Cette commande n'est pas prise en charge ici.%n%n"));
+                }
+            } catch (NotACommandException _) {
+                System.out.printf(Functions.styleAsErrorMessage("L'entrée '%s' n'est pas une commande.%n%n".formatted(input)));
+            } catch (UnknownCommandException e) {
+                System.out.printf(Functions.styleAsErrorMessage("Cette commande n'existe pas.%n%n"));
+            } catch (CommandArgumentException e) {
+                System.out.printf(Functions.styleAsErrorMessage("Les arguments de cette commande sont invalides.%n%n"));
+            }
+        } while (!quitLoop);
 
         return new MenuLeadTo("clubs.manage");
     }

@@ -150,7 +150,7 @@ public class DataManagers {
                     return true;
                 }
             }
-        } catch (ClassNotFoundException ignored) {}
+        } catch (ClassNotFoundException _) {}
 
         return false;
     }

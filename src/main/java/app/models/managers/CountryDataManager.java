@@ -47,7 +47,7 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
 
             try {
                 this.export();
-            } catch (DataManagerException ignored) {
+            } catch (DataManagerException _) {
             }
         }
     }
