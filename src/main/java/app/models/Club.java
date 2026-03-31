@@ -14,7 +14,6 @@ import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 
 import app.models.formatting.ModelKeyTextFormattingPreset;
-import app.models.formatting.ModelPrimaryKeyTextFormattingPreset;
 import utils.io.helpers.tables.TableDisplay;
 import utils.io.helpers.tables.TableDisplayFormattingOptions;
 import utils.io.helpers.texts.formatting.TextAlignement;
@@ -22,22 +21,16 @@ import utils.io.helpers.texts.formatting.TextStyle;
 
 import java.util.regex.Pattern;
 
-public class Club extends Model implements Hydratable<Club.Data> {
+public class Club extends IdentifiedModel implements Hydratable<Club.Data> {
 
     // ─── Properties ─── //
 
-    private int id = -1;
     private String name;
     @ModelReference(manager = AddressDataManager.class) private Address address;
     private int pendingAddressPk = -1;
     private String googleMapsLink;
 
     // ─── Getters ─── //
-
-    @TableDisplay(name = "#", format = @TableDisplayFormattingOptions(preset = ModelPrimaryKeyTextFormattingPreset.class, alignment = TextAlignement.RIGHT), order = 1)
-    public int getId() {
-        return this.id;
-    }
 
     @TableDisplay(name = "Nom", format = @TableDisplayFormattingOptions(styles = {TextStyle.ITALIC}), order = 2)
     public String getName() {
@@ -61,14 +54,6 @@ public class Club extends Model implements Hydratable<Club.Data> {
     }
 
     // ─── Setters ─── //
-
-    public void setId(int id) throws ModelException {
-        if (id <= 0 && id != -1) {
-            throw new ModelException("L'identifiant doit être un entier strictement positif (ou -1)");
-        }
-
-        this.id = id;
-    }
 
     public void setName(String name) throws ModelException {
         if (name == null || name.isBlank()) {
@@ -138,17 +123,21 @@ public class Club extends Model implements Hydratable<Club.Data> {
     }
 
     @Override
+    public String toString() {
+        return "#%d %s".formatted(this.getId(), this.name);
+    }
+
+    @Override
     public boolean isValid() {
-        return this.id > 0 && this.address != null && this.name != null;
+        return this.getId() > 0 && this.address != null && this.name != null;
     }
 
     // ─── Sub classes ─── //
 
-    public static class Data implements CustomSerializable, JsonConvertible {
+    public static class Data extends IdentifiedModelData implements CustomSerializable, JsonConvertible {
 
         // ─── Properties ─── //
 
-        private int id = -1;
         private String name;
         private int addressId = -1;
         private String googleMapsLink;
@@ -166,10 +155,6 @@ public class Club extends Model implements Hydratable<Club.Data> {
 
         // ─── Getters ─── //
 
-        public int getId() {
-            return this.id;
-        }
-
         public String getName() {
             return this.name;
         }
@@ -183,25 +168,6 @@ public class Club extends Model implements Hydratable<Club.Data> {
         }
 
         // ─── Setters ─── //
-
-        public void setId(int id) throws ModelException {
-            if (id <= 0 && id != -1) {
-                throw new ModelException("L'identifiant doit être un entier strictement positif (ou -1)");
-            }
-
-            this.id = id;
-        }
-
-        public void setId(String id) throws ModelException {
-            int idAsInt;
-            try {
-                idAsInt = Integer.parseInt(id);
-            } catch (NumberFormatException e) {
-                throw new ModelException("L'identifiant doit être un entier strictement positif (ou -1)", e);
-            }
-
-            this.setId(idAsInt);
-        }
 
         public void setName(String name) throws ModelException {
             if (name == null || name.isBlank()) {
@@ -262,6 +228,7 @@ public class Club extends Model implements Hydratable<Club.Data> {
             if (!obj.has("addressId")) {
                 throw new StringParserException("Le champ 'addressId' est manquant");
             }
+
             try {
                 this.setId(obj.get("id").getAsString());
                 this.setName(obj.get("name").getAsString());

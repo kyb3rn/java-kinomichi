@@ -120,6 +120,11 @@ public class Country extends Model implements CustomSerializable, CsvConvertible
     }
 
     @Override
+    public String toString() {
+        return "%s (%s)".formatted(this.name, this.iso3);
+    }
+
+    @Override
     public boolean isValid() {
         return this.name != null && this.iso2 != null && this.iso3 != null;
     }

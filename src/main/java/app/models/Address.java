@@ -13,18 +13,14 @@ import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 
-import app.models.formatting.ModelPrimaryKeyTextFormattingPreset;
 import utils.io.helpers.tables.TableDisplay;
-import utils.io.helpers.tables.TableDisplayFormattingOptions;
-import utils.io.helpers.texts.formatting.TextAlignement;
 
 import java.util.regex.Pattern;
 
-public class Address extends Model implements Hydratable<Address.Data> {
+public class Address extends IdentifiedModel implements Hydratable<Address.Data> {
 
     // ─── Properties ─── //
 
-    private int id = -1;
     @ModelReference(manager = CountryDataManager.class) private Country country;
     private String pendingCountryPk;
     private int zipCode;
@@ -34,11 +30,6 @@ public class Address extends Model implements Hydratable<Address.Data> {
     private Integer boxNumber;
 
     // ─── Getters ─── //
-
-    @TableDisplay(name = "#", format = @TableDisplayFormattingOptions(preset = ModelPrimaryKeyTextFormattingPreset.class, alignment = TextAlignement.RIGHT), order = 1)
-    public int getId() {
-        return this.id;
-    }
 
     public Country getCountry() {
         return this.country;
@@ -70,14 +61,6 @@ public class Address extends Model implements Hydratable<Address.Data> {
     }
 
     // ─── Setters ─── //
-
-    public void setId(int id) throws ModelException {
-        if (id <= 0 && id != -1) {
-            throw new ModelException("L'identifiant doit être un entier strictement positif (ou -1)");
-        }
-
-        this.id = id;
-    }
 
     public void setCountry(Country country) throws ModelException {
         if (country == null) {
@@ -195,16 +178,15 @@ public class Address extends Model implements Hydratable<Address.Data> {
 
     @Override
     public boolean isValid() {
-        return this.id > 0 && this.country != null && this.zipCode > 0 && this.city != null && this.street != null && this.number != null;
+        return this.getId() > 0 && this.country != null && this.zipCode > 0 && this.city != null && this.street != null && this.number != null;
     }
 
     // ─── Sub classes ─── //
 
-    public static class Data implements CustomSerializable, JsonConvertible {
+    public static class Data extends IdentifiedModelData implements CustomSerializable, JsonConvertible {
 
         // ─── Properties ─── //
 
-        private int id = -1;
         private String countryIso3;
         private int zipCode;
         private String city;
@@ -227,10 +209,6 @@ public class Address extends Model implements Hydratable<Address.Data> {
         }
 
         // ─── Getters ─── //
-
-        public int getId() {
-            return this.id;
-        }
 
         public String getCountryIso3() {
             return this.countryIso3;
@@ -257,25 +235,6 @@ public class Address extends Model implements Hydratable<Address.Data> {
         }
 
         // ─── Setters ─── //
-
-        public void setId(int id) throws ModelException {
-            if (id <= 0 && id != -1) {
-                throw new ModelException("L'identifiant doit être un entier strictement positif (ou -1)");
-            }
-
-            this.id = id;
-        }
-
-        public void setId(String id) throws ModelException {
-            int idAsInt;
-            try {
-                idAsInt = Integer.parseInt(id);
-            } catch (NumberFormatException e) {
-                throw new ModelException("L'identifiant doit être un entier strictement positif (ou -1)", e);
-            }
-
-            this.setId(idAsInt);
-        }
 
         public void setCountryIso3(String countryIso3) throws ModelException {
             countryIso3 = verifyCountryIso3(countryIso3);
