@@ -1,6 +1,5 @@
 package utils.io.menus;
 
-import app.utils.ExitProgramException;
 import utils.io.commands.*;
 import utils.io.helpers.Functions;
 
@@ -58,26 +57,45 @@ public abstract class OptionedMenuStage extends MenuStage {
         return false;
     }
 
-    // ─── Overrides & inheritance ─── //
-
     public abstract void display();
+
+    public void beforeDisplay() {}
+
+    public void afterDisplay() {}
+
+    public void beforeInput() {}
+
+    public void afterEveryInput(String input) {}
+
+    public void afterValidInput(String input, int choice) {}
+
+    // ─── Overrides & inheritance ─── //
 
     @Override
     public OptionedMenuMenuLeadTo use() {
         int optionsSize = this.options.size();
 
+        this.beforeDisplay();
+
         this.display();
+
+        this.afterDisplay();
 
         if (optionsSize > 0) {
             Scanner scanner = new Scanner(System.in);
             boolean isValidChoice = false;
             MenuOption selectedOption = null;
+            String input;
             int choice = -1;
 
             do {
+                this.beforeInput();
+
                 System.out.print("> ");
-                String input = scanner.nextLine();
+                input = scanner.nextLine();
                 System.out.println();
+
+                this.afterEveryInput(input);
 
                 try {
                     Command command = CommandManager.convertInput(input);
@@ -121,6 +139,8 @@ public abstract class OptionedMenuStage extends MenuStage {
                     selectedOption = this.options.get(choice - 1);
                 }
             } while (!isValidChoice);
+
+            this.afterValidInput(input, choice);
 
             if (selectedOption.getOutcome() instanceof MenuOptionOutcomeAction menuOptionOutcomeAction) {
                 menuOptionOutcomeAction.execute();

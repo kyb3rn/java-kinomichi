@@ -109,7 +109,7 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
 
     public abstract int count();
 
-    public void resolveReferences() throws ModelException {
+    public void resolveReferences() throws ModelException, DataManagerException {
         if (this.pendingModels == null || this.pendingModels.isEmpty()) {
             this.initialized = true;
             return;
@@ -148,6 +148,6 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
         }
     }
 
-    protected void addResolvedModel(Model model) throws ModelException {}
+    protected void addResolvedModel(Model model) throws ModelException, DataManagerException {}
 
 }

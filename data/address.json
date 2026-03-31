@@ -63,6 +63,14 @@
       "city": "Angleur",
       "street": "Rue des Coudriers",
       "number": "5"
+    },
+    {
+      "id": 9,
+      "countryIso3": "BEL",
+      "zipCode": 5000,
+      "city": "Namur",
+      "street": "Rue de la Citadelle",
+      "number": "12"
     }
   ]
 }

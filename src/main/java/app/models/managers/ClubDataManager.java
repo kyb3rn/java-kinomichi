@@ -34,13 +34,13 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
 
     // ─── Utility methods ─── //
 
-    public void addClub(Club club) throws ModelException {
+    public void addClub(Club club) throws ModelException, DataManagerException {
         if (!club.isValid()) {
             throw new ModelException("L'objet Club qui a voulu être ajouté n'est pas valide");
         }
 
         if (this.clubs.containsKey(club.getId())) {
-            throw new ModelException("Un club portant l'identifiant '%d' existe déjà".formatted(club.getId()));
+            throw new DataManagerException("Un club portant l'identifiant '%d' existe déjà".formatted(club.getId()));
         }
 
         this.clubs.put(club.getId(), club);
@@ -55,7 +55,7 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
         }
     }
 
-    public Club addClub(Club.Data clubData) throws ModelException {
+    public Club addClub(Club.Data clubData) throws ModelException, DataManagerException {
         Club club = new Club();
         club.hydrate(clubData);
         DataManagers.resolveModelReferences(club);
@@ -126,12 +126,12 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
     }
 
     @Override
-    protected void addResolvedModel(Model model) throws ModelException {
+    protected void addResolvedModel(Model model) throws ModelException, DataManagerException {
         if (!(model instanceof Club club)) {
             throw new ModelException("Le manager '%s' attend un objet de type Club, mais a reçu '%s'".formatted(this.getClass().getSimpleName(), model.getClass().getSimpleName()));
         }
 
-        this.clubs.put(club.getId(), club);
+        this.addClub(club);
     }
 
     @Override

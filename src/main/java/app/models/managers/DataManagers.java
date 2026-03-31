@@ -44,19 +44,19 @@ public class DataManagers {
         return instance;
     }
 
-    public static void init(Class<? extends DataManager<?>> clazz) {
+    public static void initAndResolveReferences(Class<? extends DataManager<?>> clazz) {
         try {
             DataManager<?> manager = initAndGet(clazz);
             manager.resolveReferences();
         } catch (LoadDataManagerDataException e) {
             System.out.printf(Functions.styleAsErrorMessage("Le pré-chargement du manager '%s' n'a pas pu être effectué.%n"), clazz.getSimpleName());
-        } catch (ModelException e) {
+        } catch (DataManagerException | ModelException e) {
             System.out.printf(Functions.styleAsErrorMessage("La résolution des références du manager '%s' a échoué: %s%n"), clazz.getSimpleName(), e.getMessage());
         }
     }
 
     @SafeVarargs
-    public static void initAll(Class<? extends DataManager<?>>... classes) {
+    public static void initAndResolveReferencesAll(Class<? extends DataManager<?>>... classes) {
         // Pass 1: instantiate managers (primitive data only)
         List<DataManager<?>> loadedManagers = new ArrayList<>();
         for (var clazz : classes) {
@@ -72,7 +72,7 @@ public class DataManagers {
         for (DataManager<?> manager : loadedManagers) {
             try {
                 manager.resolveReferences();
-            } catch (ModelException e) {
+            } catch (DataManagerException | ModelException e) {
                 System.out.printf(Functions.styleAsErrorMessage("La résolution des références du manager '%s' a échoué: %s%n"), manager.getClass().getSimpleName(), e.getMessage());
             }
         }

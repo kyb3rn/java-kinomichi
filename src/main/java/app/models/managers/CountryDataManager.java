@@ -1,5 +1,6 @@
 package app.models.managers;
 
+import app.models.Model;
 import app.models.ModelException;
 import utils.data_management.FileType;
 import app.models.Country;
@@ -31,13 +32,13 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
 
     // ─── Utility methods ─── //
 
-    public void addCountry(Country country) throws ModelException {
+    public void addCountry(Country country) throws ModelException, DataManagerException {
         if (!country.isValid()) {
             throw new ModelException("L'objet Country qui a voulu être ajouté n'est pas valide");
         }
 
         if (this.countries.containsKey(country.getIso3())) {
-            throw new ModelException("Un pays portant l'ISO3 '%s' existe déjà".formatted(country.getIso3()));
+            throw new DataManagerException("Un pays portant l'ISO3 '%s' existe déjà".formatted(country.getIso3()));
         }
 
         this.countries.put(country.getIso3(), country);
@@ -112,7 +113,7 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
     }
 
     @Override
-    public void hydrate(Data dataObject) throws ModelException {
+    public void hydrate(Data dataObject) throws ModelException, DataManagerException {
         for (Country country : dataObject.countries) {
             this.addCountry(country);
         }

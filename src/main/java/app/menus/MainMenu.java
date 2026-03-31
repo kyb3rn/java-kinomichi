@@ -1,15 +1,9 @@
 package app.menus;
 
-import app.models.managers.AddressDataManager;
-import app.models.managers.ClubDataManager;
-import app.models.managers.CountryDataManager;
-import app.models.managers.DataManager;
+import app.models.managers.CampDataManager;
 import app.models.managers.DataManagers;
 import utils.io.helpers.texts.formatting.TextFormatter;
-import utils.io.menus.MenuLeadTo;
 import utils.io.menus.StandardMenu;
-
-import java.util.List;
 
 public class MainMenu extends StandardMenu {
 
@@ -18,61 +12,28 @@ public class MainMenu extends StandardMenu {
     public MainMenu() {
         super("Kinomichi - Menu d'administration");
 
-        this.addOption1();
-        this.addOption2();
-        this.addOption3();
+        int campsCount = DataManagers.getCountOf(CampDataManager.class);
 
-        List<DataManager<?>> badlyInitializedDataManagers = DataManagers.getBadlyInitializedOnes();
-
-        if (!badlyInitializedDataManagers.isEmpty()) {
-            this.addOption("Re-initialisation de gestionnaires de données (%s)".formatted(badlyInitializedDataManagers.size()), "data_managers.reinit");
-        }
-
-        List<DataManager<?>> unsavedDataManagers = DataManagers.getUnsavedOnes();
-
-        if (!unsavedDataManagers.isEmpty()) {
-            this.addOption("Sauvegarder des données non enregistrées (%d)".formatted(unsavedDataManagers.size()), "data_managers.save");
+        if (campsCount > 0) {
+            this.addOption("Sélectionner un stage (%s)".formatted(campsCount), (String) null);
+            this.addOption("Ajouter un stage", (String) null);
+            this.addOption("Modifier un stage", (String) null);
+            this.addOption("Supprimer un stage", (String) null);
+        } else {
+            this.addOption("Ajouter un stage", (String) null);
         }
 
         this.addOption("Quitter");
     }
 
-    // ─── Utility methods ─── //
+    // ─── Overrides & inheritance ─── //
 
-    private void addOption1() {
-        String option1 = "Parcourir les pays (%d)".formatted(DataManagers.getCountOf(CountryDataManager.class));
-
-        boolean countriesInitialized = DataManagers.isInitialized(CountryDataManager.class);
-
-        if (!countriesInitialized) {
-            option1 = TextFormatter.strikethrough(option1) + " " + TextFormatter.red(TextFormatter.italic("(pays non chargés)"));
+    @Override
+    public void afterDisplay() {
+        int campsCount = DataManagers.getCountOf(CampDataManager.class);
+        if (campsCount == 0) {
+            System.out.printf(TextFormatter.yellow(TextFormatter.italic("Il n'y a pas encore de stage enregistré. ", TextFormatter.bold("Créez-en un !"))) + "%n%n");
         }
-
-        this.addOption(option1, countriesInitialized ? "countries.manage" : "main");
-    }
-
-    private void addOption2() {
-        String option2 = "Parcourir les adresses (%d)".formatted(DataManagers.getCountOf(AddressDataManager.class));
-
-        boolean addressesInitialized = DataManagers.isInitialized(AddressDataManager.class);
-
-        if (!addressesInitialized) {
-            option2 = TextFormatter.strikethrough(option2) + " " + TextFormatter.red(TextFormatter.italic("(adresses non chargées)"));
-        }
-
-        this.addOption(option2, addressesInitialized ? "addresses.manage" : "main");
-    }
-
-    private void addOption3() {
-        String option3 = "Gestion des clubs (%d)".formatted(DataManagers.getCountOf(ClubDataManager.class));
-
-        boolean clubsInitialized = DataManagers.isInitialized(ClubDataManager.class);
-
-        if (!clubsInitialized) {
-            option3 = TextFormatter.strikethrough(option3) + " " + TextFormatter.red(TextFormatter.italic("(clubs non chargés)"));
-        }
-
-        this.addOption(option3, clubsInitialized ? "clubs.manage" : "main");
     }
 
 }

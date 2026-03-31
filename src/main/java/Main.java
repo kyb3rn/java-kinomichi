@@ -1,6 +1,7 @@
 import app.menus.MainMenu;
 import app.menus.addresses.ListAddressesMenu;
 import app.menus.addresses.ManageAddressesMenu;
+import app.menus.camps.ManageCampMenu;
 import app.menus.clubs.AddClubMenu;
 import app.menus.clubs.ListClubsMenu;
 import app.menus.clubs.ManageClubsMenu;
@@ -8,19 +9,15 @@ import app.menus.countries.ListCountriesMenu;
 import app.menus.countries.ManageCountriesMenu;
 import app.menus.data_managers.ReInitDataManagersMenu;
 import app.menus.data_managers.SaveDataManagersMenu;
-import app.models.managers.AddressDataManager;
-import app.models.managers.ClubDataManager;
-import app.models.managers.CountryDataManager;
+import app.models.managers.CampDataManager;
 import app.models.managers.DataManagers;
 import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.menus.MenuLeadTo;
 import utils.io.menus.MenuStage;
 
 void main() {
-    DataManagers.initAll(
-        CountryDataManager.class,
-        AddressDataManager.class,
-        ClubDataManager.class
+    DataManagers.initAndResolveReferencesAll(
+        CampDataManager.class
     );
 
     HashMap<String, Supplier<MenuStage>> menus = new HashMap<>();
@@ -30,6 +27,7 @@ void main() {
     menus.put("countries.manage", ManageCountriesMenu::new);
     menus.put("addresses.manage", ManageAddressesMenu::new);
     menus.put("clubs.manage", ManageClubsMenu::new);
+    menus.put("camps.manage", ManageCampMenu::new);
 
     // Static menus (same instance reused)
     ReInitDataManagersMenu reinitDataManagersMenu = new ReInitDataManagersMenu();
