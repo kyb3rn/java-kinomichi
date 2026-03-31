@@ -1,11 +1,14 @@
 package utils.io.helpers.tables;
 
 import utils.io.helpers.Functions;
+import utils.io.helpers.texts.formatting.FormattedText;
 import utils.io.helpers.texts.formatting.TextAlignement;
 import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.helpers.texts.formatting.TextFormattingOptions;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -44,7 +47,7 @@ public class Table {
 
     public void setHorizontalPadding(int horizontalPadding) {
         if (horizontalPadding < 1 || horizontalPadding > 5) {
-            throw new IllegalArgumentException("Le padding horizontal doit être un nombre entier compris dans l'intervalle [1;5]");
+            throw new IllegalArgumentException("Le padding horizontal doit être un nombre entier compris dans entre 1 et 5 (inclus)");
         }
 
         this.horizontalPadding = horizontalPadding;
@@ -140,11 +143,11 @@ public class Table {
             StringBuilder headerStringBuilder = new StringBuilder();
             if (this.options.contains(TableOptions.DISPLAY_HEADER)) {
                 if (this.singleHeader != null) {
-                    headerStringBuilder.append(TextFormatter.center(totalInnerWidth, this.singleHeader));
+                    headerStringBuilder.append(TextFormatter.center(totalInnerWidth, this.singleHeader).toString());
                 } else {
                     headerStringBuilder.append(
                         this.columns.stream()
-                            .map(column -> TextFormatter.align(columnsInnerWidth.get(this.columns.indexOf(column)), column.getName(), column.getAlignement()))
+                            .map(column -> TextFormatter.align(columnsInnerWidth.get(this.columns.indexOf(column)), column.getName(), column.getAlignement()).toString())
                             .collect(Collectors.joining(columnSeparationStringBuilder))
                     );
                 }
@@ -167,11 +170,9 @@ public class Table {
                             this.columns.stream()
                                 .map(column -> {
                                     TextFormattingOptions opts = column.getFormattingOptions();
-                                    int savedMinWidth = opts.getMinWidth();
-                                    opts.setMinWidth(columnsInnerWidth.get(this.columns.indexOf(column)));
-                                    String formatted = TextFormatter.format(column.getValues().get(i), opts);
-                                    opts.setMinWidth(savedMinWidth);
-                                    return formatted;
+                                    int columnInnerWidth = columnsInnerWidth.get(this.columns.indexOf(column));
+                                    FormattedText formatted = TextFormatter.format(opts, column.getValues().get(i));
+                                    return TextFormatter.align(columnInnerWidth, formatted, opts.getAlignment()).toString();
                                 })
                                 .collect(Collectors.joining(columnSeparationStringBuilder))
                         )

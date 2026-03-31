@@ -21,8 +21,8 @@ public class SimpleBox {
 
     // ─── Utility methods ─── //
 
-    public void addLine(String line) {
-        this.table.addColumnValue(0, line);
+    public void addLine(Object line) {
+        this.table.addColumnValue(0, line.toString());
     }
 
     public void display() {

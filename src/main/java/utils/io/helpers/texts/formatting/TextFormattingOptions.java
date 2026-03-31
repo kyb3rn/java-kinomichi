@@ -2,6 +2,7 @@ package utils.io.helpers.texts.formatting;
 
 import java.util.*;
 import java.util.stream.*;
+import java.util.LinkedHashSet;
 
 public class TextFormattingOptions {
 
@@ -21,6 +22,15 @@ public class TextFormattingOptions {
         this.styles = EnumSet.noneOf(TextStyle.class);
         this.alignment = TextAlignement.LEFT;
         this.minWidth = 0;
+    }
+
+    public TextFormattingOptions(TextFormattingOptions other) {
+        this.color = other.color;
+        this.backgroundColor = other.backgroundColor;
+        this.styles = EnumSet.noneOf(TextStyle.class);
+        this.styles.addAll(other.styles);
+        this.alignment = other.alignment;
+        this.minWidth = other.minWidth;
     }
 
     // ─── Getters ─── //
@@ -83,6 +93,20 @@ public class TextFormattingOptions {
         return this;
     }
 
+    public TextFormattingOptions mergeWith(TextFormattingOptions outer) {
+        if ((this.color == null || this.color == TextColor.NONE) && outer.color != null && outer.color != TextColor.NONE) {
+            this.color = outer.color;
+        }
+
+        if ((this.backgroundColor == null || this.backgroundColor == TextBackgroundColor.NONE) && outer.backgroundColor != null && outer.backgroundColor != TextBackgroundColor.NONE) {
+            this.backgroundColor = outer.backgroundColor;
+        }
+
+        this.styles.addAll(outer.styles);
+
+        return this;
+    }
+
     public String buildEscapeSequence() {
         List<String> codes = new ArrayList<>();
 
@@ -103,5 +127,27 @@ public class TextFormattingOptions {
         }
 
         return "\033[" + codes.stream().collect(Collectors.joining(";")) + "m";
+    }
+
+    public String buildResetSequence() {
+        Set<String> resetCodes = new LinkedHashSet<>();
+
+        if (this.color != null && this.color != TextColor.NONE) {
+            resetCodes.add(TextColor.RESET_CODE);
+        }
+
+        if (this.backgroundColor != null && this.backgroundColor != TextBackgroundColor.NONE) {
+            resetCodes.add(TextBackgroundColor.RESET_CODE);
+        }
+
+        for (TextStyle style : this.styles) {
+            resetCodes.add(style.getResetCode());
+        }
+
+        if (resetCodes.isEmpty()) {
+            return "";
+        }
+
+        return "\033[" + String.join(";", resetCodes) + "m";
     }
 }

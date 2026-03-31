@@ -38,7 +38,7 @@ public class Functions {
     }
 
     public static String styleAsErrorMessage(String text) {
-        return TextFormatter.red(TextFormatter.italic(text));
+        return TextFormatter.red(TextFormatter.italic(text)).toString();
     }
 
 }

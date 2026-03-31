@@ -1,249 +1,291 @@
 package utils.io.helpers.texts.formatting;
 
+import java.util.*;
+
 import utils.io.helpers.Functions;
 
 public class TextFormatter {
-
-    // ─── Properties ─── //
-
-    private static final String ESCAPE = "\033[";
-    private static final String RESET = ESCAPE + "0m";
 
     // ─── Utility methods ─── //
 
     // Text colors
 
-    public static String black(String text) {
-        return ESCAPE + TextColor.BLACK.getCode() + "m" + text + RESET;
+    public static FormattedText black(Object... parts) {
+        return format(TextColor.BLACK, parts);
     }
 
-    public static String red(String text) {
-        return ESCAPE + TextColor.RED.getCode() + "m" + text + RESET;
+    public static FormattedText red(Object... parts) {
+        return format(TextColor.RED, parts);
     }
 
-    public static String green(String text) {
-        return ESCAPE + TextColor.GREEN.getCode() + "m" + text + RESET;
+    public static FormattedText green(Object... parts) {
+        return format(TextColor.GREEN, parts);
     }
 
-    public static String yellow(String text) {
-        return ESCAPE + TextColor.YELLOW.getCode() + "m" + text + RESET;
+    public static FormattedText yellow(Object... parts) {
+        return format(TextColor.YELLOW, parts);
     }
 
-    public static String blue(String text) {
-        return ESCAPE + TextColor.BLUE.getCode() + "m" + text + RESET;
+    public static FormattedText blue(Object... parts) {
+        return format(TextColor.BLUE, parts);
     }
 
-    public static String magenta(String text) {
-        return ESCAPE + TextColor.MAGENTA.getCode() + "m" + text + RESET;
+    public static FormattedText magenta(Object... parts) {
+        return format(TextColor.MAGENTA, parts);
     }
 
-    public static String cyan(String text) {
-        return ESCAPE + TextColor.CYAN.getCode() + "m" + text + RESET;
+    public static FormattedText cyan(Object... parts) {
+        return format(TextColor.CYAN, parts);
     }
 
-    public static String white(String text) {
-        return ESCAPE + TextColor.WHITE.getCode() + "m" + text + RESET;
+    public static FormattedText white(Object... parts) {
+        return format(TextColor.WHITE, parts);
     }
 
-    public static String brightBlack(String text) {
-        return ESCAPE + TextColor.BRIGHT_BLACK.getCode() + "m" + text + RESET;
+    public static FormattedText brightBlack(Object... parts) {
+        return format(TextColor.BRIGHT_BLACK, parts);
     }
 
-    public static String brightRed(String text) {
-        return ESCAPE + TextColor.BRIGHT_RED.getCode() + "m" + text + RESET;
+    public static FormattedText brightRed(Object... parts) {
+        return format(TextColor.BRIGHT_RED, parts);
     }
 
-    public static String brightGreen(String text) {
-        return ESCAPE + TextColor.BRIGHT_GREEN.getCode() + "m" + text + RESET;
+    public static FormattedText brightGreen(Object... parts) {
+        return format(TextColor.BRIGHT_GREEN, parts);
     }
 
-    public static String brightYellow(String text) {
-        return ESCAPE + TextColor.BRIGHT_YELLOW.getCode() + "m" + text + RESET;
+    public static FormattedText brightYellow(Object... parts) {
+        return format(TextColor.BRIGHT_YELLOW, parts);
     }
 
-    public static String brightBlue(String text) {
-        return ESCAPE + TextColor.BRIGHT_BLUE.getCode() + "m" + text + RESET;
+    public static FormattedText brightBlue(Object... parts) {
+        return format(TextColor.BRIGHT_BLUE, parts);
     }
 
-    public static String brightMagenta(String text) {
-        return ESCAPE + TextColor.BRIGHT_MAGENTA.getCode() + "m" + text + RESET;
+    public static FormattedText brightMagenta(Object... parts) {
+        return format(TextColor.BRIGHT_MAGENTA, parts);
     }
 
-    public static String brightCyan(String text) {
-        return ESCAPE + TextColor.BRIGHT_CYAN.getCode() + "m" + text + RESET;
+    public static FormattedText brightCyan(Object... parts) {
+        return format(TextColor.BRIGHT_CYAN, parts);
     }
 
-    public static String brightWhite(String text) {
-        return ESCAPE + TextColor.BRIGHT_WHITE.getCode() + "m" + text + RESET;
+    public static FormattedText brightWhite(Object... parts) {
+        return format(TextColor.BRIGHT_WHITE, parts);
     }
 
     // Background colors
 
-    public static String bgBlack(String text) {
-        return ESCAPE + TextBackgroundColor.BLACK.getCode() + "m" + text + RESET;
+    public static FormattedText bgBlack(Object... parts) {
+        return format(TextBackgroundColor.BLACK, parts);
     }
 
-    public static String bgRed(String text) {
-        return ESCAPE + TextBackgroundColor.RED.getCode() + "m" + text + RESET;
+    public static FormattedText bgRed(Object... parts) {
+        return format(TextBackgroundColor.RED, parts);
     }
 
-    public static String bgGreen(String text) {
-        return ESCAPE + TextBackgroundColor.GREEN.getCode() + "m" + text + RESET;
+    public static FormattedText bgGreen(Object... parts) {
+        return format(TextBackgroundColor.GREEN, parts);
     }
 
-    public static String bgYellow(String text) {
-        return ESCAPE + TextBackgroundColor.YELLOW.getCode() + "m" + text + RESET;
+    public static FormattedText bgYellow(Object... parts) {
+        return format(TextBackgroundColor.YELLOW, parts);
     }
 
-    public static String bgBlue(String text) {
-        return ESCAPE + TextBackgroundColor.BLUE.getCode() + "m" + text + RESET;
+    public static FormattedText bgBlue(Object... parts) {
+        return format(TextBackgroundColor.BLUE, parts);
     }
 
-    public static String bgMagenta(String text) {
-        return ESCAPE + TextBackgroundColor.MAGENTA.getCode() + "m" + text + RESET;
+    public static FormattedText bgMagenta(Object... parts) {
+        return format(TextBackgroundColor.MAGENTA, parts);
     }
 
-    public static String bgCyan(String text) {
-        return ESCAPE + TextBackgroundColor.CYAN.getCode() + "m" + text + RESET;
+    public static FormattedText bgCyan(Object... parts) {
+        return format(TextBackgroundColor.CYAN, parts);
     }
 
-    public static String bgWhite(String text) {
-        return ESCAPE + TextBackgroundColor.WHITE.getCode() + "m" + text + RESET;
+    public static FormattedText bgWhite(Object... parts) {
+        return format(TextBackgroundColor.WHITE, parts);
     }
 
-    public static String bgBrightBlack(String text) {
-        return ESCAPE + TextBackgroundColor.BRIGHT_BLACK.getCode() + "m" + text + RESET;
+    public static FormattedText bgBrightBlack(Object... parts) {
+        return format(TextBackgroundColor.BRIGHT_BLACK, parts);
     }
 
-    public static String bgBrightRed(String text) {
-        return ESCAPE + TextBackgroundColor.BRIGHT_RED.getCode() + "m" + text + RESET;
+    public static FormattedText bgBrightRed(Object... parts) {
+        return format(TextBackgroundColor.BRIGHT_RED, parts);
     }
 
-    public static String bgBrightGreen(String text) {
-        return ESCAPE + TextBackgroundColor.BRIGHT_GREEN.getCode() + "m" + text + RESET;
+    public static FormattedText bgBrightGreen(Object... parts) {
+        return format(TextBackgroundColor.BRIGHT_GREEN, parts);
     }
 
-    public static String bgBrightYellow(String text) {
-        return ESCAPE + TextBackgroundColor.BRIGHT_YELLOW.getCode() + "m" + text + RESET;
+    public static FormattedText bgBrightYellow(Object... parts) {
+        return format(TextBackgroundColor.BRIGHT_YELLOW, parts);
     }
 
-    public static String bgBrightBlue(String text) {
-        return ESCAPE + TextBackgroundColor.BRIGHT_BLUE.getCode() + "m" + text + RESET;
+    public static FormattedText bgBrightBlue(Object... parts) {
+        return format(TextBackgroundColor.BRIGHT_BLUE, parts);
     }
 
-    public static String bgBrightMagenta(String text) {
-        return ESCAPE + TextBackgroundColor.BRIGHT_MAGENTA.getCode() + "m" + text + RESET;
+    public static FormattedText bgBrightMagenta(Object... parts) {
+        return format(TextBackgroundColor.BRIGHT_MAGENTA, parts);
     }
 
-    public static String bgBrightCyan(String text) {
-        return ESCAPE + TextBackgroundColor.BRIGHT_CYAN.getCode() + "m" + text + RESET;
+    public static FormattedText bgBrightCyan(Object... parts) {
+        return format(TextBackgroundColor.BRIGHT_CYAN, parts);
     }
 
-    public static String bgBrightWhite(String text) {
-        return ESCAPE + TextBackgroundColor.BRIGHT_WHITE.getCode() + "m" + text + RESET;
+    public static FormattedText bgBrightWhite(Object... parts) {
+        return format(TextBackgroundColor.BRIGHT_WHITE, parts);
     }
 
     // Styles
 
-    public static String bold(String text) {
-        return ESCAPE + TextStyle.BOLD.getCode() + "m" + text + RESET;
+    public static FormattedText bold(Object... parts) {
+        return format(TextStyle.BOLD, parts);
     }
 
-    public static String italic(String text) {
-        return ESCAPE + TextStyle.ITALIC.getCode() + "m" + text + RESET;
+    public static FormattedText italic(Object... parts) {
+        return format(TextStyle.ITALIC, parts);
     }
 
-    public static String underline(String text) {
-        return ESCAPE + TextStyle.UNDERLINE.getCode() + "m" + text + RESET;
+    public static FormattedText underline(Object... parts) {
+        return format(TextStyle.UNDERLINE, parts);
     }
 
-    public static String dim(String text) {
-        return ESCAPE + TextStyle.DIM.getCode() + "m" + text + RESET;
+    public static FormattedText dim(Object... parts) {
+        return format(TextStyle.DIM, parts);
     }
 
-    public static String blink(String text) {
-        return ESCAPE + TextStyle.BLINK.getCode() + "m" + text + RESET;
+    public static FormattedText blink(Object... parts) {
+        return format(TextStyle.BLINK, parts);
     }
 
-    public static String reverse(String text) {
-        return ESCAPE + TextStyle.REVERSE.getCode() + "m" + text + RESET;
+    public static FormattedText reverse(Object... parts) {
+        return format(TextStyle.REVERSE, parts);
     }
 
-    public static String hidden(String text) {
-        return ESCAPE + TextStyle.HIDDEN.getCode() + "m" + text + RESET;
+    public static FormattedText hidden(Object... parts) {
+        return format(TextStyle.HIDDEN, parts);
     }
 
-    public static String strikethrough(String text) {
-        return ESCAPE + TextStyle.STRIKETHROUGH.getCode() + "m" + text + RESET;
-    }
-
-    // Formatting via options
-
-    public static String format(String text, TextFormattingOptions options) {
-        String escapeSequence = options.buildEscapeSequence();
-
-        if (!escapeSequence.isEmpty()) {
-            text = escapeSequence + text + RESET;
-        }
-
-        if (options.getMinWidth() > 0) {
-            text = align(options.getMinWidth(), text, options.getAlignment());
-        }
-
-        return text;
+    public static FormattedText strikethrough(Object... parts) {
+        return format(TextStyle.STRIKETHROUGH, parts);
     }
 
     // Alignment
 
-    public static String align(int lineLength, String text, TextAlignement alignement) {
-        if (text == null) {
-            text = "";
-        }
-
-        if (lineLength < Functions.visibleLength(text)) {
-            throw new IllegalArgumentException("La longueur de la ligne doit être plus grande que celle du texte reçu");
-        }
-
+    public static FormattedText align(int lineLength, Object text, TextAlignement alignement) {
         return switch (alignement) {
-            case LEFT, RIGHT -> alignSide(lineLength, text, alignement == TextAlignement.LEFT ? "-" : "");
+            case LEFT -> alignLeft(lineLength, text);
+            case RIGHT -> alignRight(lineLength, text);
             case CENTER -> center(lineLength, text);
         };
     }
 
-    public static String alignLeft(int lineLength, String text) {
-        return align(lineLength, text, TextAlignement.LEFT);
-    }
+    public static FormattedText alignLeft(int lineLength, Object text) {
+        ArrayList<FormattedText.Segment> segments = toSegments(text);
+        int visibleTextLength = visibleLengthOf(segments);
+        validateLineLength(lineLength, visibleTextLength);
 
-    public static String alignRight(int lineLength, String text) {
-        return align(lineLength, text, TextAlignement.RIGHT);
-    }
+        int rightPadding = lineLength - visibleTextLength;
 
-    public static String center(int lineLength, String text) {
-        int visibleTextLength;
-
-        if (text == null) {
-            text = "";
-            visibleTextLength = 0;
-        } else {
-            visibleTextLength = Functions.visibleLength(text);
+        if (rightPadding > 0) {
+            segments.add(new FormattedText.Segment(" ".repeat(rightPadding), new TextFormattingOptions()));
         }
 
-        if (lineLength < visibleTextLength) {
-            throw new IllegalArgumentException("La longueur de la ligne doit être plus grande que celle du texte reçu");
+        return new FormattedText(segments);
+    }
+
+    public static FormattedText alignRight(int lineLength, Object text) {
+        ArrayList<FormattedText.Segment> segments = toSegments(text);
+        int visibleTextLength = visibleLengthOf(segments);
+        validateLineLength(lineLength, visibleTextLength);
+
+        int leftPadding = lineLength - visibleTextLength;
+
+        if (leftPadding > 0) {
+            segments.addFirst(new FormattedText.Segment(" ".repeat(leftPadding), new TextFormattingOptions()));
         }
+
+        return new FormattedText(segments);
+    }
+
+    public static FormattedText center(int lineLength, Object text) {
+        ArrayList<FormattedText.Segment> segments = toSegments(text);
+        int visibleTextLength = visibleLengthOf(segments);
+        validateLineLength(lineLength, visibleTextLength);
 
         int lineLengthBeforeMidPoint = lineLength / 2;
         int writingStartPosition = lineLengthBeforeMidPoint - visibleTextLength / 2;
 
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(" ".repeat(writingStartPosition));
-        stringBuilder.append(text);
-        stringBuilder.append(" ".repeat(lineLength - visibleTextLength - writingStartPosition));
+        if (writingStartPosition > 0) {
+            segments.addFirst(new FormattedText.Segment(" ".repeat(writingStartPosition), new TextFormattingOptions()));
+        }
 
-        return stringBuilder.toString();
+        int rightPadding = lineLength - visibleTextLength - writingStartPosition;
+
+        if (rightPadding > 0) {
+            segments.add(new FormattedText.Segment(" ".repeat(rightPadding), new TextFormattingOptions()));
+        }
+
+        return new FormattedText(segments);
     }
 
-    private static String alignSide(int lineLength, String text, String flag) {
-        return ("%" + flag + (lineLength + text.length() - Functions.visibleLength(text)) + "s").formatted(text);
+    private static ArrayList<FormattedText.Segment> toSegments(Object object) {
+        if (object instanceof FormattedText formattedText) {
+            return new ArrayList<>(formattedText.getSegments());
+        }
+
+        String text = (object != null) ? object.toString() : "";
+
+        ArrayList<FormattedText.Segment> segments = new ArrayList<>();
+        segments.add(new FormattedText.Segment(text, new TextFormattingOptions()));
+
+        return segments;
     }
+
+    private static int visibleLengthOf(Collection<FormattedText.Segment> segments) {
+        return segments.stream().mapToInt(segment -> Functions.visibleLength(segment.rawText())).sum();
+    }
+
+    private static void validateLineLength(int lineLength, int visibleTextLength) {
+        if (lineLength < visibleTextLength) {
+            throw new IllegalArgumentException("La longueur de la ligne doit être plus grande que celle du texte reçu");
+        }
+    }
+
+    private static FormattedText format(TextColor color, Object... parts) {
+        return format(new TextFormattingOptions().setColor(color), parts);
+    }
+
+    private static FormattedText format(TextBackgroundColor backgroundColor, Object... parts) {
+        return format(new TextFormattingOptions().setBackgroundColor(backgroundColor), parts);
+    }
+
+    private static FormattedText format(TextStyle style, Object... parts) {
+        return format(new TextFormattingOptions().addStyle(style), parts);
+    }
+
+    public static FormattedText format(TextFormattingOptions options, Object... parts) {
+        List<FormattedText.Segment> segments = new ArrayList<>();
+
+        if (parts == null) {
+            return new FormattedText(segments);
+        }
+
+        for (Object part : parts) {
+            if (part instanceof FormattedText formattedText) {
+                FormattedText mergedFormattedText = formattedText.withMergedFormatting(options);
+                segments.addAll(mergedFormattedText.getSegments());
+            } else {
+                String text = (part != null) ? part.toString() : "";
+                segments.add(new FormattedText.Segment(text, new TextFormattingOptions(options)));
+            }
+        }
+
+        return new FormattedText(segments);
+    }
+
 }

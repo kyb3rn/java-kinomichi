@@ -1,5 +1,7 @@
 package utils.io.menus;
 
+import utils.io.helpers.Functions;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -78,7 +80,7 @@ public abstract class OptionedMenuStage extends MenuStage {
                 try {
                     choice = Integer.parseInt(input);
                 } catch (NumberFormatException e) {
-                    System.out.printf("%nL'entrée '%s' est invalide. Veuillez entrer un nombre entier entre 1 et %s (inclus).%n%n", input, this.options.size());
+                    System.out.printf(Functions.styleAsErrorMessage("L'entrée '%s' est invalide. Veuillez entrer un nombre entier entre 1 et %s (inclus).%n%n"), input, this.options.size());
                     continue;
                 }
 
@@ -86,11 +88,11 @@ public abstract class OptionedMenuStage extends MenuStage {
 
                 if (!isValidChoice) {
                     if (optionsSize == 1) {
-                        System.out.printf("%nLe choix '%s' est invalide. Seul le choix 1 est valide.%n%n", input);
+                        System.out.printf(Functions.styleAsErrorMessage("Le choix '%s' est invalide. Seul le choix 1 est valide.%n%n"), input);
                     } else if (optionsSize == 2) {
-                        System.out.printf("%nLe choix '%s' est invalide. Veuillez entrer soit 1, soit 2.%n%n", input);
+                        System.out.printf(Functions.styleAsErrorMessage("Le choix '%s' est invalide. Veuillez entrer soit 1, soit 2.%n%n"), input);
                     } else {
-                        System.out.printf("%nLe choix '%s' est invalide. Veuillez choisir une option entre 1 et %s (inclus).%n%n", input, this.options.size());
+                        System.out.printf(Functions.styleAsErrorMessage("Le choix '%s' est invalide. Veuillez choisir une option entre 1 et %s (inclus).%n%n"), input, this.options.size());
                     }
                 } else {
                     selectedOption = this.options.get(choice - 1);
@@ -107,7 +109,7 @@ public abstract class OptionedMenuStage extends MenuStage {
 
             return new OptionedMenuMenuLeadTo(choice);
         } else {
-            System.out.printf("%nAucune option attribuée à ce menu à choix%n%n");
+            System.out.printf(Functions.styleAsErrorMessage("Aucune option attribuée à ce menu à choix%n%n"));
         }
 
         return new OptionedMenuMenuLeadTo(-1);

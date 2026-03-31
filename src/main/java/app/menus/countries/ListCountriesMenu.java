@@ -34,7 +34,7 @@ public class ListCountriesMenu extends MenuStage {
         ModelTableFormatter.forList(sorted).display();
 
         if (countryDataManager.hasUnsavedChanges()) {
-            System.out.printf(TextFormatter.italic(TextFormatter.yellow(TextFormatter.bold("ATTENTION !") + " Des modifications dans cette liste n'ont pas encore été sauvegardées. Rendez-vous dans le menu principal pour résoudre ce problème.%n%n")));
+            System.out.printf("%s%n%n", TextFormatter.italic(TextFormatter.yellow(TextFormatter.bold("ATTENTION !"), " Des modifications dans cette liste n'ont pas encore été sauvegardées. Rendez-vous dans le menu principal pour résoudre ce problème.")));
         }
 
         return new MenuLeadTo("countries.manage");

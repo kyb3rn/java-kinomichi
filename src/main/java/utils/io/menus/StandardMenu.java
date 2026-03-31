@@ -44,7 +44,7 @@ public class StandardMenu extends OptionedMenuStage {
         TextFormattingOptions singleHeaderTextFormattingOptions = new TextFormattingOptions();
         singleHeaderTextFormattingOptions.setColor(TextColor.MAGENTA);
         singleHeaderTextFormattingOptions.addStyle(TextStyle.BOLD);
-        menuTable.setSingleHeader(TextFormatter.format(this.title, singleHeaderTextFormattingOptions));
+        menuTable.setSingleHeader(TextFormatter.format(singleHeaderTextFormattingOptions, this.title).toString());
 
         menuTable.removeOption(TableOptions.SEPARATE_COLUMNS);
         Table.Column prefixNumbersColumn = new Table.Column(TextAlignement.RIGHT);

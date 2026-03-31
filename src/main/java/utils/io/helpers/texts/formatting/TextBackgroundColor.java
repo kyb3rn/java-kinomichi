@@ -21,6 +21,8 @@ public enum TextBackgroundColor {
 
     // ─── Properties ─── //
 
+    public static final String RESET_CODE = "49";
+
     private final String code;
 
     // ─── Constructors ─── //

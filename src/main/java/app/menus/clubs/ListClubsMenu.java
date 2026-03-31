@@ -32,7 +32,7 @@ public class ListClubsMenu extends MenuStage {
         ModelTableFormatter.forList(sorted).display();
 
         if (clubDataManager.hasUnsavedChanges()) {
-            System.out.printf(TextFormatter.italic(TextFormatter.yellow(TextFormatter.bold("ATTENTION !") + " Des modifications dans cette liste n'ont pas encore été sauvegardées. Rendez-vous dans le menu principal pour résoudre ce problème.%n%n")));
+            System.out.printf("%s%n%n", TextFormatter.italic(TextFormatter.yellow(TextFormatter.bold("ATTENTION !"), " Des modifications dans cette liste n'ont pas encore été sauvegardées. Rendez-vous dans le menu principal pour résoudre ce problème.")));
         }
 
         return new MenuLeadTo("clubs.manage");
