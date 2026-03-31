@@ -1,76 +1,84 @@
 {
   "addresses": [
     {
-      "id": 1,
       "countryIso3": "BEL",
       "zipCode": 1060,
       "city": "Bruxelles (Saint-Gilles)",
       "street": "Rue Wafelaerts",
-      "number": "53"
+      "number": "53",
+      "id": 1
     },
     {
-      "id": 2,
       "countryIso3": "BEL",
       "zipCode": 1050,
       "city": "Bruxelles (Ixelles)",
       "street": "Rue du Brochet",
-      "number": "55"
+      "number": "55",
+      "id": 2
     },
     {
-      "id": 3,
       "countryIso3": "BEL",
       "zipCode": 1300,
       "city": "Wavre",
       "street": "Avenue du Centre Sportif",
-      "number": "22"
+      "number": "22",
+      "id": 3
     },
     {
-      "id": 4,
       "countryIso3": "BEL",
       "zipCode": 4000,
       "city": "Liège",
       "street": "Rue Sainte Marguerite",
-      "number": "51"
+      "number": "51",
+      "id": 4
     },
     {
-      "id": 5,
       "countryIso3": "BEL",
       "zipCode": 4000,
       "city": "Liège",
       "street": "Avenue de l\u0027Observatoire",
-      "number": "20"
+      "number": "20",
+      "id": 5
     },
     {
-      "id": 6,
       "countryIso3": "BEL",
       "zipCode": 4020,
       "city": "Liège",
       "street": "Rue Fosses aux Raînes",
-      "number": "42"
+      "number": "42",
+      "id": 6
     },
     {
-      "id": 7,
       "countryIso3": "BEL",
       "zipCode": 4670,
       "city": "Blegny",
       "street": "Rue de Trembleur",
-      "number": "13"
+      "number": "13",
+      "id": 7
     },
     {
-      "id": 8,
       "countryIso3": "BEL",
       "zipCode": 4031,
       "city": "Angleur",
       "street": "Rue des Coudriers",
-      "number": "5"
+      "number": "5",
+      "id": 8
     },
     {
-      "id": 9,
       "countryIso3": "BEL",
       "zipCode": 5000,
       "city": "Namur",
       "street": "Rue de la Citadelle",
-      "number": "12"
+      "number": "12",
+      "id": 9
+    },
+    {
+      "countryIso3": "BEL",
+      "zipCode": 4920,
+      "city": "Aywaille",
+      "street": "Awan-Fond de la Ville",
+      "number": "16A",
+      "id": 10
     }
   ]
 }

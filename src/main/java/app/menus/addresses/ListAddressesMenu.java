@@ -1,8 +1,10 @@
 package app.menus.addresses;
 
 import app.models.Address;
+import app.models.ModelException;
 import app.models.formatting.ModelTableFormatter;
 import app.models.managers.AddressDataManager;
+import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
 import app.models.managers.LoadDataManagerDataException;
 import utils.io.commands.*;
@@ -23,8 +25,8 @@ public class ListAddressesMenu extends MenuStage {
     public MenuLeadTo use() {
         AddressDataManager addressDataManager;
         try {
-            addressDataManager = DataManagers.initAndGet(AddressDataManager.class);
-        } catch (LoadDataManagerDataException e) {
+            addressDataManager = DataManagers.get(AddressDataManager.class);
+        } catch (DataManagerException | ModelException e) {
             System.out.printf(Functions.styleAsErrorMessage("%nLes adresses n'ont pas pu être chargées dans l'application.%n%n"));
             return new MenuLeadTo("main");
         }
@@ -44,7 +46,7 @@ public class ListAddressesMenu extends MenuStage {
                 System.out.printf("%s%n%n", TextFormatter.italic(TextFormatter.yellow(TextFormatter.bold("ATTENTION !"), " Des modifications dans cette liste n'ont pas encore été sauvegardées. Rendez-vous dans le menu principal pour résoudre ce problème.")));
             }
 
-            System.out.print("Commande : ");
+            System.out.print("> ");
             String input = scanner.nextLine().strip();
             System.out.println();
 
@@ -61,7 +63,7 @@ public class ListAddressesMenu extends MenuStage {
                         try {
                             columnChoice = Integer.parseInt(command.getArguments().getFirst().getValue());
                         } catch (NumberFormatException e) {
-                            System.out.printf(Functions.styleAsErrorMessage("L'entrée '%s' est invalide. Veuillez entrer un nombre entre 1 et %d.%n%n"), input, columnCount);
+                            System.out.printf(Functions.styleAsErrorMessage("L'entrée '%s' est invalide. Veuillez entrer un nombre entier strictement positif.%n%n"), input);
                             continue;
                         }
 

@@ -1,6 +1,7 @@
 package app.models;
 
 import app.models.managers.AddressDataManager;
+import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
 import app.models.managers.LoadDataManagerDataException;
 import com.google.gson.GsonBuilder;
@@ -95,8 +96,8 @@ public class Club extends IdentifiedModel implements Hydratable<Club.Data> {
     public void setAddressFromPk(int addressId) throws ModelException {
         Address address;
         try {
-            address = DataManagers.initAndGet(AddressDataManager.class).getAddress(addressId);
-        } catch (LoadDataManagerDataException e) {
+            address = DataManagers.get(AddressDataManager.class).getAddress(addressId);
+        } catch (DataManagerException | ModelException e) {
             throw new ModelException("Impossible de vérifier l'identifiant d'adresse '%d' (les adresses n'ont pas pu être chargées dans l'application)".formatted(addressId));
         }
 

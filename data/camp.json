@@ -1,3 +1,11 @@
 {
-  "camps": []
+  "camps": [
+    {
+      "name": "Stage de mai",
+      "addressId": 10,
+      "timeSlotStart": "2026-05-16T09:00:00Z",
+      "timeSlotEnd": "2026-05-18T18:30:00Z",
+      "id": 1
+    }
+  ]
 }

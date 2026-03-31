@@ -51,10 +51,19 @@ public class StandardMenu extends OptionedMenuStage {
         Table.Column optionsColumn = new Table.Column();
         menuTable.addColumn(prefixNumbersColumn);
         menuTable.addColumn(optionsColumn);
-        for (int i = 0; i < this.options.size(); i++) {
+        for (int i = 0, j = 0; i + j < this.options.size() + this.unoptionedRows.size();) {
+            if (this.unoptionedRows.containsKey(i)) {
+                prefixNumbersColumn.addValue(TextFormatter.bold(">") + " ");
+                optionsColumn.addValue(this.unoptionedRows.get(j));
+                j++;
+            }
+
             prefixNumbersColumn.addValue(TextFormatter.bold(String.valueOf(i + 1)) + ".");
             optionsColumn.addValue(this.options.get(i).getText());
+            i++;
         }
+
+        menuTable.setRowSeparationIndexes(this.sectionSeparationIndexes);
 
         menuTable.display();
     }

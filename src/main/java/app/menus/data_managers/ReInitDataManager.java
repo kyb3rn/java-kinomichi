@@ -27,7 +27,7 @@ public class ReInitDataManager extends MenuOptionOutcomeLeadingAction {
 
         @SuppressWarnings("unchecked")
         Class<? extends DataManager<?>> clazz = (Class<? extends DataManager<?>>) this.dataManager.getClass();
-        DataManagers.initAndResolveReferences(clazz);
+        DataManagers.initAndResolveReferencesOf(clazz);
 
         if (this.dataManager.isInitialized()) {
             String successMessage = DataManagers.hasDependencies(this.dataManager)

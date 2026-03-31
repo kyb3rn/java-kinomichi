@@ -1,17 +1,21 @@
 package utils.io.menus;
 
+import app.middlewares.Middleware;
 import utils.io.commands.*;
 import utils.io.helpers.Functions;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public abstract class OptionedMenuStage extends MenuStage {
 
     // ─── Properties ─── //
 
-    protected final List<MenuOption> options = new ArrayList<>();
+    protected final ArrayList<MenuOption> options = new ArrayList<>();
+    protected final TreeMap<Integer, String> unoptionedRows = new TreeMap<>();
+    protected final TreeSet<Integer> sectionSeparationIndexes = new TreeSet<>();
 
     // ─── Utility methods ─── //
 
@@ -69,10 +73,26 @@ public abstract class OptionedMenuStage extends MenuStage {
 
     public void afterValidInput(String input, int choice) {}
 
+    protected void addSectionSeparationIndex() {
+        sectionSeparationIndexes.add(this.options.size() + this.unoptionedRows.size());
+    }
+
+    protected void addUnoptionedRow(String row) {
+        this.unoptionedRows.put(this.options.size(), row);
+    }
+
     // ─── Overrides & inheritance ─── //
 
     @Override
     public OptionedMenuMenuLeadTo use() {
+        for (Middleware middleware : this.middlewares) {
+            MenuLeadTo menuLeadTo = middleware.verify();
+            if (menuLeadTo != null) {
+                System.out.printf(Functions.styleAsErrorMessage("Ce menu n'est pas accessible.%n%n"));
+                return new OptionedMenuMenuLeadTo(-1, menuLeadTo);
+            }
+        }
+
         int optionsSize = this.options.size();
 
         this.beforeDisplay();
@@ -121,7 +141,7 @@ public abstract class OptionedMenuStage extends MenuStage {
                 try {
                     choice = Integer.parseInt(input);
                 } catch (NumberFormatException e) {
-                    System.out.printf(Functions.styleAsErrorMessage("L'entrée '%s' est invalide. Veuillez entrer un nombre entier entre 1 et %s (inclus).%n%n"), input, this.options.size());
+                    System.out.printf(Functions.styleAsErrorMessage("L'entrée '%s' est invalide. Veuillez entrer un nombre entier strictement positif.%n%n"), input, this.options.size());
                     continue;
                 }
 

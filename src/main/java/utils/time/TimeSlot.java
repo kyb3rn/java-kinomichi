@@ -3,6 +3,8 @@ package utils.time;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.DateTimeException;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 public class TimeSlot {
 
@@ -76,6 +78,22 @@ public class TimeSlot {
         return this.end.toString();
     }
 
+    public String toPrettyStringFormat() {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault());
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH'h'mm").withZone(ZoneId.systemDefault());
+
+        String startDate = dateFormatter.format(this.start);
+        String startTime = timeFormatter.format(this.start);
+        String endDate = dateFormatter.format(this.end);
+        String endTime = timeFormatter.format(this.end);
+
+        if (startDate.equals(endDate)) {
+            return "%s de %s à %s".formatted(startDate, startTime, endTime);
+        }
+
+        return "%s à %s → %s à %s".formatted(startDate, startTime, endDate, endTime);
+    }
+
     // ─── Setters ─── //
 
     public void setStart(Instant start) {
@@ -140,7 +158,7 @@ public class TimeSlot {
 
     @Override
     public String toString() {
-        return "%s → %s".formatted(this.getFormattedStart(), this.getFormattedEnd());
+        return this.toPrettyStringFormat();
     }
 
 }

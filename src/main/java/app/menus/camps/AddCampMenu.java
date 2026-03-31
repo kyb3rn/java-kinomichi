@@ -1,7 +1,7 @@
-package app.menus.clubs;
+package app.menus.camps;
 
 import app.models.Address;
-import app.models.Club;
+import app.models.Camp;
 import app.models.ModelException;
 import app.models.managers.*;
 import app.utils.ExitProgramException;
@@ -15,7 +15,7 @@ import utils.io.menus.MenuStage;
 
 import java.util.Scanner;
 
-public class AddClubMenu extends MenuStage {
+public class AddCampMenu extends MenuStage {
 
     // ─── Utility methods ─── //
 
@@ -62,67 +62,70 @@ public class AddClubMenu extends MenuStage {
     public MenuLeadTo use() {
         Scanner scanner = new Scanner(System.in);
 
-        Club.Data clubData = new Club.Data();
-        Address.Data clubAddressData = new Address.Data();
+        Camp.Data campData = new Camp.Data();
+        Address.Data campAddressData = new Address.Data();
 
         SimpleBox sectionHeaderSimpleBox = new SimpleBox();
-        sectionHeaderSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Ajout d'un club")));
+        sectionHeaderSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Ajout d'un stage")));
         sectionHeaderSimpleBox.addLine(TextFormatter.italic("Pour annuler à tout moment, entrez la commande " + TextFormatter.bold("!b")));
         sectionHeaderSimpleBox.display();
 
         try {
             System.out.println(TextFormatter.bold(TextFormatter.green("1.")) + " Nom");
-            if (this.promptField(scanner, clubData::setName)) return new MenuLeadTo("clubs.manage");
+            if (this.promptField(scanner, campData::setName)) return new MenuLeadTo("main");
 
             System.out.println(TextFormatter.bold(TextFormatter.green("2.")) + " Adresse");
             System.out.println(TextFormatter.bold(TextFormatter.yellow("2.1.")) + " Adresse - Pays (ISO 3)");
             if (this.promptField(scanner, input -> {
-                clubAddressData.setCountryIso3(input);
-                String iso3 = clubAddressData.getCountryIso3();
+                campAddressData.setCountryIso3(input);
+                String iso3 = campAddressData.getCountryIso3();
                 try {
                     DataManagers.get(CountryDataManager.class).getCountryWithExceptions(iso3);
                 } catch (DataManagerException | ModelException e) {
                     throw new DataManagerException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3));
                 }
-            })) return new MenuLeadTo("clubs.manage");
+            })) return new MenuLeadTo("main");
 
             System.out.println(TextFormatter.bold(TextFormatter.yellow("2.2.")) + " Adresse - Code postal");
-            if (this.promptField(scanner, clubAddressData::setZipCode)) return new MenuLeadTo("clubs.manage");
+            if (this.promptField(scanner, campAddressData::setZipCode)) return new MenuLeadTo("main");
 
             System.out.println(TextFormatter.bold(TextFormatter.yellow("2.3.")) + " Adresse - Ville");
-            if (this.promptField(scanner, clubAddressData::setCity)) return new MenuLeadTo("clubs.manage");
+            if (this.promptField(scanner, campAddressData::setCity)) return new MenuLeadTo("main");
 
             System.out.println(TextFormatter.bold(TextFormatter.yellow("2.4.")) + " Adresse - Rue");
-            if (this.promptField(scanner, clubAddressData::setStreet)) return new MenuLeadTo("clubs.manage");
+            if (this.promptField(scanner, campAddressData::setStreet)) return new MenuLeadTo("main");
 
             System.out.println(TextFormatter.bold(TextFormatter.yellow("2.5.")) + " Adresse - Numéro");
-            if (this.promptField(scanner, clubAddressData::setNumber)) return new MenuLeadTo("clubs.manage");
+            if (this.promptField(scanner, campAddressData::setNumber)) return new MenuLeadTo("main");
 
-            System.out.println(TextFormatter.bold(TextFormatter.yellow("2.6.")) + " Adresse - Numéro de bôite " + TextFormatter.italic("(optionnel)"));
-            if (this.promptField(scanner, clubAddressData::setBoxNumber)) return new MenuLeadTo("clubs.manage");
+            System.out.println(TextFormatter.bold(TextFormatter.yellow("2.6.")) + " Adresse - Numéro de boîte " + TextFormatter.italic("(optionnel)"));
+            if (this.promptField(scanner, campAddressData::setBoxNumber)) return new MenuLeadTo("main");
 
-            System.out.println(TextFormatter.bold(TextFormatter.green("3.")) + " Lien Google Maps " + TextFormatter.italic("(optionnel)"));
-            if (this.promptField(scanner, clubData::setGoogleMapsLink)) return new MenuLeadTo("clubs.manage");
+            System.out.println(TextFormatter.bold(TextFormatter.green("3.")) + " Date de début " + TextFormatter.italic("(format: yyyy-MM-ddTHH:mm:ssZ)"));
+            if (this.promptField(scanner, campData::setTimeSlotStart)) return new MenuLeadTo("main");
+
+            System.out.println(TextFormatter.bold(TextFormatter.green("4.")) + " Date de fin " + TextFormatter.italic("(format: yyyy-MM-ddTHH:mm:ssZ)"));
+            if (this.promptField(scanner, campData::setTimeSlotEnd)) return new MenuLeadTo("main");
         } catch (ExitProgramException e) {
             return null;
         }
 
-        Club club;
+        Camp camp;
         try {
-            Address address = DataManagers.get(AddressDataManager.class).addAddress(clubAddressData);
-            clubData.setAddressId(address.getId());
-            club = DataManagers.get(ClubDataManager.class).addClub(clubData);
+            Address address = DataManagers.get(AddressDataManager.class).addAddress(campAddressData);
+            campData.setAddressId(address.getId());
+            camp = DataManagers.get(CampDataManager.class).addCamp(campData);
         } catch (DataManagerException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
-            return new MenuLeadTo("clubs.manage");
+            return new MenuLeadTo("main");
         }
 
-        SimpleBox clubAddedSimpleBox = new SimpleBox();
-        clubAddedSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Club ajouté")));
-        clubAddedSimpleBox.addLine(TextFormatter.italic("Le club a bien été enregistré sous l'identifiant " + TextFormatter.bold("#" + club.getId())));
-        clubAddedSimpleBox.display();
+        SimpleBox campAddedSimpleBox = new SimpleBox();
+        campAddedSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Stage ajouté")));
+        campAddedSimpleBox.addLine(TextFormatter.italic("Le stage a bien été enregistré sous l'identifiant " + TextFormatter.bold("#" + camp.getId())));
+        campAddedSimpleBox.display();
 
-        return new MenuLeadTo("clubs.manage");
+        return new MenuLeadTo("main");
     }
 
 }

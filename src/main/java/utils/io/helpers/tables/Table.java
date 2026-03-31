@@ -9,6 +9,7 @@ import utils.io.helpers.texts.formatting.TextFormattingOptions;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -25,6 +26,7 @@ public class Table {
         TableOptions.DISPLAY_HEADER,
         TableOptions.BOX_AROUND
     );
+    private final TreeSet<Integer> rowSeparationIndexes = new TreeSet<>();
 
     // ─── Constructors ─── //
 
@@ -51,6 +53,11 @@ public class Table {
         }
 
         this.horizontalPadding = horizontalPadding;
+    }
+
+    public void setRowSeparationIndexes(TreeSet<Integer> rowSeparationIndexes) {
+        this.rowSeparationIndexes.clear();
+        this.addRowSeparationIndexes(rowSeparationIndexes);
     }
 
     // ─── Utility methods ─── //
@@ -107,6 +114,20 @@ public class Table {
 
     public void removeOption(TableOptions option) {
         this.options.remove(option);
+    }
+
+    public void addRowSeparationIndexes(TreeSet<Integer> rowSeparations) {
+        for (Integer index : rowSeparations) {
+            this.addRowSeparationIndex(index);
+        }
+    }
+
+    public void addRowSeparationIndex(Integer rowSeparationIndex) {
+        if (rowSeparationIndex == null || rowSeparationIndex < 0) {
+            throw new IndexOutOfBoundsException("Un index de séparation de ligne doit être un entier positif");
+        }
+
+        this.rowSeparationIndexes.add(rowSeparationIndex);
     }
 
     public void display() {
@@ -228,10 +249,29 @@ public class Table {
                 rowSeparatorStringBuilder.append("─".repeat(this.horizontalPadding)).append('┤');
             }
 
+            // Insert row separator at the end of the sections
+            ArrayList<Integer> finalRowSeparationIndexes = new ArrayList<>();
+            if (!this.rowSeparationIndexes.isEmpty()) {
+                Integer biggestRowSeparationIndex = this.rowSeparationIndexes.reversed().getFirst();
+
+                if (biggestRowSeparationIndex > rowSeparatorStringBuilder.length()) {
+                    throw new IndexOutOfBoundsException("Un des indexes de séparation de section est en dehors du tableau");
+                }
+
+                for (Integer index : this.rowSeparationIndexes.reversed()) {
+                    rowsStringBuilder.add(index, rowSeparatorStringBuilder);
+
+                    finalRowSeparationIndexes.replaceAll(n -> n + 1);
+                    finalRowSeparationIndexes.add(index);
+                }
+            }
+
             // Insert separating rows between real rows
             if (this.options.contains(TableOptions.SEPARATE_ROWS)) {
                 for (int i = rowsStringBuilder.size() - 1; i > 0; i--) {
-                    rowsStringBuilder.add(i, rowSeparatorStringBuilder);
+                    if (!finalRowSeparationIndexes.contains(i)) {
+                        rowsStringBuilder.add(i, rowSeparatorStringBuilder);
+                    }
                 }
             }
 

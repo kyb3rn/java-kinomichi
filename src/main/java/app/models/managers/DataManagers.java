@@ -22,7 +22,7 @@ public class DataManagers {
     // ─── Utility methods ─── //
 
     @SuppressWarnings("unchecked")
-    public static <M extends DataManager<?>> M initAndGet(Class<M> clazz) throws LoadDataManagerDataException {
+    private static <M extends DataManager<?>> M initAndGet(Class<M> clazz) throws LoadDataManagerDataException {
         if (!instances.containsKey(clazz)) {
             try {
                 Constructor<M> constructor = clazz.getDeclaredConstructor();
@@ -44,19 +44,13 @@ public class DataManagers {
         return instance;
     }
 
-    public static void initAndResolveReferences(Class<? extends DataManager<?>> clazz) {
-        try {
-            DataManager<?> manager = initAndGet(clazz);
-            manager.resolveReferences();
-        } catch (LoadDataManagerDataException e) {
-            System.out.printf(Functions.styleAsErrorMessage("Le pré-chargement du manager '%s' n'a pas pu être effectué.%n"), clazz.getSimpleName());
-        } catch (DataManagerException | ModelException e) {
-            System.out.printf(Functions.styleAsErrorMessage("La résolution des références du manager '%s' a échoué: %s%n"), clazz.getSimpleName(), e.getMessage());
-        }
+    public static void initAndResolveReferencesWithThrow(Class<? extends DataManager<?>> clazz) throws DataManagerException, ModelException {
+        DataManager<?> manager = initAndGet(clazz);
+        manager.resolveReferences();
     }
 
     @SafeVarargs
-    public static void initAndResolveReferencesAll(Class<? extends DataManager<?>>... classes) {
+    public static void initAndResolveReferencesOf(Class<? extends DataManager<?>>... classes) {
         // Pass 1: instantiate managers (primitive data only)
         List<DataManager<?>> loadedManagers = new ArrayList<>();
         for (var clazz : classes) {
@@ -156,13 +150,13 @@ public class DataManagers {
     }
 
     public static List<DataManager<?>> getUnsavedOnes() {
-        return DataManagers.instances.values().stream().filter(DataManager::hasUnsavedChanges).toList();
+        return instances.values().stream().filter(DataManager::hasUnsavedChanges).toList();
     }
 
     public static List<DataManager<?>> getBadlyInitializedOnes() {
         List<DataManager<?>> badlyInitializedOnes = new ArrayList<>();
 
-        for (DataManager<?> manager : DataManagers.instances.values()) {
+        for (DataManager<?> manager : instances.values()) {
             if (!manager.isInitialized()) {
                 badlyInitializedOnes.add(manager);
             }
@@ -170,4 +164,11 @@ public class DataManagers {
 
         return badlyInitializedOnes;
     }
+
+    @SuppressWarnings("unchecked")
+    public static <M extends DataManager<?>> M get(Class<M> clazz) throws ModelException, DataManagerException {
+        initAndResolveReferencesWithThrow(clazz);
+        return (M) instances.get(clazz);
+    }
+
 }

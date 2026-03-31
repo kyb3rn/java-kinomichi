@@ -1,12 +1,12 @@
-package app.menus.clubs;
+package app.menus.camps;
 
-import app.models.Club;
+import app.AppState;
+import app.models.Camp;
 import app.models.ModelException;
 import app.models.formatting.ModelTableFormatter;
-import app.models.managers.ClubDataManager;
+import app.models.managers.CampDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
-import app.models.managers.LoadDataManagerDataException;
 import utils.io.commands.*;
 import utils.io.helpers.Functions;
 import utils.io.helpers.texts.formatting.TextFormatter;
@@ -17,35 +17,31 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
-public class ListClubsMenu extends MenuStage {
+public class SelectCampMenu extends MenuStage {
 
     // ─── Overrides & inheritance ─── //
 
     @Override
     public MenuLeadTo use() {
-        ClubDataManager clubDataManager;
+        CampDataManager campDataManager;
         try {
-            clubDataManager = DataManagers.get(ClubDataManager.class);
+            campDataManager = DataManagers.get(CampDataManager.class);
         } catch (DataManagerException | ModelException e) {
-            System.out.printf(Functions.styleAsErrorMessage("%nLes clubs n'ont pas pu être chargés dans l'application.%n%n"));
+            System.out.printf(Functions.styleAsErrorMessage("%nLes stages n'ont pas pu être chargés dans l'application.%n%n"));
             return new MenuLeadTo("main");
         }
 
-        int columnCount = ModelTableFormatter.getColumnCount(Club.class);
+        int columnCount = ModelTableFormatter.getColumnCount(Camp.class);
         int sortColumnIndex = 0;
         Scanner scanner = new Scanner(System.in);
-        boolean quitLoop = false;
 
-        do {
-            Comparator<Club> comparator = ModelTableFormatter.comparatorForColumn(Club.class, sortColumnIndex);
-            List<Club> sorted = clubDataManager.getClubs().values().stream().sorted(comparator).toList();
+        while (true) {
+            Comparator<Camp> comparator = ModelTableFormatter.comparatorForColumn(Camp.class, sortColumnIndex);
+            List<Camp> sortedCamps = campDataManager.getCamps().values().stream().sorted(comparator).toList();
 
-            ModelTableFormatter.forList(sorted).display();
+            ModelTableFormatter.forList(sortedCamps).display();
 
-            if (clubDataManager.hasUnsavedChanges()) {
-                System.out.printf("%s%n%n", TextFormatter.italic(TextFormatter.yellow(TextFormatter.bold("ATTENTION !"), " Des modifications dans cette liste n'ont pas encore été sauvegardées. Rendez-vous dans le menu principal pour résoudre ce problème.")));
-            }
-
+            System.out.println(TextFormatter.italic("Entrez l'identifiant (#) d'un stage pour le sélectionner."));
             System.out.print("> ");
             String input = scanner.nextLine().strip();
             System.out.println();
@@ -54,7 +50,9 @@ public class ListClubsMenu extends MenuStage {
                 Command command = CommandManager.convertInput(input);
 
                 switch (command.getCommand()) {
-                    case BACK -> quitLoop = true;
+                    case BACK -> {
+                        return new MenuLeadTo("camps.manage");
+                    }
                     case QUIT -> {
                         return null;
                     }
@@ -77,15 +75,30 @@ public class ListClubsMenu extends MenuStage {
                     default -> System.out.printf(Functions.styleAsErrorMessage("Cette commande n'est pas prise en charge ici.%n%n"));
                 }
             } catch (NotACommandException _) {
-                System.out.printf(Functions.styleAsErrorMessage("L'entrée '%s' n'est pas une commande.%n%n".formatted(input)));
+                int campId;
+                try {
+                    campId = Integer.parseInt(input);
+                } catch (NumberFormatException e) {
+                    System.out.printf(Functions.styleAsErrorMessage("L'entrée '%s' est invalide. Veuillez entrer un identifiant de stage.%n%n"), input);
+                    continue;
+                }
+
+                Camp selectedCamp = campDataManager.getCamp(campId);
+
+                if (selectedCamp == null) {
+                    System.out.printf(Functions.styleAsErrorMessage("Aucun stage ne porte l'identifiant '%d'.%n%n"), campId);
+                    continue;
+                }
+
+                AppState.selectedCampId = campId;
+                System.out.printf("%s%n%n", TextFormatter.green(TextFormatter.italic("Stage sélectionné : ", TextFormatter.bold(selectedCamp.toString()))));
+                return new MenuLeadTo("camps.manage.camp");
             } catch (UnknownCommandException e) {
                 System.out.printf(Functions.styleAsErrorMessage("Cette commande n'existe pas.%n%n"));
             } catch (CommandArgumentException e) {
                 System.out.printf(Functions.styleAsErrorMessage("Les arguments de cette commande sont invalides.%n%n"));
             }
-        } while (!quitLoop);
-
-        return new MenuLeadTo("clubs.manage");
+        }
     }
 
 }

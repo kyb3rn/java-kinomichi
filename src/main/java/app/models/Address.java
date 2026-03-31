@@ -1,6 +1,7 @@
 package app.models;
 
 import app.models.managers.CountryDataManager;
+import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
 import app.models.managers.LoadDataManagerDataException;
 import com.google.gson.GsonBuilder;
@@ -122,8 +123,8 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
         iso3 = verifyCountryIso3(iso3);
 
         try {
-            this.country = DataManagers.initAndGet(CountryDataManager.class).getCountryWithExceptions(iso3);
-        } catch (LoadDataManagerDataException e) {
+            this.country = DataManagers.get(CountryDataManager.class).getCountryWithExceptions(iso3);
+        } catch (DataManagerException | ModelException e) {
             throw new ModelException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3));
         }
     }

@@ -1,6 +1,8 @@
 package app.menus.clubs;
 
+import app.models.ModelException;
 import app.models.managers.ClubDataManager;
+import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
 import app.models.managers.LoadDataManagerDataException;
 import utils.io.menus.StandardMenu;
@@ -11,7 +13,7 @@ public class ManageClubsMenu extends StandardMenu {
 
     public ManageClubsMenu() {
         try {
-            ClubDataManager clubDataManager = DataManagers.initAndGet(ClubDataManager.class);
+            ClubDataManager clubDataManager = DataManagers.get(ClubDataManager.class);
 
             String unsavedIcon = clubDataManager.hasUnsavedChanges() ? " (!)" : "";
 
@@ -20,7 +22,7 @@ public class ManageClubsMenu extends StandardMenu {
             this.addOption("Liste des clubs", "clubs.list");
             this.addOption("Ajouter un club", "clubs.add");
             this.addOption("Retour", "main");
-        } catch (LoadDataManagerDataException e) {
+        } catch (DataManagerException | ModelException e) {
             throw new RuntimeException(e);
         }
     }

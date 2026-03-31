@@ -121,9 +121,9 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
             ModelReference ref = field.getAnnotation(ModelReference.class);
             if (ref != null) {
                 try {
-                    DataManager<?> depManager = DataManagers.initAndGet(ref.manager());
+                    DataManager<?> depManager = DataManagers.get(ref.manager());
                     depManager.resolveReferences();
-                } catch (LoadDataManagerDataException e) {
+                } catch (DataManagerException | ModelException e) {
                     throw new ModelException("Impossible de charger le manager dépendant '%s'".formatted(ref.manager().getSimpleName()));
                 }
             }
