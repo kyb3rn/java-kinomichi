@@ -1,19 +1,27 @@
 package utils.io.commands;
 
+import java.util.List;
+
 public enum ECommand {
 
-    QUIT("q"),
-    BACK("b"),
-    SORT("sort");
+    EXIT("exit", List.of("exit", "e")),
+    BACK("back", List.of("back", "b")),
+    SORT_COLUMN("sort", List.of("sort", "s"));
 
-    private final String command;
+    private final String name;
+    private final List<String> shortcuts;
 
-    ECommand(String command) {
-        this.command = command;
+    ECommand(String name, List<String> shortcuts) {
+        this.name = name;
+        this.shortcuts = shortcuts;
     }
 
-    public String getCommand() {
-        return this.command;
+    public String getName() {
+        return this.name;
+    }
+
+    public List<String> getShortcuts() {
+        return this.shortcuts;
     }
 
     public static ECommand convert(String command) throws UnknownCommandException, NotACommandException {
@@ -22,8 +30,10 @@ public enum ECommand {
         }
 
         for (ECommand c : ECommand.values()) {
-            if (c.command != null && c.command.equalsIgnoreCase(command)) {
-                return c;
+            for (String s : c.getShortcuts()) {
+                if (s.equalsIgnoreCase(command)) {
+                    return c;
+                }
             }
         }
 

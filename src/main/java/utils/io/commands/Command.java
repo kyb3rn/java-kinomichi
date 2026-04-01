@@ -2,31 +2,23 @@ package utils.io.commands;
 
 import java.util.ArrayList;
 
-public class Command {
+public abstract class Command {
 
-    private final ECommand command;
-    private final ArrayList<CommandArgument> arguments;
+    private final ArrayList<CommandArgument> arguments = new ArrayList<>();
 
-    public Command(ECommand command, ArrayList<CommandArgument> arguments) {
-        this.command = command;
-        this.arguments = arguments;
+    public Command(ArrayList<CommandArgument> arguments) throws CommandArgumentException {
+        this.arguments.addAll(arguments);
     }
 
-    public Command(ECommand eCommand) {
-        this.command = eCommand;
-        this.arguments = new ArrayList<>();
-    }
-
-    public ECommand getCommand() {
-        return command;
+    public Command() {
     }
 
     public ArrayList<CommandArgument> getArguments() {
         return arguments;
     }
 
-    public void addArgument(CommandArgument argument) {
-        this.arguments.add(argument);
-    }
+    protected abstract void addArgument(CommandArgument argument) throws CommandArgumentException;
+
+    protected abstract void addArguments(ArrayList<CommandArgument> arguments) throws CommandArgumentException;
 
 }

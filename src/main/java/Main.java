@@ -1,98 +1,55 @@
 import app.AppState;
-import app.views.menus.MainMenu;
-import app.views.menus.camps.*;
-import app.views.menus.clubs.AddClubMenu;
-import app.views.menus.clubs.ManageClubsMenu;
-import app.views.menus.data_managers.ReInitDataManagersMenu;
-import app.views.menus.data_managers.SaveDataManagersMenu;
-import app.views.menus.explore.ExploreDataMenu;
-import app.models.managers.*;
-import app.views.utils.ModelTableMenu;
+import app.controllers.MainController;
+import app.controllers.PersonController;
+import app.events.CallUrlEvent;
+import app.events.Event;
+import app.events.ExitProgramEvent;
+import app.events.GoBackEvent;
+import app.models.managers.CampDataManager;
+import app.models.managers.DataManagers;
+import app.models.managers.PersonDataManager;
+import app.rooting.Route;
+import app.rooting.RouteNotFoundException;
+import app.rooting.Router;
 import utils.io.helpers.Functions;
 import utils.io.helpers.texts.formatting.TextFormatter;
-import utils.io.menus.MenuLeadTo;
-import utils.io.menus.MenuStage;
-import utils.io.menus.UnloadableMenuException;
 
-void main() {
-    DataManagers.initAndResolveReferencesOf(
-        CampDataManager.class,
-        PersonDataManager.class,
-        AffiliatedDataManager.class
-    );
+public class Main {
 
-    HashMap<String, Supplier<MenuStage>> menus = new HashMap<>();
+    public static void main(String[] args) {
+        DataManagers.initAndResolveReferencesOf(
+            CampDataManager.class,
+            PersonDataManager.class
+        );
 
-    // Dynamic menus (rebuilt each time to refresh counts)
-    // Main
-    menus.put("main", MainMenu::new);
+        Router router = new Router();
+        MainController mainController = new MainController();
+        PersonController personController = new PersonController();
 
-    // Explore
-    menus.put("explore", ExploreDataMenu::new);
+        router.register(new Route("main", "/", mainController::index));
+        router.register(new Route("persons.list", "/persons(?:/sort/(?<sort>.+))?", personController::list));
 
-    // Camps
-    menus.put("camps.manage", ManageCampsMenu::new);
-    menus.put("camps.manage.camp", ManageCampMenu::new);
+        String nextPath = "/";
 
-    // Clubs
-    menus.put("clubs.manage", ManageClubsMenu::new);
+        while (nextPath != null) {
+            try {
+                AppState.navigationHistory.push(nextPath);
+                Event event = router.dispatch(nextPath);
 
-    // Static menus (same instance reused)
-    // Camps
-    AddCampMenu addCampMenu = new AddCampMenu();
-    SelectCampMenu selectCampMenu = new SelectCampMenu();
-    menus.put("camps.add", () -> addCampMenu);
-    menus.put("camps.select", () -> selectCampMenu);
-
-    // Clubs
-    AddClubMenu addClubMenu = new AddClubMenu();
-    menus.put("clubs.add", () -> addClubMenu);
-
-    // Model table menus (list views)
-    ModelTableMenu listCampsMenu = new ModelTableMenu(CampDataManager.class);
-    ModelTableMenu listCountriesMenu = new ModelTableMenu(CountryDataManager.class);
-    ModelTableMenu listAddressesMenu = new ModelTableMenu(AddressDataManager.class);
-    ModelTableMenu listClubsMenu = new ModelTableMenu(ClubDataManager.class);
-    ModelTableMenu listPersonsMenu = new ModelTableMenu(PersonDataManager.class);
-    ModelTableMenu listAffiliatedsMenu = new ModelTableMenu(AffiliatedDataManager.class);
-    menus.put("camps.list", () -> listCampsMenu);
-    menus.put("countries.list", () -> listCountriesMenu);
-    menus.put("addresses.list", () -> listAddressesMenu);
-    menus.put("clubs.list", () -> listClubsMenu);
-    menus.put("persons.list", () -> listPersonsMenu);
-    menus.put("affiliateds.list", () -> listAffiliatedsMenu);
-
-    // DataManagers
-    ReInitDataManagersMenu reinitDataManagersMenu = new ReInitDataManagersMenu();
-    SaveDataManagersMenu saveDataManagersMenu = new SaveDataManagersMenu();
-    menus.put("data_managers.reinit", () -> reinitDataManagersMenu);
-    menus.put("data_managers.save", () -> saveDataManagersMenu);
-
-    // Rooting
-    String nextMenuRoute = "main";
-
-    while (nextMenuRoute != null) {
-        Supplier<MenuStage> menuSupplier = menus.get(nextMenuRoute);
-
-        try {
-            MenuStage nextMenuStage = menuSupplier != null ? menuSupplier.get() : null;
-
-            if (nextMenuStage != null) {
-                AppState.navigationHistory.push(new MenuLeadTo(nextMenuRoute));
-                MenuLeadTo menuLeadTo = nextMenuStage.use();
-                nextMenuRoute = menuLeadTo != null ? menuLeadTo.getLeadTo() : null;
-            } else {
-                System.out.println(Functions.styleAsErrorMessage("Aucun nouveau menu ou action n'est lié à choix"));
-                MenuLeadTo lastMenuLeadTo = AppState.navigationHistory.getLast();
-                nextMenuRoute = lastMenuLeadTo != null ? lastMenuLeadTo.getLeadTo() : null;
+                nextPath = switch (event) {
+                    case CallUrlEvent callUrlEvent -> callUrlEvent.getUrl();
+                    case GoBackEvent _ -> AppState.navigationHistory.goBack();
+                    case ExitProgramEvent _ -> null;
+                    default -> null;
+                };
+            } catch (RouteNotFoundException routeNotFoundException) {
+                System.out.println(Functions.styleAsErrorMessage("Route introuvable : '%s'".formatted(nextPath)));
+                nextPath = AppState.navigationHistory.goBack();
             }
-        } catch (UnloadableMenuException e) {
-            System.out.println(Functions.styleAsErrorMessage("Impossible de naviguer dans le menu '%s'. Retour au menu précédent."));
-            MenuLeadTo previousMenuLeadTo = AppState.navigationHistory.goBack();
-            nextMenuRoute = previousMenuLeadTo != null ? previousMenuLeadTo.getLeadTo() : null;
         }
+
+        System.out.println();
+        System.out.println(TextFormatter.bold(TextFormatter.italic("Au revoir !")));
     }
 
-    System.out.println();
-    System.out.println(TextFormatter.bold(TextFormatter.italic("Au revoir !")));
 }

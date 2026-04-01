@@ -14,7 +14,7 @@ public class CommandArgument {
 
     public void setValue(String value) throws CommandArgumentException {
         if (value == null || value.isBlank()) {
-            throw new CommandArgumentException("Un argument de commande ne peut pas être vide");
+            throw new BadCommandArgumentFormatException("Un argument de commande ne peut pas être vide");
         }
 
         this.value = value;

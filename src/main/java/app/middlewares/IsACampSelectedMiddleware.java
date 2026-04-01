@@ -1,13 +1,13 @@
 package app.middlewares;
 
 import app.AppState;
-import utils.io.menus.MenuLeadTo;
+import utils.io.menus.MenuResponse;
 
 public class IsACampSelectedMiddleware extends Middleware {
 
     @Override
-    public MenuLeadTo verify() {
-        return AppState.selectedCampId != -1 ? null : new MenuLeadTo("main");
+    public MenuResponse verify() {
+        return AppState.selectedCampId != -1 ? null : new MenuResponse("main");
     }
 
 }

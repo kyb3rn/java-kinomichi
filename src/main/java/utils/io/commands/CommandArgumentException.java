@@ -1,6 +1,6 @@
 package utils.io.commands;
 
-public class CommandArgumentException extends CommandException {
+public abstract class CommandArgumentException extends CommandException {
 
     public CommandArgumentException() {
     }

@@ -1,5 +1,6 @@
 package utils.io.menus;
 
+import app.events.ExitProgramEvent;
 import utils.io.helpers.tables.Table;
 import utils.io.helpers.tables.TableOptions;
 import utils.io.helpers.texts.formatting.TextAlignement;
@@ -8,7 +9,7 @@ import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.helpers.texts.formatting.TextFormattingOptions;
 import utils.io.helpers.texts.formatting.TextStyle;
 
-public class StandardMenu extends OptionedMenuStage {
+public class StandardMenu extends OrderedMenu {
 
     // ─── Properties ─── //
 
@@ -80,7 +81,7 @@ public class StandardMenu extends OptionedMenuStage {
     }
 
     @Override
-    public void beforeDisplay() {
+    public MenuResponse beforeDisplay() {
         this.addSectionSeparationIndex();
 
         if (this.showGoBackOption) {
@@ -88,8 +89,10 @@ public class StandardMenu extends OptionedMenuStage {
         }
 
         if (this.showExitOption) {
-            this.addOption("Quitter");
+            this.addOption("Quitter", new ExitProgramEvent());
         }
+
+        return null;
     }
 
 }

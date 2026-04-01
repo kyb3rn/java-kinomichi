@@ -1,6 +1,6 @@
 package app;
 
-import app.views.utils.NavigationHistory;
+import app.utils.NavigationHistory;
 
 public class AppState {
 

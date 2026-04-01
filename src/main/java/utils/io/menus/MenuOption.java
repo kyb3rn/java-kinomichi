@@ -5,13 +5,13 @@ public class MenuOption {
     // ─── Properties ─── //
 
     private String text;
-    private MenuOptionOutcome outcome;
+    private Object response;
 
     // ─── Constructors ─── //
 
-    public MenuOption(String text, MenuOptionOutcome outcome) {
+    public MenuOption(String text, Object response) {
         this.setText(text);
-        this.setOutcome(outcome);
+        this.response = response;
     }
 
     // ─── Getters ─── //
@@ -20,8 +20,8 @@ public class MenuOption {
         return this.text;
     }
 
-    public MenuOptionOutcome getOutcome() {
-        return this.outcome;
+    public Object getResponse() {
+        return this.response;
     }
 
     // ─── Setters ─── //
@@ -34,8 +34,8 @@ public class MenuOption {
         this.text = text;
     }
 
-    public void setOutcome(MenuOptionOutcome outcome) {
-        this.outcome = outcome;
+    public void setResponse(Object response) {
+        this.response = response;
     }
 
 }
