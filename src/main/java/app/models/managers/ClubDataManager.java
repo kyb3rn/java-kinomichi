@@ -13,6 +13,7 @@ import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -69,6 +70,11 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
     }
 
     // ─── Overrides & inheritance ─── //
+
+    @Override
+    public Collection<Club> getModels() {
+        return this.clubs.values();
+    }
 
     @Override
     public void init() throws LoadDataManagerDataException {

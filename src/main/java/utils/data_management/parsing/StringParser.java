@@ -14,7 +14,7 @@ public class StringParser {
             return val;
         } catch (NumberFormatException e) {
             throw new StringParserException(
-                "Attribut %s invalide (attendu: entier positif, obtenu: %s)".formatted(fieldName, raw.trim()));
+                "Attribut %s invalide (attendu: entier positif, obtenu: %s)".formatted(fieldName, raw.trim()), e);
         }
     }
 

@@ -372,7 +372,7 @@ public class Table {
             }
         }
 
-        System.out.println(stringBuilder);
+        System.out.print(stringBuilder);
     }
 
     // ─── Sub classes ─── //

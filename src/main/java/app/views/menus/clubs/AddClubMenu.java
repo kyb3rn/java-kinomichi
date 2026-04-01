@@ -1,60 +1,22 @@
-package app.menus.clubs;
+package app.views.menus.clubs;
 
+import app.AppState;
 import app.models.Address;
 import app.models.Club;
 import app.models.ModelException;
 import app.models.managers.*;
 import app.utils.ExitProgramException;
-import app.utils.ThrowingStringAcceptor;
-import utils.io.commands.*;
+import app.views.utils.ExitCommandHandlerException;
+import app.views.utils.FormMenuStage;
+import app.views.utils.GoBackException;
 import utils.io.helpers.Functions;
 import utils.io.helpers.tables.SimpleBox;
 import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.menus.MenuLeadTo;
-import utils.io.menus.MenuStage;
 
 import java.util.Scanner;
 
-public class AddClubMenu extends MenuStage {
-
-    // ─── Utility methods ─── //
-
-    private boolean promptField(Scanner scanner, ThrowingStringAcceptor throwingStringAcceptor) throws ExitProgramException {
-        while (true) {
-            System.out.print("> ");
-            try {
-                String input = scanner.nextLine();
-
-                try {
-                    Command command = CommandManager.convertInput(input);
-                    switch (command.getCommand()) {
-                        case QUIT -> throw new ExitProgramException();
-                        case BACK -> {
-                            System.out.println();
-                            return true;
-                        }
-                        default -> throw new UnhandledCommandException(command);
-                    }
-                } catch (NotACommandException _) {
-                    throwingStringAcceptor.accept(input);
-                    System.out.println();
-                    return false;
-                } catch (UnknownCommandException e) {
-                    System.out.printf(Functions.styleAsErrorMessage("Cette commande n'existe pas.%n%n"));
-                } catch (CommandArgumentException e) {
-                    System.out.printf(Functions.styleAsErrorMessage("Les arguments de cette commande sont invalides.%n%n"));
-                } catch (UnhandledCommandException e) {
-                    System.out.printf(Functions.styleAsErrorMessage("Cette commande n'est pas prise en charge ici.%n%n"));
-                }
-            } catch (ModelException | DataManagerException e) {
-                System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
-            } catch (ExitProgramException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
+public class AddClubMenu extends FormMenuStage {
 
     // ─── Overrides & inheritance ─── //
 
@@ -68,42 +30,57 @@ public class AddClubMenu extends MenuStage {
         SimpleBox sectionHeaderSimpleBox = new SimpleBox();
         sectionHeaderSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Ajout d'un club")));
         sectionHeaderSimpleBox.addLine(TextFormatter.italic("Pour annuler à tout moment, entrez la commande " + TextFormatter.bold("!b")));
+
+        System.out.println();
         sectionHeaderSimpleBox.display();
 
         try {
+            System.out.println();
             System.out.println(TextFormatter.bold(TextFormatter.green("1.")) + " Nom");
-            if (this.promptField(scanner, clubData::setName)) return new MenuLeadTo("clubs.manage");
+            this.promptField(scanner, clubData::setName);
 
+            System.out.println();
             System.out.println(TextFormatter.bold(TextFormatter.green("2.")) + " Adresse");
             System.out.println(TextFormatter.bold(TextFormatter.yellow("2.1.")) + " Adresse - Pays (ISO 3)");
-            if (this.promptField(scanner, input -> {
+            this.promptField(scanner, input -> {
                 clubAddressData.setCountryIso3(input);
                 String iso3 = clubAddressData.getCountryIso3();
                 try {
                     DataManagers.get(CountryDataManager.class).getCountryWithExceptions(iso3);
                 } catch (DataManagerException | ModelException e) {
-                    throw new DataManagerException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3));
+                    throw new DataManagerException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3), e);
                 }
-            })) return new MenuLeadTo("clubs.manage");
+            });
 
+            System.out.println();
             System.out.println(TextFormatter.bold(TextFormatter.yellow("2.2.")) + " Adresse - Code postal");
-            if (this.promptField(scanner, clubAddressData::setZipCode)) return new MenuLeadTo("clubs.manage");
+            this.promptField(scanner, clubAddressData::setZipCode);
 
+            System.out.println();
             System.out.println(TextFormatter.bold(TextFormatter.yellow("2.3.")) + " Adresse - Ville");
-            if (this.promptField(scanner, clubAddressData::setCity)) return new MenuLeadTo("clubs.manage");
+            this.promptField(scanner, clubAddressData::setCity);
 
+            System.out.println();
             System.out.println(TextFormatter.bold(TextFormatter.yellow("2.4.")) + " Adresse - Rue");
-            if (this.promptField(scanner, clubAddressData::setStreet)) return new MenuLeadTo("clubs.manage");
+            this.promptField(scanner, clubAddressData::setStreet);
 
+            System.out.println();
             System.out.println(TextFormatter.bold(TextFormatter.yellow("2.5.")) + " Adresse - Numéro");
-            if (this.promptField(scanner, clubAddressData::setNumber)) return new MenuLeadTo("clubs.manage");
+            this.promptField(scanner, clubAddressData::setNumber);
 
+            System.out.println();
             System.out.println(TextFormatter.bold(TextFormatter.yellow("2.6.")) + " Adresse - Numéro de bôite " + TextFormatter.italic("(optionnel)"));
-            if (this.promptField(scanner, clubAddressData::setBoxNumber)) return new MenuLeadTo("clubs.manage");
+            this.promptField(scanner, clubAddressData::setBoxNumber);
 
+            System.out.println();
             System.out.println(TextFormatter.bold(TextFormatter.green("3.")) + " Lien Google Maps " + TextFormatter.italic("(optionnel)"));
-            if (this.promptField(scanner, clubData::setGoogleMapsLink)) return new MenuLeadTo("clubs.manage");
-        } catch (ExitProgramException e) {
+            this.promptField(scanner, clubData::setGoogleMapsLink);
+        } catch (GoBackException _) {
+            return AppState.navigationHistory.goBack();
+        } catch (ExitCommandHandlerException _) {
+            System.out.println(Functions.styleAsErrorMessage("Il y a eu un problème durant l'exécution du gestionnaire des commandes."));
+            return new MenuLeadTo("main");
+        } catch (ExitProgramException _) {
             return null;
         }
 
@@ -120,6 +97,8 @@ public class AddClubMenu extends MenuStage {
         SimpleBox clubAddedSimpleBox = new SimpleBox();
         clubAddedSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Club ajouté")));
         clubAddedSimpleBox.addLine(TextFormatter.italic("Le club a bien été enregistré sous l'identifiant " + TextFormatter.bold("#" + club.getId())));
+
+        System.out.println();
         clubAddedSimpleBox.display();
 
         return new MenuLeadTo("clubs.manage");

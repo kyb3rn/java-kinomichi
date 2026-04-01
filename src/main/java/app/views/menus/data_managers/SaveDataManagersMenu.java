@@ -1,7 +1,9 @@
-package app.menus.data_managers;
+package app.views.menus.data_managers;
 
+import app.AppState;
 import app.models.managers.DataManager;
 import app.models.managers.DataManagers;
+import utils.io.helpers.Functions;
 import utils.io.menus.MenuLeadTo;
 import utils.io.menus.MenuStage;
 import utils.io.menus.StandardMenu;
@@ -17,7 +19,8 @@ public class SaveDataManagersMenu extends MenuStage {
         List<DataManager<?>> unsavedDataManagers = DataManagers.getUnsavedOnes();
 
         if (unsavedDataManagers.isEmpty()) {
-            return new MenuLeadTo("main");
+            System.out.println(Functions.styleAsErrorMessage("Cette page est inaccessible. Tous les gestionnaires de données sont sauvegardés. Retour à la page précédente."));
+            return AppState.navigationHistory.goBack();
         }
 
         StandardMenu menu = new StandardMenu("Sauvegarde de gestionnaires de données");
@@ -25,8 +28,6 @@ public class SaveDataManagersMenu extends MenuStage {
         for (DataManager<?> unsavedDataManager : unsavedDataManagers) {
             menu.addOption(unsavedDataManager.getModelSimpleName(), new SaveDataManager(unsavedDataManager));
         }
-
-        menu.addOption("Retour", "main");
 
         return menu.use();
     }

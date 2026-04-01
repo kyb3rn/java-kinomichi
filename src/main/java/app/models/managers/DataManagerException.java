@@ -4,6 +4,10 @@ public class DataManagerException extends Exception {
 
     // ─── Constructors ─── //
 
+    public DataManagerException() {
+        super();
+    }
+
     public DataManagerException(String message) {
         super(message);
     }

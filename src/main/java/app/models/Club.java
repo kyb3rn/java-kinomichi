@@ -98,7 +98,7 @@ public class Club extends IdentifiedModel implements Hydratable<Club.Data> {
         try {
             address = DataManagers.get(AddressDataManager.class).getAddress(addressId);
         } catch (DataManagerException | ModelException e) {
-            throw new ModelException("Impossible de vérifier l'identifiant d'adresse '%d' (les adresses n'ont pas pu être chargées dans l'application)".formatted(addressId));
+            throw new ModelException("Impossible de vérifier l'identifiant d'adresse '%d' (les adresses n'ont pas pu être chargées dans l'application)".formatted(addressId), e);
         }
 
         if (address == null) {

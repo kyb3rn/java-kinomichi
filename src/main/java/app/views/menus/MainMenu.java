@@ -1,10 +1,7 @@
-package app.menus;
+package app.views.menus;
 
-import app.AppState;
-import app.models.managers.AddressDataManager;
 import app.models.managers.CampDataManager;
 import app.models.managers.ClubDataManager;
-import app.models.managers.CountryDataManager;
 import app.models.managers.DataManager;
 import app.models.managers.DataManagers;
 import utils.io.helpers.texts.formatting.TextFormatter;
@@ -20,9 +17,10 @@ public class MainMenu extends StandardMenu {
         super("Kinomichi - Menu d'administration");
 
         this.addCampsOption();
-        this.addCountriesOption();
-        this.addAddressesOption();
         this.addClubsOption();
+        this.addOption("Explorer les données", "explore");
+
+        this.addSectionSeparationIndex();
 
         List<DataManager<?>> badlyInitializedDataManagers = DataManagers.getBadlyInitializedOnes();
 
@@ -36,7 +34,7 @@ public class MainMenu extends StandardMenu {
             this.addOption("Sauvegarder des données non enregistrées (%d)".formatted(unsavedDataManagers.size()), "data_managers.save");
         }
 
-        this.addOption("Quitter");
+        this.setShowGoBackOption(false);
     }
 
     // ─── Utility methods ─── //
@@ -51,30 +49,6 @@ public class MainMenu extends StandardMenu {
         }
 
         this.addOption(campsOptionLabel, campsInitialized ? "camps.manage" : "main");
-    }
-
-    private void addCountriesOption() {
-        String countriesOptionLabel = "Parcourir les pays (%d)".formatted(DataManagers.getCountOf(CountryDataManager.class));
-
-        boolean countriesInitialized = DataManagers.isInitialized(CountryDataManager.class);
-
-        if (!countriesInitialized) {
-            countriesOptionLabel = TextFormatter.strikethrough(countriesOptionLabel) + " " + TextFormatter.red(TextFormatter.italic("(pays non chargés)"));
-        }
-
-        this.addOption(countriesOptionLabel, countriesInitialized ? "countries.manage" : "main");
-    }
-
-    private void addAddressesOption() {
-        String addressesOptionLabel = "Parcourir les adresses (%d)".formatted(DataManagers.getCountOf(AddressDataManager.class));
-
-        boolean addressesInitialized = DataManagers.isInitialized(AddressDataManager.class);
-
-        if (!addressesInitialized) {
-            addressesOptionLabel = TextFormatter.strikethrough(addressesOptionLabel) + " " + TextFormatter.red(TextFormatter.italic("(adresses non chargées)"));
-        }
-
-        this.addOption(addressesOptionLabel, addressesInitialized ? "addresses.manage" : "main");
     }
 
     private void addClubsOption() {
@@ -95,7 +69,7 @@ public class MainMenu extends StandardMenu {
     public void afterDisplay() {
         int campsCount = DataManagers.getCountOf(CampDataManager.class);
         if (campsCount == 0) {
-            System.out.printf(TextFormatter.yellow(TextFormatter.italic("Il n'y a pas encore de stage enregistré. ", TextFormatter.bold("Créez-en un !"))) + "%n%n");
+            System.out.println(TextFormatter.yellow(TextFormatter.italic("Il n'y a pas encore de stage enregistré. ", TextFormatter.bold("Créez-en un !"))));
         }
     }
 

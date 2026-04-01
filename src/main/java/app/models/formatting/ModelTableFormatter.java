@@ -31,7 +31,7 @@ public class ModelTableFormatter {
                 try {
                     Object value = am.method().invoke(item);
                     column.addValue(Objects.toString(value, ""));
-                } catch (Exception e) {
+                } catch (Exception _) {
                     column.addValue("");
                 }
             }
@@ -62,7 +62,7 @@ public class ModelTableFormatter {
             try {
                 Object value = am.method().invoke(item);
                 valueColumn.addValue(Objects.toString(value, ""));
-            } catch (Exception e) {
+            } catch (Exception _) {
                 valueColumn.addValue("");
             }
         }
@@ -96,7 +96,7 @@ public class ModelTableFormatter {
                 }
 
                 return value1.toString().compareTo(value2.toString());
-            } catch (Exception e) {
+            } catch (Exception _) {
                 return 0;
             }
         };
@@ -123,7 +123,7 @@ public class ModelTableFormatter {
         if (presetClass != TextFormattingPreset.class) {
             try {
                 options = presetClass.getDeclaredConstructor().newInstance().getFormattingOptions();
-            } catch (Exception e) {
+            } catch (Exception _) {
                 options = new TextFormattingOptions();
             }
         } else {

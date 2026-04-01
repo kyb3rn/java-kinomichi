@@ -4,6 +4,10 @@ public class ModelException extends Exception {
 
     // ─── Constructors ─── //
 
+    public ModelException() {
+        super();
+    }
+
     public ModelException(String message) {
         super(message);
     }

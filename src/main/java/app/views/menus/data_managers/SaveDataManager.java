@@ -1,4 +1,4 @@
-package app.menus.data_managers;
+package app.views.menus.data_managers;
 
 import app.models.ModelException;
 import app.models.managers.DataManager;
@@ -28,9 +28,9 @@ public class SaveDataManager extends MenuOptionOutcomeLeadingAction {
 
         try {
             this.dataManager.export();
-            System.out.printf("%s%n%n", TextFormatter.green("Le gestionnaire '%s' a été sauvegardé avec succès !".formatted(modelSimpleName)));
+            System.out.printf("%s%n", TextFormatter.green("Le gestionnaire '%s' a été sauvegardé avec succès !".formatted(modelSimpleName)));
         } catch (DataManagerException | ModelException e) {
-            System.out.printf("%s%n%n", TextFormatter.red("Erreur lors de la sauvegarde de '%s' : %s".formatted(modelSimpleName, e.getMessage())));
+            System.out.printf("%s%n", TextFormatter.red("Erreur lors de la sauvegarde de '%s' : %s".formatted(modelSimpleName, e.getMessage())));
         }
     }
 

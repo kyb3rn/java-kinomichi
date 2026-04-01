@@ -1,0 +1,64 @@
+{
+  "affiliateds": [
+    {
+      "id": 1,
+      "personId": 1,
+      "clubId": 1,
+      "affiliationNumber": "2018-DKMVR"
+    },
+    {
+      "id": 2,
+      "personId": 3,
+      "clubId": 1,
+      "affiliationNumber": "2019-PLHWT"
+    },
+    {
+      "id": 3,
+      "personId": 4,
+      "clubId": 3,
+      "affiliationNumber": "2020-BQNXF"
+    },
+    {
+      "id": 4,
+      "personId": 6,
+      "clubId": 2,
+      "affiliationNumber": "2017-GRJMS"
+    },
+    {
+      "id": 5,
+      "personId": 7,
+      "clubId": 6,
+      "affiliationNumber": "2021-YCWPT"
+    },
+    {
+      "id": 6,
+      "personId": 10,
+      "clubId": 4,
+      "affiliationNumber": "2022-FTLNQ"
+    },
+    {
+      "id": 7,
+      "personId": 12,
+      "clubId": 8,
+      "affiliationNumber": "2023-HXBVD"
+    },
+    {
+      "id": 8,
+      "personId": 14,
+      "clubId": 3,
+      "affiliationNumber": "2019-MWRKZ"
+    },
+    {
+      "id": 9,
+      "personId": 17,
+      "clubId": 6,
+      "affiliationNumber": "2024-JSNPG"
+    },
+    {
+      "id": 10,
+      "personId": 20,
+      "clubId": 5,
+      "affiliationNumber": "2025-CVQTW"
+    }
+  ]
+}

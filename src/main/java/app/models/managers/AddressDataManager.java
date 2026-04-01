@@ -18,6 +18,7 @@ import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.TreeMap;
 import java.util.List;
 
@@ -76,6 +77,11 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
     // ─── Overrides & inheritance ─── //
 
     @Override
+    public Collection<Address> getModels() {
+        return this.addresses.values();
+    }
+
+    @Override
     public void init() throws LoadDataManagerDataException {
         if (!this.isInitialized()) {
             DataWriter<Data> dataWriter = new DataWriter<>();
@@ -86,7 +92,7 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
             try {
                 csvReader.readFile(filePath, modelData);
             } catch (Exception e) {
-                throw new LoadDataManagerDataException("Les données du manager '%s' n'ont pas pu être lues dans le fichier '%s'".formatted(this.getClass().getSimpleName(), filePath));
+                throw new LoadDataManagerDataException("Les données du manager '%s' n'ont pas pu être lues dans le fichier '%s'".formatted(this.getClass().getSimpleName(), filePath), e);
             }
 
             try {

@@ -5,6 +5,8 @@ import app.models.ModelException;
 import utils.data_management.FileType;
 import app.models.Country;
 import utils.data_management.converters.CustomSerializable;
+
+import java.util.Collection;
 import utils.data_management.converters.convertibles.CsvConvertible;
 import utils.data_management.converters.readers.CsvReader;
 import utils.data_management.converters.writers.*;
@@ -67,6 +69,11 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
     // ─── Overrides & inheritance ─── //
 
     @Override
+    public Collection<Country> getModels() {
+        return this.countries.values();
+    }
+
+    @Override
     public void init() throws LoadDataManagerDataException {
         if (!this.isInitialized()) {
             this.defaultFileType = FileType.CSV;
@@ -79,7 +86,7 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
             try {
                 csvReader.readFile(filePath, modelData, true);
             } catch (Exception e) {
-                throw new LoadDataManagerDataException("Les données du manager '%s' n'ont pas pu être lues dans le fichier '%s'".formatted(this.getClass().getSimpleName(), filePath));
+                throw new LoadDataManagerDataException("Les données du manager '%s' n'ont pas pu être lues dans le fichier '%s'".formatted(this.getClass().getSimpleName(), filePath), e);
             }
 
             try {

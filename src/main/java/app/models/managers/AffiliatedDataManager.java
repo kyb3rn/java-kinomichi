@@ -1,13 +1,11 @@
 package app.models.managers;
 
-import app.models.Camp;
+import app.models.Affiliated;
 import app.models.Model;
 import app.models.ModelException;
 import com.google.gson.*;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
-
-import java.util.Collection;
 import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.converters.readers.JsonReader;
 import utils.data_management.converters.writers.DataWriter;
@@ -15,37 +13,38 @@ import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
 
-public class CampDataManager extends DataManager<CampDataManager.Data> {
+public class AffiliatedDataManager extends DataManager<AffiliatedDataManager.Data> {
 
     // ─── Properties ─── //
 
-    private final TreeMap<Integer, Camp> camps = new TreeMap<>();
+    private final TreeMap<Integer, Affiliated> affiliateds = new TreeMap<>();
 
     // ─── Getters ─── //
 
-    public TreeMap<Integer, Camp> getCamps() {
-        return this.camps;
+    public TreeMap<Integer, Affiliated> getAffiliateds() {
+        return this.affiliateds;
     }
 
-    public Camp getCamp(Integer id) {
-        return this.camps.get(id);
+    public Affiliated getAffiliated(Integer id) {
+        return this.affiliateds.get(id);
     }
 
     // ─── Utility methods ─── //
 
-    public void addCamp(Camp camp) throws ModelException, DataManagerException {
-        if (!camp.isValid()) {
-            throw new ModelException("L'objet Camp qui a voulu être ajouté n'est pas valide");
+    public void addAffiliated(Affiliated affiliated) throws ModelException, DataManagerException {
+        if (!affiliated.isValid()) {
+            throw new ModelException("L'objet Affiliated qui a voulu être ajouté n'est pas valide");
         }
 
-        if (this.camps.containsKey(camp.getId())) {
-            throw new DataManagerException("Un stage portant l'identifiant '%d' existe déjà".formatted(camp.getId()));
+        if (this.affiliateds.containsKey(affiliated.getId())) {
+            throw new DataManagerException("Un affilié portant l'identifiant '%d' existe déjà".formatted(affiliated.getId()));
         }
 
-        this.camps.put(camp.getId(), camp);
+        this.affiliateds.put(affiliated.getId(), affiliated);
 
         if (this.isInitialized()) {
             this.unsavedChanges = true;
@@ -57,24 +56,24 @@ public class CampDataManager extends DataManager<CampDataManager.Data> {
         }
     }
 
-    public Camp addCamp(Camp.Data campData) throws ModelException, DataManagerException {
-        Camp camp = new Camp();
-        camp.hydrate(campData);
-        DataManagers.resolveModelReferences(camp);
+    public Affiliated addAffiliated(Affiliated.Data affiliatedData) throws ModelException, DataManagerException {
+        Affiliated affiliated = new Affiliated();
+        affiliated.hydrate(affiliatedData);
+        DataManagers.resolveModelReferences(affiliated);
 
-        int maxId = this.camps.values().stream().mapToInt(Camp::getId).max().orElse(0);
-        camp.setId(maxId + 1);
+        int maxId = this.affiliateds.values().stream().mapToInt(Affiliated::getId).max().orElse(0);
+        affiliated.setId(maxId + 1);
 
-        this.addCamp(camp);
+        this.addAffiliated(affiliated);
 
-        return camp;
+        return affiliated;
     }
 
     // ─── Overrides & inheritance ─── //
 
     @Override
-    public Collection<Camp> getModels() {
-        return this.camps.values();
+    public Collection<Affiliated> getModels() {
+        return this.affiliateds.values();
     }
 
     @Override
@@ -118,27 +117,27 @@ public class CampDataManager extends DataManager<CampDataManager.Data> {
 
     @Override
     public int count() {
-        return this.camps.size();
+        return this.affiliateds.size();
     }
 
     @Override
     public void hydrate(Data dataObject) throws ModelException {
         this.pendingModels = new ArrayList<>();
 
-        for (Camp.Data campData : dataObject.camps) {
-            Camp camp = new Camp();
-            camp.hydrate(campData);
-            this.pendingModels.add(camp);
+        for (Affiliated.Data affiliatedData : dataObject.affiliateds) {
+            Affiliated affiliated = new Affiliated();
+            affiliated.hydrate(affiliatedData);
+            this.pendingModels.add(affiliated);
         }
     }
 
     @Override
     protected void addResolvedModel(Model model) throws ModelException, DataManagerException {
-        if (!(model instanceof Camp camp)) {
-            throw new ModelException("Le manager '%s' attend un objet de type Camp, mais a reçu '%s'".formatted(this.getClass().getSimpleName(), model.getClass().getSimpleName()));
+        if (!(model instanceof Affiliated affiliated)) {
+            throw new ModelException("Le manager '%s' attend un objet de type Affiliated, mais a reçu '%s'".formatted(this.getClass().getSimpleName(), model.getClass().getSimpleName()));
         }
 
-        this.addCamp(camp);
+        this.addAffiliated(affiliated);
     }
 
     @Override
@@ -152,13 +151,13 @@ public class CampDataManager extends DataManager<CampDataManager.Data> {
 
         // ─── Properties ─── //
 
-        private final List<Camp.Data> camps = new ArrayList<>();
+        private final List<Affiliated.Data> affiliateds = new ArrayList<>();
 
         // ─── Constructors ─── //
 
-        public Data(CampDataManager campDataManager) throws ModelException {
-            for (Camp camp : campDataManager.getCamps().values()) {
-                this.camps.add(camp.dehydrate());
+        public Data(AffiliatedDataManager affiliatedDataManager) throws ModelException {
+            for (Affiliated affiliated : affiliatedDataManager.getAffiliateds().values()) {
+                this.affiliateds.add(affiliated.dehydrate());
             }
         }
 
@@ -181,17 +180,17 @@ public class CampDataManager extends DataManager<CampDataManager.Data> {
                 throw new StringParserException("Le JSON reçu n'est pas un objet valide (%s)".formatted(e.getMessage()), e);
             }
 
-            if (!obj.has("camps")) {
-                throw new StringParserException("Le champ 'camps' est manquant");
-            } else if (!obj.get("camps").isJsonArray()) {
-                throw new StringParserException("Le champ 'camps' doit être un tableau");
+            if (!obj.has("affiliateds")) {
+                throw new StringParserException("Le champ 'affiliateds' est manquant");
+            } else if (!obj.get("affiliateds").isJsonArray()) {
+                throw new StringParserException("Le champ 'affiliateds' doit être un tableau");
             }
 
-            JsonArray campsArray = obj.getAsJsonArray("camps");
-            for (JsonElement element : campsArray) {
-                Camp.Data campData = new Camp.Data();
-                campData.parseJson(element.toString());
-                this.camps.add(campData);
+            JsonArray affiliatedsArray = obj.getAsJsonArray("affiliateds");
+            for (JsonElement element : affiliatedsArray) {
+                Affiliated.Data affiliatedData = new Affiliated.Data();
+                affiliatedData.parseJson(element.toString());
+                this.affiliateds.add(affiliatedData);
             }
         }
 

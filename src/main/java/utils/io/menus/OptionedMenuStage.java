@@ -1,15 +1,23 @@
 package utils.io.menus;
 
+import app.AppState;
 import app.middlewares.Middleware;
-import utils.io.commands.*;
+import app.utils.ExitProgramException;
+import app.views.utils.ExitCommandHandlerException;
+import app.views.utils.FormMenuStage;
+import app.views.utils.GoBackException;
+import app.views.utils.InvalidInputFormMenuException;
+import utils.io.commands.UnhandledCommandException;
 import utils.io.helpers.Functions;
 
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
-public abstract class OptionedMenuStage extends MenuStage {
+public abstract class OptionedMenuStage extends FormMenuStage {
 
     // ─── Properties ─── //
 
@@ -84,95 +92,80 @@ public abstract class OptionedMenuStage extends MenuStage {
     // ─── Overrides & inheritance ─── //
 
     @Override
-    public OptionedMenuMenuLeadTo use() {
+    public MenuLeadTo use() {
         for (Middleware middleware : this.middlewares) {
             MenuLeadTo menuLeadTo = middleware.verify();
             if (menuLeadTo != null) {
-                System.out.printf(Functions.styleAsErrorMessage("Ce menu n'est pas accessible.%n%n"));
+                System.out.println(Functions.styleAsErrorMessage("Ce menu n'est pas accessible."));
                 return new OptionedMenuMenuLeadTo(-1, menuLeadTo);
             }
         }
 
-        int optionsSize = this.options.size();
-
         this.beforeDisplay();
 
+        System.out.println();
         this.display();
 
         this.afterDisplay();
 
+        int optionsSize = this.options.size();
         if (optionsSize > 0) {
             Scanner scanner = new Scanner(System.in);
-            boolean isValidChoice = false;
-            MenuOption selectedOption = null;
-            String input;
-            int choice = -1;
+            AtomicInteger choice = new AtomicInteger(-1);
+            AtomicReference<MenuOption> selectedOption = new AtomicReference<>();
+            AtomicReference<String> validInput = new AtomicReference<>();
 
-            do {
-                this.beforeInput();
-
-                System.out.print("> ");
-                input = scanner.nextLine();
-                System.out.println();
-
-                this.afterEveryInput(input);
-
-                try {
-                    Command command = CommandManager.convertInput(input);
+            try {
+                this.promptInput(scanner, (_, command) -> {
                     switch (command.getCommand()) {
-                        case QUIT -> {
-                            return null;
-                        }
+                        case QUIT -> throw new ExitProgramException();
+                        case BACK -> throw new GoBackException();
                         default -> throw new UnhandledCommandException(command);
                     }
-                } catch (NotACommandException _) {
-                    // Continue the process
-                } catch (UnknownCommandException e) {
-                    System.out.printf(Functions.styleAsErrorMessage("Cette commande n'existe pas.%n%n"));
-                    continue;
-                } catch (CommandArgumentException e) {
-                    System.out.printf(Functions.styleAsErrorMessage("Les arguments de cette commande sont invalides.%n%n"));
-                    continue;
-                } catch (UnhandledCommandException e) {
-                    System.out.printf(Functions.styleAsErrorMessage("Cette commande n'est pas prise en charge ici.%n%n"));
-                    continue;
-                }
-
-                try {
-                    choice = Integer.parseInt(input);
-                } catch (NumberFormatException e) {
-                    System.out.printf(Functions.styleAsErrorMessage("L'entrée '%s' est invalide. Veuillez entrer un nombre entier strictement positif.%n%n"), input, this.options.size());
-                    continue;
-                }
-
-                isValidChoice = choice > 0 && choice <= optionsSize;
-
-                if (!isValidChoice) {
-                    if (optionsSize == 1) {
-                        System.out.printf(Functions.styleAsErrorMessage("Le choix '%s' est invalide. Seul le choix 1 est valide.%n%n"), input);
-                    } else if (optionsSize == 2) {
-                        System.out.printf(Functions.styleAsErrorMessage("Le choix '%s' est invalide. Veuillez entrer soit 1, soit 2.%n%n"), input);
-                    } else {
-                        System.out.printf(Functions.styleAsErrorMessage("Le choix '%s' est invalide. Veuillez choisir une option entre 1 et %s (inclus).%n%n"), input, this.options.size());
+                }, input -> {
+                    int parsedChoice;
+                    try {
+                        parsedChoice = Integer.parseInt(input);
+                    } catch (NumberFormatException e) {
+                        throw new InvalidInputFormMenuException("L'entrée '%s' est invalide. Veuillez entrer un nombre entier strictement positif.".formatted(input), e);
                     }
-                } else {
-                    selectedOption = this.options.get(choice - 1);
+
+                    if (parsedChoice < 1 || parsedChoice > optionsSize) {
+                        if (optionsSize == 1) {
+                            throw new InvalidInputFormMenuException("Le choix '%s' est invalide. Seul le choix 1 est valide.".formatted(input));
+                        } else if (optionsSize == 2) {
+                            throw new InvalidInputFormMenuException("Le choix '%s' est invalide. Veuillez entrer soit 1, soit 2.".formatted(input));
+                        } else {
+                            throw new InvalidInputFormMenuException("Le choix '%s' est invalide. Veuillez choisir une option entre 1 et %s (inclus).".formatted(input, optionsSize));
+                        }
+                    }
+
+                    validInput.set(input);
+                    choice.set(parsedChoice);
+                    selectedOption.set(this.options.get(parsedChoice - 1));
+                }, this::beforeInput, this::afterEveryInput);
+            } catch (GoBackException _) {
+                return AppState.navigationHistory.goBack();
+            } catch (ExitProgramException _) {
+                return null;
+            } catch (ExitCommandHandlerException _) {
+            }
+
+            this.afterValidInput(validInput.get(), choice.get());
+
+            if (selectedOption.get() != null) {
+                if (selectedOption.get().getOutcome() instanceof MenuOptionOutcomeAction menuOptionOutcomeAction) {
+                    menuOptionOutcomeAction.execute();
                 }
-            } while (!isValidChoice);
 
-            this.afterValidInput(input, choice);
-
-            if (selectedOption.getOutcome() instanceof MenuOptionOutcomeAction menuOptionOutcomeAction) {
-                menuOptionOutcomeAction.execute();
+                if (selectedOption.get().getOutcome() instanceof LeadableMenuOptionOutcome leadableMenuOptionOutcome) {
+                    return new OptionedMenuMenuLeadTo(choice.get(), leadableMenuOptionOutcome.getLeadingChoice());
+                }
             }
 
-            if (selectedOption.getOutcome() instanceof LeadableMenuOptionOutcome leadableMenuOptionOutcome) {
-                return new OptionedMenuMenuLeadTo(choice, leadableMenuOptionOutcome.getLeadingChoice());
-            }
-
-            return new OptionedMenuMenuLeadTo(choice);
+            return new OptionedMenuMenuLeadTo(choice.get());
         } else {
-            System.out.printf(Functions.styleAsErrorMessage("Aucune option attribuée à ce menu à choix%n%n"));
+            System.out.println(Functions.styleAsErrorMessage("Aucune option attribuée à ce menu à choix"));
         }
 
         return new OptionedMenuMenuLeadTo(-1);

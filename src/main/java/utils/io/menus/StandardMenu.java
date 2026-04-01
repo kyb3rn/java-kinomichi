@@ -13,6 +13,8 @@ public class StandardMenu extends OptionedMenuStage {
     // ─── Properties ─── //
 
     private String title = null;
+    private boolean showGoBackOption = true;
+    private boolean showExitOption = true;
 
     // ─── Constructors ─── //
 
@@ -23,6 +25,14 @@ public class StandardMenu extends OptionedMenuStage {
     public StandardMenu() {}
 
     // ─── Setters ─── //
+
+    public void setShowGoBackOption(boolean showGoBackOption) {
+        this.showGoBackOption = showGoBackOption;
+    }
+
+    public void setShowExitOption(boolean showExitOption) {
+        this.showExitOption = showExitOption;
+    }
 
     public void setTitle(String title) {
         if (title.isBlank()) {
@@ -38,6 +48,7 @@ public class StandardMenu extends OptionedMenuStage {
 
     // ─── Overrides & inheritance ─── //
 
+    @Override
     public void display() {
         Table menuTable = new Table();
 
@@ -66,6 +77,19 @@ public class StandardMenu extends OptionedMenuStage {
         menuTable.setRowSeparationIndexes(this.sectionSeparationIndexes);
 
         menuTable.display();
+    }
+
+    @Override
+    public void beforeDisplay() {
+        this.addSectionSeparationIndex();
+
+        if (this.showGoBackOption) {
+            this.addOption("Retour", "main");
+        }
+
+        if (this.showExitOption) {
+            this.addOption("Quitter");
+        }
     }
 
 }

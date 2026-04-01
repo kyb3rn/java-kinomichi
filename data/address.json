@@ -63,22 +63,6 @@
       "street": "Rue des Coudriers",
       "number": "5",
       "id": 8
-    },
-    {
-      "countryIso3": "BEL",
-      "zipCode": 5000,
-      "city": "Namur",
-      "street": "Rue de la Citadelle",
-      "number": "12",
-      "id": 9
-    },
-    {
-      "countryIso3": "BEL",
-      "zipCode": 4920,
-      "city": "Aywaille",
-      "street": "Awan-Fond de la Ville",
-      "number": "16A",
-      "id": 10
     }
   ]
 }

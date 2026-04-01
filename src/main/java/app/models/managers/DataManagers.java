@@ -34,9 +34,7 @@ public class DataManagers {
                 if (cause instanceof LoadDataManagerDataException lde) {
                     throw lde;
                 }
-                throw new LoadDataManagerDataException(
-                    "Impossible d'instancier le manager '%s'".formatted(clazz.getSimpleName())
-                );
+                throw new LoadDataManagerDataException("Impossible d'instancier le manager '%s'".formatted(clazz.getSimpleName()), e);
             }
         }
         M instance = (M) instances.get(clazz);
@@ -57,8 +55,8 @@ public class DataManagers {
             try {
                 DataManager<?> manager = initAndGet(clazz);
                 loadedManagers.add(manager);
-            } catch (LoadDataManagerDataException e) {
-                System.out.printf(Functions.styleAsErrorMessage("Le pré-chargement du manager '%s' n'a pas pu être effectué.%n"), clazz.getSimpleName());
+            } catch (LoadDataManagerDataException _) {
+                System.out.println(Functions.styleAsErrorMessage("Le pré-chargement du manager '%s' n'a pas pu être effectué.".formatted(clazz.getSimpleName())));
             }
         }
 
@@ -67,7 +65,7 @@ public class DataManagers {
             try {
                 manager.resolveReferences();
             } catch (DataManagerException | ModelException e) {
-                System.out.printf(Functions.styleAsErrorMessage("La résolution des références du manager '%s' a échoué: %s%n"), manager.getClass().getSimpleName(), e.getMessage());
+                System.out.println(Functions.styleAsErrorMessage("La résolution des références du manager '%s' a échoué: %s".formatted(manager.getClass().getSimpleName(), e.getMessage())));
             }
         }
     }
@@ -90,7 +88,7 @@ public class DataManagers {
                 pendingField = modelClass.getDeclaredField(pendingFieldName);
                 pendingField.setAccessible(true);
             } catch (NoSuchFieldException e) {
-                throw new ModelException("Champ '%s' introuvable sur '%s'".formatted(pendingFieldName, modelClass.getSimpleName()));
+                throw new ModelException("Champ '%s' introuvable sur '%s'".formatted(pendingFieldName, modelClass.getSimpleName()), e);
             }
 
             // Read the pending value
@@ -98,7 +96,7 @@ public class DataManagers {
             try {
                 pendingValue = pendingField.get(model);
             } catch (IllegalAccessException e) {
-                throw new ModelException("Impossible de lire '%s' sur '%s'".formatted(pendingFieldName, modelClass.getSimpleName()));
+                throw new ModelException("Impossible de lire '%s' sur '%s'".formatted(pendingFieldName, modelClass.getSimpleName()), e);
             }
 
             // Find and call setXxxFromPk(pendingValue)
@@ -111,7 +109,7 @@ public class DataManagers {
                 if (cause instanceof ModelException me) {
                     throw me;
                 }
-                throw new ModelException("Impossible d'appeler '%s' sur '%s'".formatted(setterName, modelClass.getSimpleName()));
+                throw new ModelException("Impossible d'appeler '%s' sur '%s'".formatted(setterName, modelClass.getSimpleName()), e);
             }
         }
     }
@@ -119,7 +117,7 @@ public class DataManagers {
     public static int getCountOf(Class<? extends DataManager<?>> clazz) {
         try {
             return initAndGet(clazz).count();
-        } catch (LoadDataManagerDataException e) {
+        } catch (LoadDataManagerDataException _) {
             return 0;
         }
     }
@@ -127,7 +125,7 @@ public class DataManagers {
     public static boolean isInitialized(Class<? extends DataManager<?>> clazz) {
         try {
             return initAndGet(clazz).isInitialized();
-        } catch (LoadDataManagerDataException e) {
+        } catch (LoadDataManagerDataException _) {
             return false;
         }
     }

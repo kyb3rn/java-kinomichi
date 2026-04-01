@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 
 public abstract class DataManager<T extends CustomSerializable> implements Hydratable<T> {
@@ -55,6 +56,21 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
     }
 
     // ─── Utility methods ─── //
+
+    @SuppressWarnings("unchecked")
+    public Class<? extends Model> getModelClass() {
+        String managerPackage = this.getClass().getPackageName();
+        String parentPackage = managerPackage.substring(0, managerPackage.lastIndexOf('.'));
+        String modelName = this.getModelSimpleName();
+
+        try {
+            return (Class<? extends Model>) Class.forName(parentPackage + "." + modelName);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("Impossible de résoudre la classe Model pour '%s'".formatted(this.getClass().getSimpleName()), e);
+        }
+    }
+
+    public abstract Collection<? extends Model> getModels();
 
     public abstract void init() throws LoadDataManagerDataException;
 
@@ -102,7 +118,7 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
             try {
                 fileWriter.writeFile(this.getFilePath().toString());
             } catch (IOException e) {
-                throw new DataManagerException("Impossible d'écrire dans le fichier '%s'".formatted(this.getFilePath()));
+                throw new DataManagerException("Impossible d'écrire dans le fichier '%s'".formatted(this.getFilePath()), e);
             }
         }
     }
@@ -124,7 +140,7 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
                     DataManager<?> depManager = DataManagers.get(ref.manager());
                     depManager.resolveReferences();
                 } catch (DataManagerException | ModelException e) {
-                    throw new ModelException("Impossible de charger le manager dépendant '%s'".formatted(ref.manager().getSimpleName()));
+                    throw new ModelException("Impossible de charger le manager dépendant '%s'".formatted(ref.manager().getSimpleName()), e);
                 }
             }
         }

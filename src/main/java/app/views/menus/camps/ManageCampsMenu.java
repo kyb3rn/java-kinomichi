@@ -1,4 +1,4 @@
-package app.menus.camps;
+package app.views.menus.camps;
 
 import app.AppState;
 import app.models.managers.CampDataManager;
@@ -34,8 +34,6 @@ public class ManageCampsMenu extends StandardMenu {
             this.addOption("Modifier un stage", (String) null);
             this.addOption("Supprimer un stage", (String) null);
         }
-
-        this.addOption("Retour", "camps.manage");
     }
 
 }

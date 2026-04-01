@@ -1,24 +1,24 @@
-import app.menus.MainMenu;
-import app.menus.addresses.ListAddressesMenu;
-import app.menus.addresses.ManageAddressesMenu;
-import app.menus.camps.*;
-import app.menus.clubs.AddClubMenu;
-import app.menus.clubs.ListClubsMenu;
-import app.menus.clubs.ManageClubsMenu;
-import app.menus.countries.ListCountriesMenu;
-import app.menus.countries.ManageCountriesMenu;
-import app.menus.data_managers.ReInitDataManagersMenu;
-import app.menus.data_managers.SaveDataManagersMenu;
-import app.models.managers.CampDataManager;
-import app.models.managers.DataManagers;
+import app.AppState;
+import app.views.menus.MainMenu;
+import app.views.menus.camps.*;
+import app.views.menus.clubs.AddClubMenu;
+import app.views.menus.clubs.ManageClubsMenu;
+import app.views.menus.data_managers.ReInitDataManagersMenu;
+import app.views.menus.data_managers.SaveDataManagersMenu;
+import app.views.menus.explore.ExploreDataMenu;
+import app.models.managers.*;
+import app.views.utils.ModelTableMenu;
 import utils.io.helpers.Functions;
 import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.menus.MenuLeadTo;
 import utils.io.menus.MenuStage;
+import utils.io.menus.UnloadableMenuException;
 
 void main() {
     DataManagers.initAndResolveReferencesOf(
-        CampDataManager.class
+        CampDataManager.class,
+        PersonDataManager.class,
+        AffiliatedDataManager.class
     );
 
     HashMap<String, Supplier<MenuStage>> menus = new HashMap<>();
@@ -27,15 +27,12 @@ void main() {
     // Main
     menus.put("main", MainMenu::new);
 
+    // Explore
+    menus.put("explore", ExploreDataMenu::new);
+
     // Camps
     menus.put("camps.manage", ManageCampsMenu::new);
     menus.put("camps.manage.camp", ManageCampMenu::new);
-
-    // Countries
-    menus.put("countries.manage", ManageCountriesMenu::new);
-
-    // Addresses
-    menus.put("addresses.manage", ManageAddressesMenu::new);
 
     // Clubs
     menus.put("clubs.manage", ManageClubsMenu::new);
@@ -43,25 +40,27 @@ void main() {
     // Static menus (same instance reused)
     // Camps
     AddCampMenu addCampMenu = new AddCampMenu();
-    ListCampsMenu listCampsMenu = new ListCampsMenu();
     SelectCampMenu selectCampMenu = new SelectCampMenu();
     menus.put("camps.add", () -> addCampMenu);
-    menus.put("camps.list", () -> listCampsMenu);
     menus.put("camps.select", () -> selectCampMenu);
 
-    // Countries
-    ListCountriesMenu listCountriesMenu = new ListCountriesMenu();
-    menus.put("countries.list", () -> listCountriesMenu);
-
-    // Addresses
-    ListAddressesMenu listAddressesMenu = new ListAddressesMenu();
-    menus.put("addresses.list", () -> listAddressesMenu);
-
     // Clubs
-    ListClubsMenu listClubsMenu = new ListClubsMenu();
     AddClubMenu addClubMenu = new AddClubMenu();
-    menus.put("clubs.list", () -> listClubsMenu);
     menus.put("clubs.add", () -> addClubMenu);
+
+    // Model table menus (list views)
+    ModelTableMenu listCampsMenu = new ModelTableMenu(CampDataManager.class);
+    ModelTableMenu listCountriesMenu = new ModelTableMenu(CountryDataManager.class);
+    ModelTableMenu listAddressesMenu = new ModelTableMenu(AddressDataManager.class);
+    ModelTableMenu listClubsMenu = new ModelTableMenu(ClubDataManager.class);
+    ModelTableMenu listPersonsMenu = new ModelTableMenu(PersonDataManager.class);
+    ModelTableMenu listAffiliatedsMenu = new ModelTableMenu(AffiliatedDataManager.class);
+    menus.put("camps.list", () -> listCampsMenu);
+    menus.put("countries.list", () -> listCountriesMenu);
+    menus.put("addresses.list", () -> listAddressesMenu);
+    menus.put("clubs.list", () -> listClubsMenu);
+    menus.put("persons.list", () -> listPersonsMenu);
+    menus.put("affiliateds.list", () -> listAffiliatedsMenu);
 
     // DataManagers
     ReInitDataManagersMenu reinitDataManagersMenu = new ReInitDataManagersMenu();
@@ -70,22 +69,30 @@ void main() {
     menus.put("data_managers.save", () -> saveDataManagersMenu);
 
     // Rooting
-    String previousMenuRoute = null;
     String nextMenuRoute = "main";
 
     while (nextMenuRoute != null) {
         Supplier<MenuStage> menuSupplier = menus.get(nextMenuRoute);
-        MenuStage nextMenuStage = menuSupplier != null ? menuSupplier.get() : null;
 
-        if (nextMenuStage != null) {
-            previousMenuRoute = nextMenuRoute;
-            MenuLeadTo menuLeadTo = nextMenuStage.use();
-            nextMenuRoute = menuLeadTo != null ? menuLeadTo.getLeadTo() : null;
-        } else {
-            System.out.printf(Functions.styleAsErrorMessage("Aucun nouveau menu ou action n'est lié à choix%n%n"));
-            nextMenuRoute = previousMenuRoute;
+        try {
+            MenuStage nextMenuStage = menuSupplier != null ? menuSupplier.get() : null;
+
+            if (nextMenuStage != null) {
+                AppState.navigationHistory.push(new MenuLeadTo(nextMenuRoute));
+                MenuLeadTo menuLeadTo = nextMenuStage.use();
+                nextMenuRoute = menuLeadTo != null ? menuLeadTo.getLeadTo() : null;
+            } else {
+                System.out.println(Functions.styleAsErrorMessage("Aucun nouveau menu ou action n'est lié à choix"));
+                MenuLeadTo lastMenuLeadTo = AppState.navigationHistory.getLast();
+                nextMenuRoute = lastMenuLeadTo != null ? lastMenuLeadTo.getLeadTo() : null;
+            }
+        } catch (UnloadableMenuException e) {
+            System.out.println(Functions.styleAsErrorMessage("Impossible de naviguer dans le menu '%s'. Retour au menu précédent."));
+            MenuLeadTo previousMenuLeadTo = AppState.navigationHistory.goBack();
+            nextMenuRoute = previousMenuLeadTo != null ? previousMenuLeadTo.getLeadTo() : null;
         }
     }
 
+    System.out.println();
     System.out.println(TextFormatter.bold(TextFormatter.italic("Au revoir !")));
 }

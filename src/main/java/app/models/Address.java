@@ -125,7 +125,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
         try {
             this.country = DataManagers.get(CountryDataManager.class).getCountryWithExceptions(iso3);
         } catch (DataManagerException | ModelException e) {
-            throw new ModelException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3));
+            throw new ModelException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3), e);
         }
     }
 
@@ -262,7 +262,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
             try {
                 intZipCode = Integer.parseInt(zipCode);
             } catch (NumberFormatException e) {
-                throw new ModelException("Le code postal doit être un entier strictement positif");
+                throw new ModelException("Le code postal doit être un entier strictement positif",e );
             }
 
             this.setZipCode(intZipCode);
@@ -318,7 +318,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
                 try {
                     intBoxNumber = Integer.parseInt(boxNumber);
                 } catch (NumberFormatException e) {
-                    throw new ModelException("Le numéro de bôite doit être un entier strictement positif");
+                    throw new ModelException("Le numéro de bôite doit être un entier strictement positif",e );
                 }
 
                 this.setBoxNumber(intBoxNumber);

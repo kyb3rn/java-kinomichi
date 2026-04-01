@@ -1,4 +1,4 @@
-package app.menus.camps;
+package app.views.menus.camps;
 
 import app.AppState;
 import app.middlewares.IsACampSelectedMiddleware;
@@ -16,7 +16,6 @@ public class ManageCampMenu extends StandardMenu {
 
         this.setTitle("Kinomichi - Gestion du stage " + TextFormatter.bold("#%s".formatted(campId)));
         this.addUnoptionedRow("À venir !");
-        this.addOption("Retour", "camps.manage");
     }
 
 }

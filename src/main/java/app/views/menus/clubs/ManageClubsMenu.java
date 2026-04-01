@@ -1,11 +1,12 @@
-package app.menus.clubs;
+package app.views.menus.clubs;
 
 import app.models.ModelException;
 import app.models.managers.ClubDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
-import app.models.managers.LoadDataManagerDataException;
+import utils.io.helpers.Functions;
 import utils.io.menus.StandardMenu;
+import utils.io.menus.UnloadableMenuException;
 
 public class ManageClubsMenu extends StandardMenu {
 
@@ -21,9 +22,9 @@ public class ManageClubsMenu extends StandardMenu {
 
             this.addOption("Liste des clubs", "clubs.list");
             this.addOption("Ajouter un club", "clubs.add");
-            this.addOption("Retour", "main");
         } catch (DataManagerException | ModelException e) {
-            throw new RuntimeException(e);
+            System.out.println(Functions.styleAsErrorMessage("Impossible d'initialiser et récupérer le manager 'ClubDataManager'."));
+            throw new UnloadableMenuException();
         }
     }
 

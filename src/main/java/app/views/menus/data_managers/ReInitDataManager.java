@@ -1,4 +1,4 @@
-package app.menus.data_managers;
+package app.views.menus.data_managers;
 
 import app.models.managers.DataManager;
 import app.models.managers.DataManagers;
@@ -33,7 +33,7 @@ public class ReInitDataManager extends MenuOptionOutcomeLeadingAction {
             String successMessage = DataManagers.hasDependencies(this.dataManager)
                     ? "Le gestionnaire '%s' et ses dépendances ont été ré-initialisés avec succès !".formatted(modelSimpleName)
                     : "Le gestionnaire '%s' a été ré-initialisé avec succès !".formatted(modelSimpleName);
-            System.out.printf("%s%n%n", TextFormatter.green(successMessage));
+            System.out.printf("%s%n", TextFormatter.green(successMessage));
         }
     }
 
