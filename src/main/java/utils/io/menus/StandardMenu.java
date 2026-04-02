@@ -92,7 +92,9 @@ public abstract class StandardMenu extends OrderedMenu {
     @Override
     public MenuResponse beforeDisplay() {
         if (!this.navigationOptionsAdded) {
-            this.addSectionSeparationIndex();
+            if (this.showGoBackOption || this.showExitOption) {
+                this.addSectionSeparationIndex();
+            }
 
             if (this.showGoBackOption) {
                 this.addOption("Retour", this.backResponseObject);

@@ -9,6 +9,7 @@ public enum ECommand {
 
     EXIT("exit", List.of("exit", "e")),
     BACK("back", List.of("back", "b")),
+    BACK_BACK("backback", List.of("backback", "bb")),
     SORT_COLUMN("sort", List.of("sort", "s"));
 
     private final String name;

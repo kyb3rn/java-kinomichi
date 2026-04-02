@@ -65,6 +65,12 @@
       "clubId": 3,
       "affiliationNumber": "dsqdqs",
       "id": 11
+    },
+    {
+      "personId": 23,
+      "clubId": 7,
+      "affiliationNumber": "2005-MFKAN",
+      "id": 12
     }
   ]
 }

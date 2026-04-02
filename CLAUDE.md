@@ -60,7 +60,7 @@ Controllers existants : `MainController`, `ExploreController`, `PersonController
 ## Views (package `app.views`)
 
 - `View` (abstract) — classe de base, methode abstraite `Event render()`
-- Les views construisent des menus (`KinomichiStandardMenu`, `ModelTableMenu`) ou gerent des formulaires manuels (scanner + boucle d'input)
+- Les views construisent des menus (`KinomichiStandardMenu`, `ModelListMenu`) ou gerent des formulaires manuels (scanner + boucle d'input)
 - `render()` retourne un `Event` qui remonte au controller puis a la boucle principale
 
 Views existantes :
@@ -87,7 +87,7 @@ Hierarchie des menus (dans `utils/`) :
 
 Surcouches applicatives (dans `app/utils/menus/`) :
 - `KinomichiStandardMenu` (extends StandardMenu) — preconfigure le `CommandHandler` pour mapper `BackCommand` → `GoBackEvent`, `ExitCommand` → `ExitProgramEvent`
-- `ModelTableMenu<M>` (extends OrderedMenu) — affiche une table de modeles via `ModelTableFormatter`, gere la commande `!sort`
+- `ModelListMenu<M>` (extends OrderedMenu) — affiche une table de modeles via `ModelTableFormatter`, gere la commande `!sort`
 
 `MenuResponse` encapsule la reponse (un `Event`, une `Command`, ou autre objet) qui remonte au code appelant.
 

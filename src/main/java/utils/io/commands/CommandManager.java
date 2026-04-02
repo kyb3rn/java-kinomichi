@@ -1,6 +1,7 @@
 package utils.io.commands;
 
 import utils.io.commands.exceptions.*;
+import utils.io.commands.list.BackBackCommand;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
 import utils.io.commands.list.SortColumnCommand;
@@ -48,6 +49,7 @@ public class CommandManager {
     public static void loadCommands() {
         commands.put(ECommand.EXIT, ExitCommand.class);
         commands.put(ECommand.BACK, BackCommand.class);
+        commands.put(ECommand.BACK_BACK, BackBackCommand.class);
         commands.put(ECommand.SORT_COLUMN, SortColumnCommand.class);
     }
 

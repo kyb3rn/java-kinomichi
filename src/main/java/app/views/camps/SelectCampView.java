@@ -4,6 +4,7 @@ import app.events.CallUrlEvent;
 import app.events.Event;
 import app.events.ExitProgramEvent;
 import app.events.FormResultEvent;
+import app.events.GoBackBackEvent;
 import app.events.GoBackEvent;
 import app.models.Camp;
 import app.models.formatting.ModelTableFormatter;
@@ -13,6 +14,7 @@ import app.utils.menus.InvalidMenuInputException;
 import app.views.View;
 import utils.io.commands.exceptions.CommandResponseException;
 import utils.io.commands.exceptions.UnhandledCommandException;
+import utils.io.commands.list.BackBackCommand;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
 import utils.io.commands.list.SortColumnCommand;
@@ -49,13 +51,16 @@ public class SelectCampView extends View {
         try {
             final int[] selectedCampId = new int[1];
 
-            KinomichiFunctions.promptInput(scanner, (_, command) -> {
+            KinomichiFunctions.promptInputWithCommandHandling(scanner, (_, command) -> {
                 switch (command) {
                     case ExitCommand exitCommand -> {
                         return exitCommand;
                     }
                     case BackCommand backCommand -> {
                         return backCommand;
+                    }
+                    case BackBackCommand backBackCommand -> {
+                        return backBackCommand;
                     }
                     case SortColumnCommand sortColumnCommand -> {
                         int columnCount = ModelTableFormatter.getColumnCount(Camp.class);
@@ -95,6 +100,8 @@ public class SelectCampView extends View {
                 return new CallUrlEvent("/camps/select/sort/" + this.buildSortPathSegment(sortColumnCommand));
             } else if (response instanceof ExitCommand) {
                 return new ExitProgramEvent();
+            } else if (response instanceof BackBackCommand) {
+                return new GoBackBackEvent();
             } else if (response instanceof BackCommand) {
                 return new GoBackEvent();
             }

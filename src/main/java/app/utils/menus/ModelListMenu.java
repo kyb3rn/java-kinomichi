@@ -1,11 +1,13 @@
 package app.utils.menus;
 
 import app.events.ExitProgramEvent;
+import app.events.GoBackBackEvent;
 import app.events.GoBackEvent;
 import app.models.Model;
 import app.models.formatting.ModelTableFormatter;
 import utils.io.commands.Command;
 import utils.io.commands.exceptions.UnhandledCommandException;
+import utils.io.commands.list.BackBackCommand;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
 import utils.io.commands.list.SortColumnCommand;
@@ -14,7 +16,7 @@ import utils.io.menus.OrderedMenu;
 import java.util.Collection;
 import java.util.List;
 
-public class ModelTableMenu<M extends Model> extends OrderedMenu {
+public class ModelListMenu<M extends Model> extends OrderedMenu {
 
     // ─── Properties ─── //
 
@@ -24,7 +26,7 @@ public class ModelTableMenu<M extends Model> extends OrderedMenu {
 
     // ─── Constructors ─── //
 
-    public ModelTableMenu(Class<M> modelClass, Collection<M> models) {
+    public ModelListMenu(Class<M> modelClass, Collection<M> models) {
         this.modelClass = modelClass;
         this.models = List.copyOf(models);
         this.columnCount = ModelTableFormatter.getColumnCount(this.modelClass);
@@ -44,6 +46,8 @@ public class ModelTableMenu<M extends Model> extends OrderedMenu {
             return sortColumnCommand;
         } else if (command instanceof ExitCommand) {
             return new ExitProgramEvent();
+        } else if (command instanceof BackBackCommand) {
+            return new GoBackBackEvent();
         } else if (command instanceof BackCommand) {
             return new GoBackEvent();
         }

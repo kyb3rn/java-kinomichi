@@ -78,6 +78,7 @@ public class Main {
 
                 nextPath = switch (event) {
                     case CallUrlEvent callUrlEvent -> callUrlEvent.getUrl();
+                    case GoBackBackEvent _ -> AppState.navigationHistory.goBackUntilDifferentRoute(router);
                     case GoBackEvent _ -> AppState.navigationHistory.goBack();
                     case ExitProgramEvent _ -> null;
                     case null -> null;

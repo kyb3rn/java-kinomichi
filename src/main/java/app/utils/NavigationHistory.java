@@ -1,5 +1,8 @@
 package app.utils;
 
+import app.routing.RouteNotFoundException;
+import app.routing.Router;
+
 import java.util.ArrayList;
 
 public class NavigationHistory {
@@ -47,6 +50,38 @@ public class NavigationHistory {
         this.paths.subList(targetIndex, this.paths.size()).clear();
 
         return targetPath;
+    }
+
+    public String goBackUntilDifferentRoute(Router router) {
+        if (this.paths.size() < 2) {
+            return this.goBack();
+        }
+
+        String currentPath = this.paths.getLast();
+        String currentRouteName;
+
+        try {
+            currentRouteName = router.match(currentPath).getMatchedRoute().getName();
+        } catch (RouteNotFoundException e) {
+            return this.goBack();
+        }
+
+        for (int i = this.paths.size() - 2; i >= 0; i--) {
+            try {
+                String routeName = router.match(this.paths.get(i)).getMatchedRoute().getName();
+
+                if (!routeName.equals(currentRouteName)) {
+                    int steps = this.paths.size() - 1 - i;
+                    return this.goBack(steps);
+                }
+            } catch (RouteNotFoundException e) {
+                int steps = this.paths.size() - 1 - i;
+                return this.goBack(steps);
+            }
+        }
+
+        this.paths.clear();
+        return null;
     }
 
 }

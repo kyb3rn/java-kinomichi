@@ -3,7 +3,7 @@ package app.views;
 import app.events.CallUrlEvent;
 import app.events.Event;
 import app.models.Model;
-import app.utils.menus.ModelTableMenu;
+import app.utils.menus.ModelListMenu;
 import utils.io.commands.list.SortColumnCommand;
 import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.menus.MenuResponse;
@@ -34,13 +34,13 @@ public class ModelListView<M extends Model> extends View {
 
     @Override
     public Event render() {
-        ModelTableMenu<M> modelTableMenu = new ModelTableMenu<>(this.modelClass, this.models);
+        ModelListMenu<M> modelListMenu = new ModelListMenu<>(this.modelClass, this.models);
 
         if (this.hasUnsavedChanges) {
             System.out.println(TextFormatter.italic(TextFormatter.yellow(TextFormatter.bold("ATTENTION !"), " Des modifications dans cette liste n'ont pas encore été sauvegardées. Rendez-vous dans le menu principal pour résoudre ce problème.")));
         }
 
-        MenuResponse menuResponse = modelTableMenu.use();
+        MenuResponse menuResponse = modelListMenu.use();
         Object response = menuResponse.getResponse();
 
         if (response instanceof Event event) {

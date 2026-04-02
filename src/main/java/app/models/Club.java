@@ -204,6 +204,13 @@ public class Club extends IdentifiedModel implements Hydratable<Club.Data> {
                     throw new ModelException("Le lien Google Maps d'un club ne peut pas être vide (null accepté)");
                 }
 
+                googleMapsLink = googleMapsLink.strip();
+
+                Pattern googleMapsLinkPattern = Pattern.compile("^https://maps\\.app\\.goo\\.gl/[A-Za-z0-9]{17}$");
+                if (!googleMapsLinkPattern.matcher(googleMapsLink).matches()) {
+                    throw new ModelException("Le format du lien Google Maps est invalide");
+                }
+
                 this.googleMapsLink = googleMapsLink.strip();
             }
         }
