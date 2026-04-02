@@ -1,6 +1,6 @@
 package utils.io.menus;
 
-import app.utils.menus.InvalidInputFormMenuException;
+import app.utils.menus.InvalidMenuInputException;
 import utils.io.commands.*;
 import utils.io.helpers.Functions;
 
@@ -83,24 +83,24 @@ public abstract class OrderedMenu extends Menu {
                 }
 
                 if (this.options.isEmpty()) {
-                    throw new InvalidInputFormMenuException("L'entrée '%s' n'est pas une commande.".formatted(input));
+                    throw new InvalidMenuInputException("L'entrée '%s' n'est pas une commande.".formatted(input));
                 }
 
                 int parsedChoice;
                 try {
                     parsedChoice = Integer.parseInt(input);
                 } catch (NumberFormatException e) {
-                    throw new InvalidInputFormMenuException("L'entrée '%s' est invalide. Veuillez entrer un nombre entier strictement positif.".formatted(input), e);
+                    throw new InvalidMenuInputException("L'entrée '%s' est invalide. Veuillez entrer un nombre entier strictement positif.".formatted(input), e);
                 }
 
                 int optionsSize = this.options.size();
                 if (parsedChoice < 1 || parsedChoice > optionsSize) {
                     if (optionsSize == 1) {
-                        throw new InvalidInputFormMenuException("Le choix '%s' est invalide. Seul le choix 1 est valide.".formatted(input));
+                        throw new InvalidMenuInputException("Le choix '%s' est invalide. Seul le choix 1 est valide.".formatted(input));
                     } else if (optionsSize == 2) {
-                        throw new InvalidInputFormMenuException("Le choix '%s' est invalide. Veuillez entrer soit 1, soit 2.".formatted(input));
+                        throw new InvalidMenuInputException("Le choix '%s' est invalide. Veuillez entrer soit 1, soit 2.".formatted(input));
                     } else {
-                        throw new InvalidInputFormMenuException("Le choix '%s' est invalide. Veuillez choisir une option entre 1 et %s (inclus).".formatted(input, optionsSize));
+                        throw new InvalidMenuInputException("Le choix '%s' est invalide. Veuillez choisir une option entre 1 et %s (inclus).".formatted(input, optionsSize));
                     }
                 }
 
@@ -108,7 +108,7 @@ public abstract class OrderedMenu extends Menu {
                 selectedOption.set((OrderedMenuOption) this.options.get(parsedChoice - 1));
 
                 break;
-            } catch (InvalidInputFormMenuException e) {
+            } catch (InvalidMenuInputException e) {
                 System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
             }
         }

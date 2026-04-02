@@ -8,7 +8,7 @@ import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.helpers.texts.formatting.TextFormattingOptions;
 import utils.io.helpers.texts.formatting.TextStyle;
 
-public class StandardMenu extends OrderedMenu {
+public abstract class StandardMenu extends OrderedMenu {
 
     // ─── Properties ─── //
 

@@ -9,7 +9,7 @@ import app.models.Camp;
 import app.models.formatting.ModelTableFormatter;
 import app.models.managers.CampDataManager;
 import app.utils.helpers.KinomichiFunctions;
-import app.utils.menus.InvalidInputFormMenuException;
+import app.utils.menus.InvalidMenuInputException;
 import app.views.View;
 import utils.io.commands.CommandResponseException;
 import utils.io.commands.UnhandledCommandException;
@@ -74,13 +74,13 @@ public class SelectCampView extends View {
                 try {
                     campId = Integer.parseInt(input);
                 } catch (NumberFormatException e) {
-                    throw new InvalidInputFormMenuException("L'entrée '%s' est invalide. Veuillez entrer un nombre entier strictement positif.".formatted(input), e);
+                    throw new InvalidMenuInputException("L'entrée '%s' est invalide. Veuillez entrer un nombre entier strictement positif.".formatted(input), e);
                 }
 
                 Camp selectedCamp = this.campDataManager.getCamp(campId);
 
                 if (selectedCamp == null) {
-                    throw new InvalidInputFormMenuException("Aucun stage ne porte l'identifiant '%d'.".formatted(campId));
+                    throw new InvalidMenuInputException("Aucun stage ne porte l'identifiant '%d'.".formatted(campId));
                 }
 
                 selectedCampId[0] = campId;
