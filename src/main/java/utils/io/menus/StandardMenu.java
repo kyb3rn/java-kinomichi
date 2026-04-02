@@ -1,6 +1,7 @@
 package utils.io.menus;
 
 import app.events.ExitProgramEvent;
+import app.events.GoBackEvent;
 import utils.io.helpers.tables.Table;
 import utils.io.helpers.tables.TableOptions;
 import utils.io.helpers.texts.formatting.TextAlignement;
@@ -16,14 +17,23 @@ public class StandardMenu extends OrderedMenu {
     private String title = null;
     private boolean showGoBackOption = true;
     private boolean showExitOption = true;
+    private Object backResponseObject = null;
+    private Object exitResponseObject = null;
 
     // ─── Constructors ─── //
 
-    public StandardMenu(String title) {
+    public StandardMenu() {}
+
+    public StandardMenu(String title, Object backResponseObject) {
         this.setTitle(title);
+        this.backResponseObject = backResponseObject;
     }
 
-    public StandardMenu() {}
+    public StandardMenu(String title, Object backResponseObject, Object exitResponseObject) {
+        this.setTitle(title);
+        this.backResponseObject = backResponseObject;
+        this.exitResponseObject = exitResponseObject;
+    }
 
     // ─── Setters ─── //
 
@@ -85,11 +95,11 @@ public class StandardMenu extends OrderedMenu {
         this.addSectionSeparationIndex();
 
         if (this.showGoBackOption) {
-            this.addOption("Retour", "main");
+            this.addOption("Retour", this.backResponseObject);
         }
 
         if (this.showExitOption) {
-            this.addOption("Quitter", new ExitProgramEvent());
+            this.addOption("Quitter", this.exitResponseObject);
         }
 
         return null;

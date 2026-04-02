@@ -63,6 +63,14 @@
       "street": "Rue des Coudriers",
       "number": "5",
       "id": 8
+    },
+    {
+      "countryIso3": "FRA",
+      "zipCode": 9000,
+      "city": "Paris",
+      "street": "Rue Fauvière",
+      "number": "16C",
+      "id": 9
     }
   ]
 }

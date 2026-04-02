@@ -1,23 +1,23 @@
 package app.utils.menus;
 
-import app.middlewares.Middleware;
-import utils.io.helpers.Functions;
-import utils.io.menus.MenuResponse;
+import app.events.ExitProgramEvent;
+import app.events.GoBackEvent;
+import utils.io.commands.UnhandledCommandException;
+import utils.io.commands.list.BackCommand;
+import utils.io.commands.list.ExitCommand;
 import utils.io.menus.StandardMenu;
 
 public class KinomichiStandardMenu extends StandardMenu {
 
-    @Override
-    public MenuResponse beforeUse() {
-        for (Middleware middleware : this.middlewares) {
-            MenuResponse menuResponse = middleware.verify();
-            if (menuResponse != null) {
-                System.out.println(Functions.styleAsErrorMessage("Ce menu n'est pas accessible."));
-                return menuResponse;
-            }
-        }
+    // ─── Constructors ─── //
 
-        return null;
+    public KinomichiStandardMenu(String title, Object backResponseObject) {
+        super(title, backResponseObject, new ExitProgramEvent());
+        this.setCommandHandler((input, command) -> switch (command) {
+            case BackCommand _ -> new GoBackEvent();
+            case ExitCommand _ -> new ExitProgramEvent();
+            default -> throw new UnhandledCommandException(command);
+        });
     }
 
 }

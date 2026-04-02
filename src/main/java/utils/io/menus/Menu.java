@@ -1,7 +1,5 @@
 package utils.io.menus;
 
-import app.middlewares.Middleware;
-
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
@@ -13,7 +11,6 @@ public abstract class Menu {
 
     // ─── Properties ─── //
 
-    protected ArrayList<Middleware> middlewares = new ArrayList<>();
     protected final ArrayList<MenuOption> options = new ArrayList<>();
     private Supplier<MenuResponse> beforeUseHook;
     private Supplier<MenuResponse> beforeDisplayHook;

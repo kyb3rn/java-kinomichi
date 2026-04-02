@@ -2,11 +2,11 @@ package app.controllers;
 
 import app.events.Event;
 import app.events.GoBackEvent;
-import app.models.Person;
+import app.models.Address;
 import app.models.ModelException;
+import app.models.managers.AddressDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
-import app.models.managers.PersonDataManager;
 import app.rooting.Request;
 import app.views.ModelListView;
 import utils.io.commands.list.SortColumnCommand;
@@ -15,24 +15,24 @@ import utils.io.helpers.Functions;
 import java.util.List;
 import java.util.LinkedHashMap;
 
-public class PersonController extends Controller {
+public class AddressController extends Controller {
 
     // ─── Utility methods ─── //
 
     public Event list(Request request) {
-        PersonDataManager personDataManager;
+        AddressDataManager addressDataManager;
         try {
-            personDataManager = DataManagers.get(PersonDataManager.class);
+            addressDataManager = DataManagers.get(AddressDataManager.class);
         } catch (DataManagerException | ModelException e) {
-            System.out.println(Functions.styleAsErrorMessage("Les données des personnes n'ont pas pu être chargées."));
+            System.out.println(Functions.styleAsErrorMessage("Les données des adresses n'ont pas pu être chargées."));
             return new GoBackEvent();
         }
 
         LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders = this.parseSortParameter(request);
-        List<Person> sortedPersons = this.sortModels(personDataManager.getModels(), Person.class, sortOrders);
+        List<Address> sortedAddresses = this.sortModels(addressDataManager.getModels(), Address.class, sortOrders);
 
-        ModelListView<Person> personListView = new ModelListView<>(Person.class, sortedPersons, personDataManager.hasUnsavedChanges(), "/persons");
-        return personListView.render();
+        ModelListView<Address> addressListView = new ModelListView<>(Address.class, sortedAddresses, addressDataManager.hasUnsavedChanges(), "/addresses/list");
+        return addressListView.render();
     }
 
 }

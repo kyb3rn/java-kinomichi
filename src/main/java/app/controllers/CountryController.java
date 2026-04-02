@@ -2,11 +2,11 @@ package app.controllers;
 
 import app.events.Event;
 import app.events.GoBackEvent;
-import app.models.Person;
+import app.models.Country;
 import app.models.ModelException;
+import app.models.managers.CountryDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
-import app.models.managers.PersonDataManager;
 import app.rooting.Request;
 import app.views.ModelListView;
 import utils.io.commands.list.SortColumnCommand;
@@ -15,24 +15,24 @@ import utils.io.helpers.Functions;
 import java.util.List;
 import java.util.LinkedHashMap;
 
-public class PersonController extends Controller {
+public class CountryController extends Controller {
 
     // ─── Utility methods ─── //
 
     public Event list(Request request) {
-        PersonDataManager personDataManager;
+        CountryDataManager countryDataManager;
         try {
-            personDataManager = DataManagers.get(PersonDataManager.class);
+            countryDataManager = DataManagers.get(CountryDataManager.class);
         } catch (DataManagerException | ModelException e) {
-            System.out.println(Functions.styleAsErrorMessage("Les données des personnes n'ont pas pu être chargées."));
+            System.out.println(Functions.styleAsErrorMessage("Les données des pays n'ont pas pu être chargées."));
             return new GoBackEvent();
         }
 
         LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders = this.parseSortParameter(request);
-        List<Person> sortedPersons = this.sortModels(personDataManager.getModels(), Person.class, sortOrders);
+        List<Country> sortedCountries = this.sortModels(countryDataManager.getModels(), Country.class, sortOrders);
 
-        ModelListView<Person> personListView = new ModelListView<>(Person.class, sortedPersons, personDataManager.hasUnsavedChanges(), "/persons");
-        return personListView.render();
+        ModelListView<Country> countryListView = new ModelListView<>(Country.class, sortedCountries, countryDataManager.hasUnsavedChanges(), "/countries/list");
+        return countryListView.render();
     }
 
 }

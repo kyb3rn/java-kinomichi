@@ -1,6 +1,7 @@
 package utils.io.menus;
 
 import app.utils.menus.InvalidInputFormMenuException;
+import utils.io.commands.*;
 import utils.io.helpers.Functions;
 
 import java.util.Scanner;
@@ -14,6 +15,13 @@ public abstract class OrderedMenu extends Menu {
 
     protected final TreeMap<Integer, String> unoptionedRows = new TreeMap<>();
     protected final TreeSet<Integer> sectionSeparationIndexes = new TreeSet<>();
+    private CommandHandler commandHandler;
+
+    // ─── Setters ─── //
+
+    public void setCommandHandler(CommandHandler commandHandler) {
+        this.commandHandler = commandHandler;
+    }
 
     // ─── Utility methods ─── //
 
@@ -24,16 +32,6 @@ public abstract class OrderedMenu extends Menu {
     public void addOption(String text, Object response) {
         int order = this.options.size() + 1;
         this.options.add(new OrderedMenuOption(order, text, response));
-    }
-
-    private boolean isChoiceValid(String input) {
-        for (MenuOption option : this.options) {
-            if (option.getText().equals(input)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @Override
@@ -55,6 +53,37 @@ public abstract class OrderedMenu extends Menu {
                 if (hookResponse != null) {
                     this.beforeUseExit();
                     return hookResponse;
+                }
+
+                if (this.commandHandler != null) {
+                    try {
+                        Command command = CommandManager.convertInput(input);
+                        try {
+                            Object commandResponse = this.commandHandler.handle(input, command);
+                            if (commandResponse != null) {
+                                return new MenuResponse(commandResponse);
+                            }
+                            continue;
+                        } catch (UnhandledCommandException _) {
+                            System.out.println(Functions.styleAsErrorMessage("Cette commande n'est pas prise en charge ici."));
+                            continue;
+                        }
+                    } catch (NotACommandException _) {
+                        // Not a command, fall through to numeric parsing
+                    } catch (UnknownCommandException _) {
+                        System.out.println(Functions.styleAsErrorMessage("Cette commande n'existe pas."));
+                        continue;
+                    } catch (CommandArgumentException _) {
+                        System.out.println(Functions.styleAsErrorMessage("Les arguments de cette commande sont invalides."));
+                        continue;
+                    } catch (UnimplementedCommandException _) {
+                        System.out.println(Functions.styleAsErrorMessage("Cette commande n'est pas implémentée."));
+                        continue;
+                    }
+                }
+
+                if (this.options.isEmpty()) {
+                    throw new InvalidInputFormMenuException("L'entrée '%s' n'est pas une commande.".formatted(input));
                 }
 
                 int parsedChoice;

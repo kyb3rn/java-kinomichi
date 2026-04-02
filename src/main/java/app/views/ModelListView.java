@@ -2,7 +2,7 @@ package app.views;
 
 import app.events.CallUrlEvent;
 import app.events.Event;
-import app.models.Person;
+import app.models.Model;
 import app.utils.menus.ModelTableMenu;
 import utils.io.commands.list.SortColumnCommand;
 import utils.io.helpers.texts.formatting.TextFormatter;
@@ -12,37 +12,41 @@ import utils.io.menus.UnhandledMenuResponseType;
 import java.util.Collection;
 import java.util.Map;
 
-public class PersonListView extends View {
+public class ModelListView<M extends Model> extends View {
 
     // ─── Properties ─── //
 
-    private final Collection<Person> persons;
+    private final Class<M> modelClass;
+    private final Collection<M> models;
     private final boolean hasUnsavedChanges;
+    private final String sortBasePath;
 
     // ─── Constructors ─── //
 
-    public PersonListView(Collection<Person> persons, boolean hasUnsavedChanges) {
-        this.persons = persons;
+    public ModelListView(Class<M> modelClass, Collection<M> models, boolean hasUnsavedChanges, String sortBasePath) {
+        this.modelClass = modelClass;
+        this.models = models;
         this.hasUnsavedChanges = hasUnsavedChanges;
+        this.sortBasePath = sortBasePath;
     }
 
     // ─── Overrides & inheritance ─── //
 
     @Override
     public Event render() {
-        ModelTableMenu<Person> personTableMenu = new ModelTableMenu<>(Person.class, this.persons);
+        ModelTableMenu<M> modelTableMenu = new ModelTableMenu<>(this.modelClass, this.models);
 
         if (this.hasUnsavedChanges) {
             System.out.println(TextFormatter.italic(TextFormatter.yellow(TextFormatter.bold("ATTENTION !"), " Des modifications dans cette liste n'ont pas encore été sauvegardées. Rendez-vous dans le menu principal pour résoudre ce problème.")));
         }
 
-        MenuResponse menuResponse = personTableMenu.use();
+        MenuResponse menuResponse = modelTableMenu.use();
         Object response = menuResponse.getResponse();
 
         if (response instanceof Event event) {
             return event;
         } else if (response instanceof SortColumnCommand sortColumnCommand) {
-            return new CallUrlEvent("/persons/sort/" + this.buildSortPathSegment(sortColumnCommand));
+            return new CallUrlEvent(this.sortBasePath + "/sort/" + this.buildSortPathSegment(sortColumnCommand));
         } else {
             throw new UnhandledMenuResponseType();
         }

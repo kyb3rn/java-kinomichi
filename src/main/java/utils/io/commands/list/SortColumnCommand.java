@@ -6,7 +6,7 @@ import java.util.*;
 
 public class SortColumnCommand extends Command {
 
-    private final TreeMap<Integer, SortOrder> sortOrders =  new TreeMap<>();
+    private final LinkedHashMap<Integer, SortOrder> sortOrders = new LinkedHashMap<>();
 
     public SortColumnCommand(ArrayList<CommandArgument> arguments) throws CommandArgumentException {
         if (arguments.isEmpty()) {
@@ -42,7 +42,7 @@ public class SortColumnCommand extends Command {
         }
     }
 
-    public TreeMap<Integer, SortOrder> getSortOrders() {
+    public LinkedHashMap<Integer, SortOrder> getSortOrders() {
         return this.sortOrders;
     }
 

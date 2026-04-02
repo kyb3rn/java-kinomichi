@@ -1,5 +1,53 @@
 package app.controllers;
 
+import app.models.Model;
+import app.models.formatting.ModelTableFormatter;
+import app.rooting.Request;
+import utils.io.commands.list.SortColumnCommand;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 public abstract class Controller {
+
+    // ─── Utility methods ─── //
+
+    protected LinkedHashMap<Integer, SortColumnCommand.SortOrder> parseSortParameter(Request request) {
+        LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders = new LinkedHashMap<>();
+        String sortParameter = request.getParameter("sort");
+
+        if (sortParameter == null || sortParameter.isBlank()) {
+            return sortOrders;
+        }
+
+        String[] sortParts = sortParameter.split(",");
+        for (String sortPart : sortParts) {
+            String[] columnAndOrder = sortPart.split(":");
+            int columnIndex = Integer.parseInt(columnAndOrder[0]);
+            SortColumnCommand.SortOrder sortOrder = (columnAndOrder.length > 1)
+                    ? SortColumnCommand.SortOrder.fromString(columnAndOrder[1])
+                    : SortColumnCommand.SortOrder.ASCENDING;
+            sortOrders.put(columnIndex, sortOrder);
+        }
+
+        return sortOrders;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    protected <M extends Model> List<M> sortModels(Collection<M> models, Class<M> modelClass, LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders) {
+        Comparator<M> combinedComparator = sortOrders.entrySet().stream()
+                .map(entry -> {
+                    Comparator<M> columnComparator = ModelTableFormatter.comparatorForColumn(modelClass, entry.getKey() - 1);
+                    return entry.getValue() == SortColumnCommand.SortOrder.DESCENDING
+                            ? columnComparator.reversed()
+                            : columnComparator;
+                })
+                .reduce(Comparator::thenComparing)
+                .orElse(ModelTableFormatter.comparatorForColumn(modelClass, 0));
+
+        return models.stream().sorted(combinedComparator).toList();
+    }
 
 }

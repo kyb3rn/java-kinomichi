@@ -2,7 +2,7 @@ package app.controllers;
 
 import app.events.Event;
 import app.rooting.Request;
-import app.views.MainView;
+import app.views.main.MainView;
 
 public class MainController extends Controller {
 

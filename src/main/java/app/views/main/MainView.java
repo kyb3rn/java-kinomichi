@@ -1,4 +1,4 @@
-package app.views;
+package app.views.main;
 
 import app.events.CallUrlEvent;
 import app.events.Event;
@@ -6,9 +6,10 @@ import app.models.managers.CampDataManager;
 import app.models.managers.ClubDataManager;
 import app.models.managers.DataManager;
 import app.models.managers.DataManagers;
+import app.views.View;
 import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.menus.MenuResponse;
-import utils.io.menus.StandardMenu;
+import app.utils.menus.KinomichiStandardMenu;
 import utils.io.menus.UnhandledMenuResponseType;
 
 import java.util.List;
@@ -17,10 +18,10 @@ public class MainView extends View {
 
     @Override
     public Event render() {
-        StandardMenu mainMenu = new StandardMenu("Kinomichi - Menu d'administration");
+        KinomichiStandardMenu mainMenu = new KinomichiStandardMenu("Kinomichi - Menu d'administration", null);
         mainMenu.setShowGoBackOption(false);
 
-        this.addCampsOption(mainMenu);
+        this.addCampsOptions(mainMenu);
         this.addClubsOption(mainMenu);
         mainMenu.addOption("Explorer les données", new CallUrlEvent("/explore"));
 
@@ -28,6 +29,14 @@ public class MainView extends View {
 
         this.addBadlyInitializedDataManagersOption(mainMenu);
         this.addUnsavedDataManagersOption(mainMenu);
+
+        mainMenu.setAfterDisplayHook(() -> {
+            int campsCount = DataManagers.getCountOf(CampDataManager.class);
+            if (campsCount == 0) {
+                System.out.println(TextFormatter.yellow(TextFormatter.italic("Il n'y a pas encore de stage enregistré. ", TextFormatter.bold("Créez-en un !"))));
+            }
+            return null;
+        });
 
         MenuResponse menuResponse = mainMenu.use();
 
@@ -38,7 +47,7 @@ public class MainView extends View {
         }
     }
 
-    private void addUnsavedDataManagersOption(StandardMenu mainMenu) {
+    private void addUnsavedDataManagersOption(KinomichiStandardMenu mainMenu) {
         List<DataManager<?>> unsavedDataManagers = DataManagers.getUnsavedOnes();
 
         if (!unsavedDataManagers.isEmpty()) {
@@ -46,7 +55,7 @@ public class MainView extends View {
         }
     }
 
-    private void addBadlyInitializedDataManagersOption(StandardMenu mainMenu) {
+    private void addBadlyInitializedDataManagersOption(KinomichiStandardMenu mainMenu) {
         List<DataManager<?>> badlyInitializedDataManagers = DataManagers.getBadlyInitializedOnes();
 
         if (!badlyInitializedDataManagers.isEmpty()) {
@@ -54,19 +63,26 @@ public class MainView extends View {
         }
     }
 
-    private void addCampsOption(StandardMenu mainMenu) {
-        String campsOptionLabel = "Gestion des stages (%d)".formatted(DataManagers.getCountOf(CampDataManager.class));
-
+    private void addCampsOptions(KinomichiStandardMenu mainMenu) {
         boolean campsInitialized = DataManagers.isInitialized(CampDataManager.class);
 
         if (!campsInitialized) {
-            campsOptionLabel = TextFormatter.strikethrough(campsOptionLabel) + " " + TextFormatter.red(TextFormatter.italic("(stages non chargés)"));
+            String campsOptionLabel = TextFormatter.strikethrough("Stages") + " " + TextFormatter.red(TextFormatter.italic("(stages non chargés)"));
+            mainMenu.addOption(campsOptionLabel, new CallUrlEvent("/"));
+            return;
         }
 
-        mainMenu.addOption(campsOptionLabel, new CallUrlEvent(campsInitialized ? "/camps" : "/"));
+        int campsCount = DataManagers.getCountOf(CampDataManager.class);
+        if (campsCount > 0) {
+            mainMenu.addOption("Sélectionner un stage à gérer", new CallUrlEvent("/camps/select"));
+        }
+
+        mainMenu.addOption("Ajouter un stage", new CallUrlEvent("/camps/add"));
+
+        mainMenu.addSectionSeparationIndex();
     }
 
-    private void addClubsOption(StandardMenu mainMenu) {
+    private void addClubsOption(KinomichiStandardMenu mainMenu) {
         String clubsOptionLabel = "Gestion des clubs (%d)".formatted(DataManagers.getCountOf(ClubDataManager.class));
 
         boolean clubsInitialized = DataManagers.isInitialized(ClubDataManager.class);
@@ -75,7 +91,7 @@ public class MainView extends View {
             clubsOptionLabel = TextFormatter.strikethrough(clubsOptionLabel) + " " + TextFormatter.red(TextFormatter.italic("(clubs non chargés)"));
         }
 
-        mainMenu.addOption(clubsOptionLabel, new CallUrlEvent(clubsInitialized ? "/clubs" : "/"));
+        mainMenu.addOption(clubsOptionLabel, new CallUrlEvent(clubsInitialized ? "/clubs/dashboard" : "/"));
     }
 
 }

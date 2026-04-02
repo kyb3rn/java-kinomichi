@@ -1,6 +1,8 @@
 package app.rooting;
 
+import app.events.CallUrlEvent;
 import app.events.Event;
+import app.middlewares.Middleware;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,7 +69,16 @@ public class Router {
 
     public Event dispatch(String path) throws RouteNotFoundException {
         Request request = this.match(path);
-        return request.getMatchedRoute().getControllerAction().execute(request);
+        Route matchedRoute = request.getMatchedRoute();
+
+        for (Middleware middleware : matchedRoute.getMiddlewares()) {
+            CallUrlEvent middlewareEvent = middleware.verify();
+            if (middlewareEvent != null) {
+                return middlewareEvent;
+            }
+        }
+
+        return matchedRoute.getControllerAction().execute(request);
     }
 
 }

@@ -1,9 +1,9 @@
 package app.middlewares;
 
-import utils.io.menus.MenuResponse;
+import app.events.CallUrlEvent;
 
 public abstract class Middleware {
 
-    public abstract MenuResponse verify();
+    public abstract CallUrlEvent verify();
 
 }

@@ -1,12 +1,7 @@
 package app.utils.helpers;
 
-import app.models.ModelException;
-import app.models.managers.DataManagerException;
-import app.utils.ExitProgramException;
-import app.utils.ThrowingStringAcceptor;
-import app.utils.menus.ExitInputPromptException;
-import app.utils.menus.GoBackException;
-import app.utils.menus.InvalidInputFormMenuException;
+import app.utils.ThrowingConsumer;
+import app.utils.ThrowingConsumerException;
 import utils.io.commands.*;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
@@ -23,11 +18,11 @@ public class KinomichiFunctions extends Functions {
 
     // ─── Utility methods ─── //
 
-    public static void promptInput(Scanner scanner, CommandHandler commandHandler, ThrowingStringAcceptor inputHandler) throws ExitProgramException, ExitInputPromptException {
-        promptInput(scanner, commandHandler, inputHandler, null, null);
+    public static void promptInput(Scanner scanner, CommandHandler commandHandler, ThrowingConsumer<String> inputConsumer) throws CommandResponseException {
+        promptInput(scanner, commandHandler, inputConsumer, null, null);
     }
 
-    public static void promptInput(Scanner scanner, CommandHandler commandHandler, ThrowingStringAcceptor inputHandler, Supplier<MenuResponse> beforePrompt, Function<String, MenuResponse> afterEveryInput) throws ExitProgramException, ExitInputPromptException {
+    public static void promptInput(Scanner scanner, CommandHandler commandHandler, ThrowingConsumer<String> inputConsumer, Supplier<MenuResponse> beforePrompt, Function<String, MenuResponse> afterEveryInput) throws CommandResponseException {
         scanner = scanner != null ? scanner : new Scanner(System.in);
 
         while (true) {
@@ -51,38 +46,51 @@ public class KinomichiFunctions extends Functions {
 
                 try {
                     Command command = CommandManager.convertInput(input);
-                    commandHandler.handle(input, command);
+                    try {
+                        Object commandResponse = commandHandler.handle(input, command);
+                        if (commandResponse != null) {
+                            throw new CommandResponseException(commandResponse);
+                        }
+                    } catch (UnhandledCommandException _) {
+                        System.out.println(Functions.styleAsErrorMessage("Cette commande n'est pas prise en charge ici."));
+                    }
                 } catch (NotACommandException _) {
-                    inputHandler.accept(input);
+                    try {
+                        inputConsumer.accept(input);
+                    } catch (Exception e) {
+                        throw new ThrowingConsumerException(e);
+                    }
                     break;
                 } catch (UnknownCommandException _) {
                     System.out.println(Functions.styleAsErrorMessage("Cette commande n'existe pas."));
                 } catch (CommandArgumentException _) {
                     System.out.println(Functions.styleAsErrorMessage("Les arguments de cette commande sont invalides."));
-                } catch (UnhandledCommandException _) {
-                    System.out.println(Functions.styleAsErrorMessage("Cette commande n'est pas prise en charge ici."));
+                } catch (UnimplementedCommandException e) {
+                    System.out.println(Functions.styleAsErrorMessage("Cette commande n'est pas implémentée."));
                 }
-            } catch (InvalidInputFormMenuException | ModelException | DataManagerException e) {
-                System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
-            } catch (ExitProgramException | ExitInputPromptException | HookInterruptException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } catch (ThrowingConsumerException e) {
+                if (e.getCause() != null) {
+                    System.out.println(Functions.styleAsErrorMessage(e.getCause().getMessage()));
+                } else {
+                    System.out.println(Functions.styleAsErrorMessage("La gestion de l'input a rencontré un problème inattendu."));
+                }
             }
         }
     }
 
-    public static void promptField(Scanner scanner, ThrowingStringAcceptor inputHandler) throws ExitProgramException, ExitInputPromptException {
+    public static void promptField(Scanner scanner, ThrowingConsumer<String> inputConsumer) throws CommandResponseException {
         promptInput(scanner, (_, command) -> {
             switch (command) {
-                case ExitCommand _ -> throw new ExitProgramException();
-                case BackCommand _ -> {
+                case ExitCommand exitCommand -> {
+                    return exitCommand;
+                }
+                case BackCommand backCommand -> {
                     System.out.println();
-                    throw new GoBackException();
+                    return backCommand;
                 }
                 default -> throw new UnhandledCommandException(command);
             }
-        }, inputHandler);
+        }, inputConsumer);
     }
 
 }
