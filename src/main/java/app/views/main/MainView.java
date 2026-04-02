@@ -6,6 +6,7 @@ import app.models.managers.CampDataManager;
 import app.models.managers.ClubDataManager;
 import app.models.managers.DataManager;
 import app.models.managers.DataManagers;
+import app.models.managers.PersonDataManager;
 import app.views.View;
 import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.menus.MenuResponse;
@@ -22,6 +23,7 @@ public class MainView extends View {
         mainMenu.setShowGoBackOption(false);
 
         this.addCampsOptions(mainMenu);
+        this.addPersonsOption(mainMenu);
         this.addClubsOption(mainMenu);
         mainMenu.addOption("Explorer les données", new CallUrlEvent("/explore"));
 
@@ -80,6 +82,18 @@ public class MainView extends View {
         mainMenu.addOption("Ajouter un stage", new CallUrlEvent("/camps/add"));
 
         mainMenu.addSectionSeparationIndex();
+    }
+
+    private void addPersonsOption(KinomichiStandardMenu mainMenu) {
+        String personsOptionLabel = "Gestion des personnes (%d)".formatted(DataManagers.getCountOf(PersonDataManager.class));
+
+        boolean personsInitialized = DataManagers.isInitialized(PersonDataManager.class);
+
+        if (!personsInitialized) {
+            personsOptionLabel = TextFormatter.strikethrough(personsOptionLabel) + " " + TextFormatter.red(TextFormatter.italic("(personnes non chargées)"));
+        }
+
+        mainMenu.addOption(personsOptionLabel, new CallUrlEvent(personsInitialized ? "/persons/dashboard" : "/"));
     }
 
     private void addClubsOption(KinomichiStandardMenu mainMenu) {

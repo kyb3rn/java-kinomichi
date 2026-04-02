@@ -163,6 +163,17 @@ public class DataManagers {
         return badlyInitializedOnes;
     }
 
+    public static void exportAll() {
+        for (DataManager<?> dataManager : instances.values()) {
+            if (dataManager.hasUnsavedChanges()) {
+                try {
+                    dataManager.export();
+                } catch (DataManagerException | ModelException _) {
+                }
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public static <M extends DataManager<?>> M get(Class<M> clazz) throws ModelException, DataManagerException {
         initAndResolveReferencesWithThrow(clazz);

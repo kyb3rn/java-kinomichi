@@ -2,6 +2,7 @@ package app.models.managers;
 
 import app.models.Model;
 import app.models.ModelException;
+import app.models.NotResultForPrimaryKeyException;
 import app.models.Person;
 import com.google.gson.*;
 import utils.data_management.FileType;
@@ -29,11 +30,49 @@ public class PersonDataManager extends DataManager<PersonDataManager.Data> {
         return this.persons;
     }
 
+    // ─── Utility methods ─── //
+
     public Person getPerson(Integer id) {
         return this.persons.get(id);
     }
 
-    // ─── Utility methods ─── //
+    public Person getPersonWithExceptions(int id) throws NotResultForPrimaryKeyException {
+        Person person = this.getPerson(id);
+
+        if (person == null) {
+            throw new NotResultForPrimaryKeyException("Aucune des personnes enregistrées ne porte l'identifiant '%d'".formatted(id));
+        }
+
+        return person;
+    }
+
+    public Person addPerson(Person person, boolean autoAssignId) throws ModelException, DataManagerException {
+        if (autoAssignId) {
+            int maxId = this.persons.values().stream().mapToInt(Person::getId).max().orElse(0);
+            person.setId(maxId + 1);
+        }
+
+        if (!person.isValid()) {
+            throw new ModelException("L'objet Person qui a voulu être ajouté n'est pas valide");
+        }
+
+        if (this.persons.containsKey(person.getId())) {
+            throw new DataManagerException("Une personne portant l'identifiant '%d' existe déjà".formatted(person.getId()));
+        }
+
+        this.persons.put(person.getId(), person);
+
+        if (this.isInitialized()) {
+            this.unsavedChanges = true;
+
+            try {
+                this.export();
+            } catch (DataManagerException _) {
+            }
+        }
+
+        return person;
+    }
 
     public void addPerson(Person person) throws ModelException, DataManagerException {
         if (!person.isValid()) {

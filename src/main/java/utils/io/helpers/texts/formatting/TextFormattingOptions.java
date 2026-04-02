@@ -11,7 +11,7 @@ public class TextFormattingOptions {
     private TextColor color;
     private TextBackgroundColor backgroundColor;
     private final EnumSet<TextStyle> styles;
-    private TextAlignement alignment;
+    private TextAlignment alignment;
     private int minWidth;
 
     // ─── Constructors ─── //
@@ -20,7 +20,7 @@ public class TextFormattingOptions {
         this.color = null;
         this.backgroundColor = null;
         this.styles = EnumSet.noneOf(TextStyle.class);
-        this.alignment = TextAlignement.LEFT;
+        this.alignment = TextAlignment.LEFT;
         this.minWidth = 0;
     }
 
@@ -47,7 +47,7 @@ public class TextFormattingOptions {
         return this.styles;
     }
 
-    public TextAlignement getAlignment() {
+    public TextAlignment getAlignment() {
         return this.alignment;
     }
 
@@ -67,7 +67,7 @@ public class TextFormattingOptions {
         return this;
     }
 
-    public TextFormattingOptions setAlignment(TextAlignement alignment) {
+    public TextFormattingOptions setAlignment(TextAlignment alignment) {
         this.alignment = alignment;
         return this;
     }

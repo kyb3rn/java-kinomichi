@@ -1,10 +1,8 @@
 package utils.io.menus;
 
-import app.events.ExitProgramEvent;
-import app.events.GoBackEvent;
 import utils.io.helpers.tables.Table;
 import utils.io.helpers.tables.TableOptions;
-import utils.io.helpers.texts.formatting.TextAlignement;
+import utils.io.helpers.texts.formatting.TextAlignment;
 import utils.io.helpers.texts.formatting.TextColor;
 import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.helpers.texts.formatting.TextFormattingOptions;
@@ -19,6 +17,7 @@ public class StandardMenu extends OrderedMenu {
     private boolean showExitOption = true;
     private Object backResponseObject = null;
     private Object exitResponseObject = null;
+    private boolean navigationOptionsAdded = false;
 
     // ─── Constructors ─── //
 
@@ -69,7 +68,7 @@ public class StandardMenu extends OrderedMenu {
         menuTable.setSingleHeader(TextFormatter.format(singleHeaderTextFormattingOptions, this.title).toString());
 
         menuTable.removeOption(TableOptions.SEPARATE_COLUMNS);
-        Table.Column prefixNumbersColumn = new Table.Column(TextAlignement.RIGHT);
+        Table.Column prefixNumbersColumn = new Table.Column(TextAlignment.RIGHT);
         Table.Column optionsColumn = new Table.Column();
         menuTable.addColumn(prefixNumbersColumn);
         menuTable.addColumn(optionsColumn);
@@ -92,14 +91,18 @@ public class StandardMenu extends OrderedMenu {
 
     @Override
     public MenuResponse beforeDisplay() {
-        this.addSectionSeparationIndex();
+        if (!this.navigationOptionsAdded) {
+            this.addSectionSeparationIndex();
 
-        if (this.showGoBackOption) {
-            this.addOption("Retour", this.backResponseObject);
-        }
+            if (this.showGoBackOption) {
+                this.addOption("Retour", this.backResponseObject);
+            }
 
-        if (this.showExitOption) {
-            this.addOption("Quitter", this.exitResponseObject);
+            if (this.showExitOption) {
+                this.addOption("Quitter", this.exitResponseObject);
+            }
+
+            this.navigationOptionsAdded = true;
         }
 
         return null;

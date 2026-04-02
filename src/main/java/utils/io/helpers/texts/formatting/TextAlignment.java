@@ -1,5 +1,5 @@
 package utils.io.helpers.texts.formatting;
 
-public enum TextAlignement {
+public enum TextAlignment {
     LEFT, CENTER, RIGHT;
 }

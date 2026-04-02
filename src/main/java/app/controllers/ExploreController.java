@@ -1,7 +1,7 @@
 package app.controllers;
 
 import app.events.Event;
-import app.rooting.Request;
+import app.routing.Request;
 import app.views.explore.ExploreDataView;
 
 public class ExploreController extends Controller {

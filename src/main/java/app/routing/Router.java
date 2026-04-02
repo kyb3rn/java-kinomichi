@@ -1,4 +1,4 @@
-package app.rooting;
+package app.routing;
 
 import app.events.CallUrlEvent;
 import app.events.Event;

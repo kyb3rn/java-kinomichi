@@ -3,6 +3,7 @@ package app.models.managers;
 import app.models.Club;
 import app.models.Model;
 import app.models.ModelException;
+import app.models.NotResultForPrimaryKeyException;
 import com.google.gson.*;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
@@ -29,11 +30,21 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
         return this.clubs;
     }
 
+    // ─── Utility methods ─── //
+
     public Club getClub(Integer id) {
         return this.clubs.get(id);
     }
 
-    // ─── Utility methods ─── //
+    public Club getClubWithExceptions(int id) throws NotResultForPrimaryKeyException {
+        Club club = this.getClub(id);
+
+        if (club == null) {
+            throw new NotResultForPrimaryKeyException("Aucun des clubs enregistrés ne porte l'identifiant '%d'".formatted(id));
+        }
+
+        return club;
+    }
 
     public void addClub(Club club) throws ModelException, DataManagerException {
         if (!club.isValid()) {
@@ -80,12 +91,12 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
     public void init() throws LoadDataManagerDataException {
         if (!this.isInitialized()) {
             DataWriter<Data> dataWriter = new DataWriter<>();
-            JsonReader<Data> csvReader = new JsonReader<>(dataWriter);
+            JsonReader<Data> jsonReader = new JsonReader<>(dataWriter);
 
             Data modelData = new Data();
             String filePath = this.getFilePath().toString();
             try {
-                csvReader.readFile(filePath, modelData);
+                jsonReader.readFile(filePath, modelData);
             } catch (Exception e) {
                 throw new LoadDataManagerDataException("Les données du manager '%s' n'ont pas pu être lues dans le fichier '%s'".formatted(this.getClass().getSimpleName(), filePath), e);
             }

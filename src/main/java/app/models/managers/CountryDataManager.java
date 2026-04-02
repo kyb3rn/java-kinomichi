@@ -2,6 +2,7 @@ package app.models.managers;
 
 import app.models.Model;
 import app.models.ModelException;
+import app.models.NotResultForPrimaryKeyException;
 import utils.data_management.FileType;
 import app.models.Country;
 import utils.data_management.converters.CustomSerializable;
@@ -28,11 +29,11 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
         return this.countries;
     }
 
+    // ─── Utility methods ─── //
+
     public Country getCountry(String iso3) {
         return this.countries.get(iso3);
     }
-
-    // ─── Utility methods ─── //
 
     public void addCountry(Country country) throws ModelException, DataManagerException {
         if (!country.isValid()) {
@@ -55,12 +56,12 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
         }
     }
 
-    public Country getCountryWithExceptions(String iso3) throws ModelException {
+    public Country getCountryWithExceptions(String iso3) throws NotResultForPrimaryKeyException {
         Country country;
         country = this.getCountry(iso3);
 
         if (country == null) {
-            throw new ModelException("Aucun des pays enregistrés ne porte l'ISO3 '%s'".formatted(iso3));
+            throw new NotResultForPrimaryKeyException("Aucun des pays enregistrés ne porte l'ISO3 '%s'".formatted(iso3));
         }
 
         return country;

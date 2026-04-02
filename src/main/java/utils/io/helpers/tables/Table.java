@@ -2,7 +2,7 @@ package utils.io.helpers.tables;
 
 import utils.io.helpers.Functions;
 import utils.io.helpers.texts.formatting.FormattedText;
-import utils.io.helpers.texts.formatting.TextAlignement;
+import utils.io.helpers.texts.formatting.TextAlignment;
 import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.helpers.texts.formatting.TextFormattingOptions;
 
@@ -66,16 +66,16 @@ public class Table {
         this.columns.add(column);
     }
 
-    public void addColumn(String name, TextAlignement textAlignement) {
-        this.columns.add(new Column(name, textAlignement));
+    public void addColumn(String name, TextAlignment textAlignment) {
+        this.columns.add(new Column(name, textAlignment));
     }
 
     public void addColumn(String name) {
         this.columns.add(new Column(name));
     }
 
-    public void addColumn(TextAlignement textAlignement) {
-        this.columns.add(new Column(textAlignement));
+    public void addColumn(TextAlignment textAlignment) {
+        this.columns.add(new Column(textAlignment));
     }
 
     public void addColumn() {
@@ -168,7 +168,7 @@ public class Table {
                 } else {
                     headerStringBuilder.append(
                         this.columns.stream()
-                            .map(column -> TextFormatter.align(columnsInnerWidth.get(this.columns.indexOf(column)), column.getName(), column.getAlignement()).toString())
+                            .map(column -> TextFormatter.align(columnsInnerWidth.get(this.columns.indexOf(column)), column.getName(), column.getAlignment()).toString())
                             .collect(Collectors.joining(columnSeparationStringBuilder))
                     );
                 }
@@ -392,17 +392,17 @@ public class Table {
             this.formattingOptions = formattingOptions;
         }
 
-        public Column(String name, TextAlignement alignement) {
+        public Column(String name, TextAlignment alignment) {
             this.setName(name);
-            this.formattingOptions.setAlignment(alignement);
+            this.formattingOptions.setAlignment(alignment);
         }
 
         public Column(TextFormattingOptions formattingOptions) {
             this.formattingOptions = formattingOptions;
         }
 
-        public Column(TextAlignement alignement) {
-            this.formattingOptions.setAlignment(alignement);
+        public Column(TextAlignment alignment) {
+            this.formattingOptions.setAlignment(alignment);
         }
 
         public Column(String name) {
@@ -426,7 +426,7 @@ public class Table {
             return this.formattingOptions;
         }
 
-        public TextAlignement getAlignement() {
+        public TextAlignment getAlignment() {
             return this.formattingOptions.getAlignment();
         }
 

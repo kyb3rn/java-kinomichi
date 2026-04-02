@@ -3,6 +3,7 @@ package app.models.managers;
 import app.models.Camp;
 import app.models.Model;
 import app.models.ModelException;
+import app.models.NotResultForPrimaryKeyException;
 import com.google.gson.*;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
@@ -30,11 +31,21 @@ public class CampDataManager extends DataManager<CampDataManager.Data> {
         return this.camps;
     }
 
+    // ─── Utility methods ─── //
+
     public Camp getCamp(Integer id) {
         return this.camps.get(id);
     }
 
-    // ─── Utility methods ─── //
+    public Camp getCampWithExceptions(int id) throws NotResultForPrimaryKeyException {
+        Camp camp = this.getCamp(id);
+
+        if (camp == null) {
+            throw new NotResultForPrimaryKeyException("Aucun des stages enregistrés ne porte l'identifiant '%d'".formatted(id));
+        }
+
+        return camp;
+    }
 
     public void addCamp(Camp camp) throws ModelException, DataManagerException {
         if (!camp.isValid()) {

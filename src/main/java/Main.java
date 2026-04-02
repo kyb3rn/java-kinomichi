@@ -8,9 +8,9 @@ import app.models.managers.AffiliatedDataManager;
 import app.models.managers.CampDataManager;
 import app.models.managers.DataManagers;
 import app.models.managers.PersonDataManager;
-import app.rooting.Route;
-import app.rooting.RouteNotFoundException;
-import app.rooting.Router;
+import app.routing.Route;
+import app.routing.RouteNotFoundException;
+import app.routing.Router;
 import utils.io.commands.CommandManager;
 import utils.io.helpers.Functions;
 import utils.io.helpers.texts.formatting.TextFormatter;
@@ -46,7 +46,9 @@ public class Main {
         router.register(new Route("explore", "/explore", exploreController::index));
 
         // Persons
-        router.register(new Route("persons.list", "/persons(?:/sort/(?<sort>.+))?", personController::list));
+        router.register(new Route("persons.dashboard", "/persons/dashboard", personController::dashboard));
+        router.register(new Route("persons.list", "/persons/list(?:/sort/(?<sort>.+))?", personController::list));
+        router.register(new Route("persons.add", "/persons/add", personController::add));
 
         // Camps
         router.register(new Route("camps.list", "/camps/list(?:/sort/(?<sort>.+))?", campController::list));
@@ -90,6 +92,8 @@ public class Main {
                 nextPath = "/";
             }
         }
+
+        DataManagers.exportAll();
 
         System.out.println();
         System.out.println(TextFormatter.bold(TextFormatter.italic("Au revoir !")));

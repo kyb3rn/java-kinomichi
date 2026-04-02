@@ -3,7 +3,6 @@ package app.models;
 import app.models.managers.CountryDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
-import app.models.managers.LoadDataManagerDataException;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -13,8 +12,10 @@ import utils.data_management.converters.Hydratable;
 import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
-
+import app.models.formatting.ModelKeyTextFormattingPreset;
 import utils.io.helpers.tables.TableDisplay;
+import utils.io.helpers.tables.TableDisplayFormattingOptions;
+import utils.io.helpers.texts.formatting.TextAlignment;
 
 import java.util.regex.Pattern;
 
@@ -34,6 +35,11 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
 
     public Country getCountry() {
         return this.country;
+    }
+
+    @TableDisplay(name = "#& (pays)", format = @TableDisplayFormattingOptions(preset = ModelKeyTextFormattingPreset.class, alignment = TextAlignment.CENTER), order = 2)
+    public String getCountryIso3() {
+        return this.country != null ? this.country.getIso3() : null;
     }
 
     @TableDisplay(name = "Code postal", order = 3)
@@ -110,7 +116,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
             this.boxNumber = null;
         } else {
             if (boxNumber <= 0) {
-                throw new ModelException("Le numéro de bôite doit être un entier strictement positif");
+                throw new ModelException("Le numéro de boîte doit être un entier strictement positif");
             }
 
             this.boxNumber = boxNumber;
@@ -124,6 +130,8 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
 
         try {
             this.country = DataManagers.get(CountryDataManager.class).getCountryWithExceptions(iso3);
+        } catch (NotResultForPrimaryKeyException e) {
+            throw e;
         } catch (DataManagerException | ModelException e) {
             throw new ModelException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3), e);
         }
@@ -262,7 +270,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
             try {
                 intZipCode = Integer.parseInt(zipCode);
             } catch (NumberFormatException e) {
-                throw new ModelException("Le code postal doit être un entier strictement positif",e );
+                throw new ModelException("Le code postal doit être un entier strictement positif", e);
             }
 
             this.setZipCode(intZipCode);
@@ -297,7 +305,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
                 this.boxNumber = null;
             } else {
                 if (boxNumber <= 0) {
-                    throw new ModelException("Le numéro de bôite doit être un entier strictement positif");
+                    throw new ModelException("Le numéro de boîte doit être un entier strictement positif");
                 }
 
                 this.boxNumber = boxNumber;
@@ -309,7 +317,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
                 this.boxNumber = null;
             } else {
                 if (boxNumber.isBlank()) {
-                    throw new ModelException("Le numéro de bôite ne peut pas être vide");
+                    throw new ModelException("Le numéro de boîte ne peut pas être vide");
                 }
 
                 boxNumber = boxNumber.strip();
@@ -318,7 +326,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
                 try {
                     intBoxNumber = Integer.parseInt(boxNumber);
                 } catch (NumberFormatException e) {
-                    throw new ModelException("Le numéro de bôite doit être un entier strictement positif",e );
+                    throw new ModelException("Le numéro de boîte doit être un entier strictement positif", e);
                 }
 
                 this.setBoxNumber(intBoxNumber);

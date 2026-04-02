@@ -1,6 +1,6 @@
 package utils.io.helpers.tables;
 
-import utils.io.helpers.texts.formatting.TextAlignement;
+import utils.io.helpers.texts.formatting.TextAlignment;
 import utils.io.helpers.texts.formatting.TextBackgroundColor;
 import utils.io.helpers.texts.formatting.TextColor;
 import utils.io.helpers.texts.formatting.TextFormattingPreset;
@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface TableDisplayFormattingOptions {
     Class<? extends TextFormattingPreset> preset() default TextFormattingPreset.class;
-    TextAlignement alignment() default TextAlignement.LEFT;
+    TextAlignment alignment() default TextAlignment.LEFT;
     TextColor color() default TextColor.NONE;
     TextBackgroundColor backgroundColor() default TextBackgroundColor.NONE;
     TextStyle[] styles() default {};

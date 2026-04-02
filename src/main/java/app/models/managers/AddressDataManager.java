@@ -3,6 +3,7 @@ package app.models.managers;
 import app.models.Address;
 import app.models.Model;
 import app.models.ModelException;
+import app.models.NotResultForPrimaryKeyException;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -34,11 +35,21 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
         return this.addresses;
     }
 
+    // ─── Utility methods ─── //
+
     public Address getAddress(Integer id) {
         return this.addresses.get(id);
     }
 
-    // ─── Utility methods ─── //
+    public Address getAddressWithExceptions(int id) throws NotResultForPrimaryKeyException {
+        Address address = this.getAddress(id);
+
+        if (address == null) {
+            throw new NotResultForPrimaryKeyException("Aucune des adresses enregistrées ne porte l'identifiant '%d'".formatted(id));
+        }
+
+        return address;
+    }
 
     public void addAddress(Address address) throws ModelException, DataManagerException {
         if (!address.isValid()) {
@@ -85,12 +96,12 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
     public void init() throws LoadDataManagerDataException {
         if (!this.isInitialized()) {
             DataWriter<Data> dataWriter = new DataWriter<>();
-            JsonReader<Data> csvReader = new JsonReader<>(dataWriter);
+            JsonReader<Data> jsonReader = new JsonReader<>(dataWriter);
 
             Data modelData = new Data();
             String filePath = this.getFilePath().toString();
             try {
-                csvReader.readFile(filePath, modelData);
+                jsonReader.readFile(filePath, modelData);
             } catch (Exception e) {
                 throw new LoadDataManagerDataException("Les données du manager '%s' n'ont pas pu être lues dans le fichier '%s'".formatted(this.getClass().getSimpleName(), filePath), e);
             }

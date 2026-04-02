@@ -2,7 +2,7 @@ package app.controllers;
 
 import app.models.Model;
 import app.models.formatting.ModelTableFormatter;
-import app.rooting.Request;
+import app.routing.Request;
 import utils.io.commands.list.SortColumnCommand;
 
 import java.util.Collection;
@@ -35,7 +35,6 @@ public abstract class Controller {
         return sortOrders;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     protected <M extends Model> List<M> sortModels(Collection<M> models, Class<M> modelClass, LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders) {
         Comparator<M> combinedComparator = sortOrders.entrySet().stream()
                 .map(entry -> {

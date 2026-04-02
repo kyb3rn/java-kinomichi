@@ -1,4 +1,4 @@
-package app.rooting;
+package app.routing;
 
 public class RouteNotFoundException extends Exception {
 

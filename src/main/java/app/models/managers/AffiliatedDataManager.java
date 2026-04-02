@@ -3,6 +3,7 @@ package app.models.managers;
 import app.models.Affiliated;
 import app.models.Model;
 import app.models.ModelException;
+import app.models.NotResultForPrimaryKeyException;
 import com.google.gson.*;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
@@ -29,11 +30,21 @@ public class AffiliatedDataManager extends DataManager<AffiliatedDataManager.Dat
         return this.affiliateds;
     }
 
+    // ─── Utility methods ─── //
+
     public Affiliated getAffiliated(Integer id) {
         return this.affiliateds.get(id);
     }
 
-    // ─── Utility methods ─── //
+    public Affiliated getAffiliatedWithExceptions(int id) throws NotResultForPrimaryKeyException {
+        Affiliated affiliated = this.getAffiliated(id);
+
+        if (affiliated == null) {
+            throw new NotResultForPrimaryKeyException("Aucun des affiliés enregistrés ne porte l'identifiant '%d'".formatted(id));
+        }
+
+        return affiliated;
+    }
 
     public void addAffiliated(Affiliated affiliated) throws ModelException, DataManagerException {
         if (!affiliated.isValid()) {

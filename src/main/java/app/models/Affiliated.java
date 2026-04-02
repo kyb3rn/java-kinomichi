@@ -16,7 +16,7 @@ import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 import utils.io.helpers.tables.TableDisplay;
 import utils.io.helpers.tables.TableDisplayFormattingOptions;
-import utils.io.helpers.texts.formatting.TextAlignement;
+import utils.io.helpers.texts.formatting.TextAlignment;
 import utils.io.helpers.texts.formatting.TextStyle;
 
 public class Affiliated extends Person implements Hydratable<Affiliated.Data> {
@@ -46,9 +46,9 @@ public class Affiliated extends Person implements Hydratable<Affiliated.Data> {
 
     // ─── Special getters ─── //
 
-    @TableDisplay(name = "#& (club)", format = @TableDisplayFormattingOptions(preset = ModelKeyTextFormattingPreset.class, alignment = TextAlignement.CENTER), order = 6)
+    @TableDisplay(name = "#& (club)", format = @TableDisplayFormattingOptions(preset = ModelKeyTextFormattingPreset.class, alignment = TextAlignment.CENTER), order = 6)
     public int getClubId() {
-        return this.club.getId();
+        return this.club != null ? this.club.getId() : -1;
     }
 
     // ─── Setters ─── //

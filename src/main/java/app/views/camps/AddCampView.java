@@ -50,11 +50,15 @@ public class AddCampView extends View {
             KinomichiFunctions.promptField(scanner, input -> {
                 campAddressData.setCountryIso3(input);
                 String iso3 = campAddressData.getCountryIso3();
+
+                CountryDataManager countryDataManager;
                 try {
-                    DataManagers.get(CountryDataManager.class).getCountryWithExceptions(iso3);
+                    countryDataManager = DataManagers.get(CountryDataManager.class);
                 } catch (DataManagerException | ModelException e) {
                     throw new DataManagerException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3), e);
                 }
+
+                countryDataManager.getCountryWithExceptions(iso3);
             });
 
             System.out.println();

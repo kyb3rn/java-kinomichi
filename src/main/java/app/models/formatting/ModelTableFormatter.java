@@ -5,7 +5,7 @@ import utils.io.helpers.tables.Table;
 import utils.io.helpers.tables.TableDisplay;
 import utils.io.helpers.tables.TableDisplayFormattingOptions;
 import utils.io.helpers.tables.TableOptions;
-import utils.io.helpers.texts.formatting.TextAlignement;
+import utils.io.helpers.texts.formatting.TextAlignment;
 import utils.io.helpers.texts.formatting.TextFormattingOptions;
 import utils.io.helpers.texts.formatting.TextFormattingPreset;
 import utils.io.helpers.texts.formatting.TextStyle;
@@ -50,7 +50,7 @@ public class ModelTableFormatter {
         );
         Table formatter = new Table(options);
 
-        Table.Column keyColumn = new Table.Column(TextAlignement.RIGHT);
+        Table.Column keyColumn = new Table.Column(TextAlignment.RIGHT);
 
         for (AnnotatedMethod am : tableDisplayAnnotatedMethods) {
             keyColumn.addValue(am.annotation().name());

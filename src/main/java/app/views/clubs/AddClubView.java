@@ -7,6 +7,7 @@ import app.events.GoBackEvent;
 import app.models.Address;
 import app.models.Club;
 import app.models.ModelException;
+import app.models.NotResultForPrimaryKeyException;
 import app.models.managers.CountryDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
@@ -50,11 +51,15 @@ public class AddClubView extends View {
             KinomichiFunctions.promptField(scanner, input -> {
                 clubAddressData.setCountryIso3(input);
                 String iso3 = clubAddressData.getCountryIso3();
+
+                CountryDataManager countryDataManager;
                 try {
-                    DataManagers.get(CountryDataManager.class).getCountryWithExceptions(iso3);
+                    countryDataManager = DataManagers.get(CountryDataManager.class);
                 } catch (DataManagerException | ModelException e) {
                     throw new DataManagerException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3), e);
                 }
+
+                countryDataManager.getCountryWithExceptions(iso3);
             });
 
             System.out.println();

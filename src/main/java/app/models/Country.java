@@ -3,15 +3,13 @@ package app.models;
 import utils.data_management.converters.CustomSerializable;
 import utils.data_management.converters.convertibles.CsvConvertible;
 import utils.data_management.parsing.ParserException;
-import utils.data_management.parsing.StringParser;
 import utils.data_management.parsing.StringParserException;
 
-import java.util.ArrayList;
 import java.util.List;
 import app.models.formatting.ModelPrimaryKeyTextFormattingPreset;
 import utils.io.helpers.tables.TableDisplay;
 import utils.io.helpers.tables.TableDisplayFormattingOptions;
-import utils.io.helpers.texts.formatting.TextAlignement;
+import utils.io.helpers.texts.formatting.TextAlignment;
 import utils.io.helpers.texts.formatting.TextStyle;
 
 import java.util.regex.Pattern;
@@ -31,12 +29,12 @@ public class Country extends Model implements CustomSerializable, CsvConvertible
         return this.name;
     }
 
-    @TableDisplay(name = "ISO 3166-1 alpha-2", format = @TableDisplayFormattingOptions(alignment = TextAlignement.CENTER), order = 2)
+    @TableDisplay(name = "ISO 3166-1 alpha-2", format = @TableDisplayFormattingOptions(alignment = TextAlignment.CENTER), order = 2)
     public String getIso2() {
         return this.iso2;
     }
 
-    @TableDisplay(name = "ISO 3166-1 alpha-3", format = @TableDisplayFormattingOptions(preset = ModelPrimaryKeyTextFormattingPreset.class, alignment = TextAlignement.CENTER), order = 3)
+    @TableDisplay(name = "ISO 3166-1 alpha-3", format = @TableDisplayFormattingOptions(preset = ModelPrimaryKeyTextFormattingPreset.class, alignment = TextAlignment.CENTER), order = 3)
     public String getIso3() {
         return this.iso3;
     }

@@ -4,7 +4,6 @@ import app.models.formatting.ModelKeyTextFormattingPreset;
 import app.models.managers.AddressDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
-import app.models.managers.LoadDataManagerDataException;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -16,7 +15,7 @@ import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 import utils.io.helpers.tables.TableDisplay;
 import utils.io.helpers.tables.TableDisplayFormattingOptions;
-import utils.io.helpers.texts.formatting.TextAlignement;
+import utils.io.helpers.texts.formatting.TextAlignment;
 import utils.io.helpers.texts.formatting.TextStyle;
 import utils.time.TimeSlot;
 
@@ -50,9 +49,9 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
 
     // ─── Special getters ─── //
 
-    @TableDisplay(name = "#& (adresse)", format = @TableDisplayFormattingOptions(preset = ModelKeyTextFormattingPreset.class, alignment = TextAlignement.CENTER), order = 3)
+    @TableDisplay(name = "#& (adresse)", format = @TableDisplayFormattingOptions(preset = ModelKeyTextFormattingPreset.class, alignment = TextAlignment.CENTER), order = 3)
     public int getAddressId() {
-        return this.address.getId();
+        return this.address != null ? this.address.getId() : -1;
     }
 
     // ─── Setters ─── //

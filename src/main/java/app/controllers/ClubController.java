@@ -11,7 +11,7 @@ import app.models.managers.AddressDataManager;
 import app.models.managers.ClubDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
-import app.rooting.Request;
+import app.routing.Request;
 import app.views.ModelListView;
 import app.views.clubs.AddClubFormData;
 import app.views.clubs.AddClubView;
