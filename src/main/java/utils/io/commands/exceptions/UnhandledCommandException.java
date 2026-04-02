@@ -1,4 +1,6 @@
-package utils.io.commands;
+package utils.io.commands.exceptions;
+
+import utils.io.commands.Command;
 
 public class UnhandledCommandException extends CommandException {
 

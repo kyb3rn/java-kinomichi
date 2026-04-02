@@ -1,4 +1,4 @@
-package utils.io.commands;
+package utils.io.commands.exceptions;
 
 public class TooManyCommandArgumentsException extends CommandArgumentsAmountException {
 

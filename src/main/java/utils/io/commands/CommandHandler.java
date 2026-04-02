@@ -1,5 +1,7 @@
 package utils.io.commands;
 
+import utils.io.commands.exceptions.UnhandledCommandException;
+
 @FunctionalInterface
 public interface CommandHandler {
 

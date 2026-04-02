@@ -1,6 +1,6 @@
-package utils.io.commands;
+package utils.io.commands.exceptions;
 
-public class BadCommandArgumentFormatException extends CommandArgumentException {
+public class BadCommandArgumentFormatException extends CommandArgumentsException {
 
     public BadCommandArgumentFormatException() {
     }

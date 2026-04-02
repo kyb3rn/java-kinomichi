@@ -1,6 +1,6 @@
-package utils.io.commands;
+package utils.io.commands.exceptions;
 
-public class CommandArgumentsAmountException extends CommandArgumentException {
+public class CommandArgumentsAmountException extends CommandArgumentsException {
 
     public CommandArgumentsAmountException() {
     }

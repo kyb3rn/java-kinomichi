@@ -1,5 +1,8 @@
 package utils.io.commands;
 
+import utils.io.commands.exceptions.NotACommandException;
+import utils.io.commands.exceptions.UnknownCommandException;
+
 import java.util.List;
 
 public enum ECommand {

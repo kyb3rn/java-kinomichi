@@ -1,5 +1,6 @@
 package app.controllers;
 
+import app.events.CallUrlEvent;
 import app.events.Event;
 import app.events.GoBackEvent;
 import app.models.Country;
@@ -25,7 +26,7 @@ public class CountryController extends Controller {
             countryDataManager = DataManagers.get(CountryDataManager.class);
         } catch (DataManagerException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage("Les données des pays n'ont pas pu être chargées."));
-            return new GoBackEvent();
+            return new CallUrlEvent("/");
         }
 
         LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders = this.parseSortParameter(request);

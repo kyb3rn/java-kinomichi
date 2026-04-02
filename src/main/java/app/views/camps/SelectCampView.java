@@ -11,8 +11,8 @@ import app.models.managers.CampDataManager;
 import app.utils.helpers.KinomichiFunctions;
 import app.utils.menus.InvalidMenuInputException;
 import app.views.View;
-import utils.io.commands.CommandResponseException;
-import utils.io.commands.UnhandledCommandException;
+import utils.io.commands.exceptions.CommandResponseException;
+import utils.io.commands.exceptions.UnhandledCommandException;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
 import utils.io.commands.list.SortColumnCommand;
@@ -99,7 +99,7 @@ public class SelectCampView extends View {
                 return new GoBackEvent();
             }
 
-            return new GoBackEvent();
+            return new CallUrlEvent("/");
         }
     }
 

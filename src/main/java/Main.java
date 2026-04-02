@@ -1,9 +1,6 @@
 import app.AppState;
 import app.controllers.*;
-import app.events.CallUrlEvent;
-import app.events.Event;
-import app.events.ExitProgramEvent;
-import app.events.GoBackEvent;
+import app.events.*;
 import app.models.managers.AffiliatedDataManager;
 import app.models.managers.CampDataManager;
 import app.models.managers.DataManagers;
@@ -19,8 +16,6 @@ public class Main {
 
     public static void main(String[] args) {
         DataManagers.initAndResolveReferencesOf(
-            CampDataManager.class,
-            PersonDataManager.class,
             AffiliatedDataManager.class
         );
 
@@ -71,8 +66,8 @@ public class Main {
         router.register(new Route("countries.list", "/countries/list(?:/sort/(?<sort>.+))?", countryController::list));
 
         // Data Managers
-        router.register(new Route("data_managers.reinit", "/data-managers/reinit(?:/(?<manager>.+))?", dataManagerController::reinit));
-        router.register(new Route("data_managers.save", "/data-managers/save(?:/(?<manager>.+))?", dataManagerController::save));
+        router.register(new Route("data_managers.reinit", "/data-managers/reinit", dataManagerController::reinit));
+        router.register(new Route("data_managers.save", "/data-managers/save", dataManagerController::save));
 
         String nextPath = "/";
 
@@ -85,11 +80,14 @@ public class Main {
                     case CallUrlEvent callUrlEvent -> callUrlEvent.getUrl();
                     case GoBackEvent _ -> AppState.navigationHistory.goBack();
                     case ExitProgramEvent _ -> null;
-                    default -> null;
+                    case null -> null;
+                    default -> throw new UnhandledEventException(event);
                 };
-            } catch (RouteNotFoundException routeNotFoundException) {
-                System.out.println(Functions.styleAsErrorMessage("Route introuvable : '%s'".formatted(nextPath)));
+            } catch (RouteNotFoundException _) {
+                System.out.println(Functions.styleAsErrorMessage("Route reçue ('%s') introuvable.".formatted(nextPath)));
                 nextPath = "/";
+            } catch (UnhandledEventException e) {
+                System.out.println(Functions.styleAsErrorMessage("Aucun processus n'est lié à l'événement reçu (%s).".formatted(e.getEvent().getClass().getSimpleName())));
             }
         }
 

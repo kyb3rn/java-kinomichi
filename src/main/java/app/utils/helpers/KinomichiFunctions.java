@@ -3,6 +3,7 @@ package app.utils.helpers;
 import app.utils.ThrowingConsumer;
 import app.utils.ThrowingConsumerException;
 import utils.io.commands.*;
+import utils.io.commands.exceptions.*;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
 import utils.io.helpers.Functions;
@@ -63,10 +64,12 @@ public class KinomichiFunctions extends Functions {
                     break;
                 } catch (UnknownCommandException _) {
                     System.out.println(Functions.styleAsErrorMessage("Cette commande n'existe pas."));
-                } catch (CommandArgumentException _) {
+                } catch (CommandArgumentsException _) {
                     System.out.println(Functions.styleAsErrorMessage("Les arguments de cette commande sont invalides."));
                 } catch (UnimplementedCommandException e) {
                     System.out.println(Functions.styleAsErrorMessage("Cette commande n'est pas implémentée."));
+                } catch (CommandInstanciationException e) {
+                    System.out.println(Functions.styleAsErrorMessage("Cette commande existe mais n'a pas pu être instanciée."));
                 }
             } catch (ThrowingConsumerException e) {
                 if (e.getCause() != null) {

@@ -1,19 +1,15 @@
 package app.views.persons;
 
-import app.events.Event;
-import app.events.ExitProgramEvent;
-import app.events.FormResultEvent;
-import app.events.GoBackEvent;
+import app.events.*;
 import app.models.Affiliated;
 import app.models.ModelException;
 import app.models.Person;
 import app.models.managers.ClubDataManager;
-import app.models.managers.CountryDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
 import app.utils.helpers.KinomichiFunctions;
 import app.views.View;
-import utils.io.commands.CommandResponseException;
+import utils.io.commands.exceptions.CommandResponseException;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
 import utils.io.helpers.Functions;
@@ -107,7 +103,7 @@ public class AddPersonView extends View {
             }
 
             System.out.println(Functions.styleAsErrorMessage("Il y a eu un problème durant l'exécution du gestionnaire des commandes."));
-            return new GoBackEvent();
+            return new CallUrlEvent("/");
         }
 
         return new FormResultEvent<>(new AddPersonFormData(person, affiliatedData));

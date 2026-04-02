@@ -2,7 +2,7 @@ package app.views.data_managers;
 
 import app.events.CallUrlEvent;
 import app.events.Event;
-import app.events.GoBackEvent;
+import app.events.SaveDataManagerEvent;
 import app.models.managers.DataManager;
 import app.views.View;
 import utils.io.helpers.Functions;
@@ -29,14 +29,14 @@ public class SaveDataManagersView extends View {
     @Override
     public Event render() {
         if (this.unsavedDataManagers.isEmpty()) {
-            System.out.println(Functions.styleAsErrorMessage("Cette page est inaccessible. Tous les gestionnaires de données sont sauvegardés. Retour à la page précédente."));
-            return new GoBackEvent();
+            System.out.println(Functions.styleAsErrorMessage("Cette page est inaccessible. Tous les gestionnaires de données sont sauvegardés."));
+            return new CallUrlEvent("/");
         }
 
         KinomichiStandardMenu saveMenu = new KinomichiStandardMenu("Sauvegarde de gestionnaires de données", new CallUrlEvent("/"));
 
         for (DataManager<?> unsavedDataManager : this.unsavedDataManagers) {
-            saveMenu.addOption(unsavedDataManager.getModelSimpleName(), new CallUrlEvent("/data-managers/save/" + unsavedDataManager.getClass().getSimpleName()));
+            saveMenu.addOption(unsavedDataManager.getModelSimpleName(), new SaveDataManagerEvent(unsavedDataManager));
         }
 
         MenuResponse menuResponse = saveMenu.use();

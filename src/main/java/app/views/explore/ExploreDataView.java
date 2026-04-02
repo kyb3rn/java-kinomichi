@@ -18,7 +18,7 @@ public class ExploreDataView extends View {
         KinomichiStandardMenu exploreMenu = new KinomichiStandardMenu("Explorer les données", new CallUrlEvent("/"));
 
         this.addDataManagerOption(exploreMenu, "Stages", CampDataManager.class, "/camps/list", "stages non chargés");
-        this.addDataManagerOption(exploreMenu, "Personnes", PersonDataManager.class, "/persons", "personnes non chargées");
+        this.addDataManagerOption(exploreMenu, "Personnes", PersonDataManager.class, "/persons/list", "personnes non chargées");
         this.addDataManagerOption(exploreMenu, "Affiliés", AffiliatedDataManager.class, "/affiliateds/list", "affiliés non chargés");
         this.addDataManagerOption(exploreMenu, "Clubs", ClubDataManager.class, "/clubs/list", "clubs non chargés");
         this.addDataManagerOption(exploreMenu, "Adresses", AddressDataManager.class, "/addresses/list", "adresses non chargées");

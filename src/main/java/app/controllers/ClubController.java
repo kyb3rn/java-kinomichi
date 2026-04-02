@@ -33,8 +33,8 @@ public class ClubController extends Controller {
         try {
             clubDataManager = DataManagers.get(ClubDataManager.class);
         } catch (DataManagerException | ModelException e) {
-            System.out.println(Functions.styleAsErrorMessage("Impossible d'initialiser et récupérer le manager 'ClubDataManager'."));
-            return new GoBackEvent();
+            System.out.println(Functions.styleAsErrorMessage("Les données des clubs n'ont pas pu être chargées."));
+            return new CallUrlEvent("/");
         }
 
         ClubsDashboardView clubsDashboardView = new ClubsDashboardView(clubDataManager.count(), clubDataManager.hasUnsavedChanges());
@@ -73,7 +73,7 @@ public class ClubController extends Controller {
             clubDataManager = DataManagers.get(ClubDataManager.class);
         } catch (DataManagerException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage("Les données des clubs n'ont pas pu être chargées."));
-            return new GoBackEvent();
+            return new CallUrlEvent("/");
         }
 
         LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders = this.parseSortParameter(request);

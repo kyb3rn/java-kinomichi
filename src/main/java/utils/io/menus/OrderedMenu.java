@@ -2,6 +2,7 @@ package utils.io.menus;
 
 import app.utils.menus.InvalidMenuInputException;
 import utils.io.commands.*;
+import utils.io.commands.exceptions.*;
 import utils.io.helpers.Functions;
 
 import java.util.Scanner;
@@ -73,11 +74,14 @@ public abstract class OrderedMenu extends Menu {
                     } catch (UnknownCommandException _) {
                         System.out.println(Functions.styleAsErrorMessage("Cette commande n'existe pas."));
                         continue;
-                    } catch (CommandArgumentException _) {
+                    } catch (CommandArgumentsException _) {
                         System.out.println(Functions.styleAsErrorMessage("Les arguments de cette commande sont invalides."));
                         continue;
                     } catch (UnimplementedCommandException _) {
                         System.out.println(Functions.styleAsErrorMessage("Cette commande n'est pas implémentée."));
+                        continue;
+                    } catch (CommandInstanciationException e) {
+                        System.out.println(Functions.styleAsErrorMessage("Cette commande existe mais n'a pas pu être instanciée."));
                         continue;
                     }
                 }

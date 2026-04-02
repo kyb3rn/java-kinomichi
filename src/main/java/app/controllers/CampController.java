@@ -67,7 +67,7 @@ public class CampController extends Controller {
             campDataManager = DataManagers.get(CampDataManager.class);
         } catch (DataManagerException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage("Les stages n'ont pas pu être chargés dans l'application."));
-            return new GoBackEvent();
+            return new CallUrlEvent("/");
         }
 
         LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders = this.parseSortParameter(request);
@@ -89,7 +89,7 @@ public class CampController extends Controller {
             campDataManager = DataManagers.get(CampDataManager.class);
         } catch (DataManagerException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage("Les données des stages n'ont pas pu être chargées."));
-            return new GoBackEvent();
+            return new CallUrlEvent("/");
         }
 
         LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders = this.parseSortParameter(request);

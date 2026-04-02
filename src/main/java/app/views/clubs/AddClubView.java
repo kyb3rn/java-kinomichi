@@ -1,19 +1,15 @@
 package app.views.clubs;
 
-import app.events.Event;
-import app.events.ExitProgramEvent;
-import app.events.FormResultEvent;
-import app.events.GoBackEvent;
+import app.events.*;
 import app.models.Address;
 import app.models.Club;
 import app.models.ModelException;
-import app.models.NotResultForPrimaryKeyException;
 import app.models.managers.CountryDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
 import app.utils.helpers.KinomichiFunctions;
 import app.views.View;
-import utils.io.commands.CommandResponseException;
+import utils.io.commands.exceptions.CommandResponseException;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
 import utils.io.helpers.Functions;
@@ -95,7 +91,7 @@ public class AddClubView extends View {
             }
 
             System.out.println(Functions.styleAsErrorMessage("Il y a eu un problème durant l'exécution du gestionnaire des commandes."));
-            return new GoBackEvent();
+            return new CallUrlEvent("/");
         }
 
         return new FormResultEvent<>(new AddClubFormData(clubData, clubAddressData));

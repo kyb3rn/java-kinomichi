@@ -2,7 +2,7 @@ package app.utils.menus;
 
 import app.events.ExitProgramEvent;
 import app.events.GoBackEvent;
-import utils.io.commands.UnhandledCommandException;
+import utils.io.commands.exceptions.UnhandledCommandException;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
 import utils.io.menus.StandardMenu;

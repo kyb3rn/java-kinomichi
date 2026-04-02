@@ -33,8 +33,8 @@ public class PersonController extends Controller {
         try {
             personDataManager = DataManagers.get(PersonDataManager.class);
         } catch (DataManagerException | ModelException e) {
-            System.out.println(Functions.styleAsErrorMessage("Impossible d'initialiser et récupérer le manager 'PersonDataManager'."));
-            return new GoBackEvent();
+            System.out.println(Functions.styleAsErrorMessage("Les données des personnes n'ont pas pu être chargées."));
+            return new CallUrlEvent("/");
         }
 
         PersonsDashboardView personsDashboardView = new PersonsDashboardView(personDataManager.count(), personDataManager.hasUnsavedChanges());
@@ -87,7 +87,7 @@ public class PersonController extends Controller {
             personDataManager = DataManagers.get(PersonDataManager.class);
         } catch (DataManagerException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage("Les données des personnes n'ont pas pu être chargées."));
-            return new GoBackEvent();
+            return new CallUrlEvent("/");
         }
 
         LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders = this.parseSortParameter(request);

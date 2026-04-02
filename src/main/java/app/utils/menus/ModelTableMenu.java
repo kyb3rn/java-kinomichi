@@ -5,7 +5,7 @@ import app.events.GoBackEvent;
 import app.models.Model;
 import app.models.formatting.ModelTableFormatter;
 import utils.io.commands.Command;
-import utils.io.commands.UnhandledCommandException;
+import utils.io.commands.exceptions.UnhandledCommandException;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
 import utils.io.commands.list.SortColumnCommand;

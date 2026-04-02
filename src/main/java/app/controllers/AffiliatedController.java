@@ -1,5 +1,6 @@
 package app.controllers;
 
+import app.events.CallUrlEvent;
 import app.events.Event;
 import app.events.GoBackEvent;
 import app.models.Affiliated;
@@ -25,7 +26,7 @@ public class AffiliatedController extends Controller {
             affiliatedDataManager = DataManagers.get(AffiliatedDataManager.class);
         } catch (DataManagerException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage("Les données des affiliés n'ont pas pu être chargées."));
-            return new GoBackEvent();
+            return new CallUrlEvent("/");
         }
 
         LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders = this.parseSortParameter(request);

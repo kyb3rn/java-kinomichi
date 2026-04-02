@@ -1,6 +1,9 @@
 package utils.io.commands.list;
 
 import utils.io.commands.*;
+import utils.io.commands.exceptions.BadCommandArgumentFormatException;
+import utils.io.commands.exceptions.CommandArgumentsException;
+import utils.io.commands.exceptions.TooFewCommandArgumentsException;
 
 import java.util.*;
 
@@ -8,7 +11,7 @@ public class SortColumnCommand extends Command {
 
     private final LinkedHashMap<Integer, SortOrder> sortOrders = new LinkedHashMap<>();
 
-    public SortColumnCommand(ArrayList<CommandArgument> arguments) throws CommandArgumentException {
+    public SortColumnCommand(ArrayList<CommandArgument> arguments) throws CommandArgumentsException {
         if (arguments.isEmpty()) {
             throw new TooFewCommandArgumentsException();
         }
@@ -17,7 +20,7 @@ public class SortColumnCommand extends Command {
     }
 
     @Override
-    protected void addArgument(CommandArgument argument) throws CommandArgumentException {
+    protected void addArgument(CommandArgument argument) throws CommandArgumentsException {
         String[] parts = argument.getValue().split(":");
         if (parts.length > 2) {
             throw new BadCommandArgumentFormatException("Un argument de tri de colonne doit être au format [0-9]+(:(ASC|DESC))?");
@@ -36,7 +39,7 @@ public class SortColumnCommand extends Command {
     }
 
     @Override
-    protected void addArguments(ArrayList<CommandArgument> arguments) throws CommandArgumentException {
+    protected void addArguments(ArrayList<CommandArgument> arguments) throws CommandArgumentsException {
         for (CommandArgument argument : arguments) {
             this.addArgument(argument);
         }
