@@ -3,12 +3,12 @@ package app.controllers;
 import app.events.CallUrlEvent;
 import app.events.Event;
 import app.events.FormResultEvent;
-import app.events.GoBackEvent;
-import app.models.Affiliated;
+import app.models.Affiliation;
 import app.models.Person;
 import app.models.ModelException;
-import app.models.managers.AffiliatedDataManager;
+import app.models.managers.AffiliationDataManager;
 import app.models.managers.DataManagerException;
+import app.models.formatting.table.UnimplementedModelTableException;
 import app.models.managers.DataManagers;
 import app.models.managers.PersonDataManager;
 import app.routing.Request;
@@ -50,16 +50,16 @@ public class PersonController extends Controller {
                 PersonDataManager personDataManager = DataManagers.get(PersonDataManager.class);
                 Person person = personDataManager.addPerson(addPersonFormData.person(), true);
 
-                if (addPersonFormData.affiliatedData() != null) {
-                    Affiliated.Data affiliatedData = addPersonFormData.affiliatedData();
-                    affiliatedData.setPersonId(person.getId());
+                if (addPersonFormData.affiliation() != null) {
+                    Affiliation affiliation = addPersonFormData.affiliation();
+                    affiliation.setPerson(person);
 
-                    Affiliated affiliated = DataManagers.get(AffiliatedDataManager.class).addAffiliated(affiliatedData);
+                    DataManagers.get(AffiliationDataManager.class).addAffiliation(affiliation);
 
                     SimpleBox personAddedSimpleBox = new SimpleBox();
                     personAddedSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Personne ajoutée et affiliée")));
                     personAddedSimpleBox.addLine(TextFormatter.italic("La personne a bien été enregistrée sous l'identifiant " + TextFormatter.bold("#" + person.getId())));
-                    personAddedSimpleBox.addLine(TextFormatter.italic("L'affiliation a bien été enregistrée sous l'identifiant " + TextFormatter.bold("#" + affiliated.getId())));
+                    personAddedSimpleBox.addLine(TextFormatter.italic("L'affiliation a bien été enregistrée et liée à la personne " + TextFormatter.bold("#" + person.getId())));
 
                     System.out.println();
                     personAddedSimpleBox.display();
@@ -87,11 +87,18 @@ public class PersonController extends Controller {
             personDataManager = DataManagers.get(PersonDataManager.class);
         } catch (DataManagerException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage("Les données des personnes n'ont pas pu être chargées."));
-            return new CallUrlEvent("/");
+            return new CallUrlEvent("/explore");
         }
 
         LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders = this.parseSortParameter(request);
-        List<Person> sortedPersons = this.sortModels(personDataManager.getModels(), Person.class, sortOrders);
+        List<Person> sortedPersons;
+
+        try {
+            sortedPersons = this.sortModels(personDataManager.getModels(), Person.class, sortOrders);
+        } catch (UnimplementedModelTableException e) {
+            System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
+            return new CallUrlEvent("/explore");
+        }
 
         ModelListView<Person> personListView = new ModelListView<>(Person.class, sortedPersons, personDataManager.hasUnsavedChanges(), "/persons/list");
         return personListView.render();

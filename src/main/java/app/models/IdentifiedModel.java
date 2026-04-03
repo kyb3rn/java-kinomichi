@@ -1,10 +1,5 @@
 package app.models;
 
-import app.models.formatting.ModelPrimaryKeyTextFormattingPreset;
-import utils.io.helpers.tables.TableDisplay;
-import utils.io.helpers.tables.TableDisplayFormattingOptions;
-import utils.io.helpers.texts.formatting.TextAlignment;
-
 public abstract class IdentifiedModel extends Model {
 
     // ─── Properties ─── //
@@ -13,7 +8,6 @@ public abstract class IdentifiedModel extends Model {
 
     // ─── Getters ─── //
 
-    @TableDisplay(name = "#", format = @TableDisplayFormattingOptions(preset = ModelPrimaryKeyTextFormattingPreset.class, alignment = TextAlignment.RIGHT), order = 1)
     public int getId() {
         return this.id;
     }

@@ -2,6 +2,7 @@ package app.controllers;
 
 import app.models.Model;
 import app.models.formatting.ModelTableFormatter;
+import app.models.formatting.table.UnimplementedModelTableException;
 import app.routing.Request;
 import utils.io.commands.list.SortColumnCommand;
 
@@ -35,16 +36,22 @@ public abstract class Controller {
         return sortOrders;
     }
 
-    protected <M extends Model> List<M> sortModels(Collection<M> models, Class<M> modelClass, LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders) {
-        Comparator<M> combinedComparator = sortOrders.entrySet().stream()
-                .map(entry -> {
-                    Comparator<M> columnComparator = ModelTableFormatter.comparatorForColumn(modelClass, entry.getKey() - 1);
-                    return entry.getValue() == SortColumnCommand.SortOrder.DESCENDING
-                            ? columnComparator.reversed()
-                            : columnComparator;
-                })
-                .reduce(Comparator::thenComparing)
-                .orElse(ModelTableFormatter.comparatorForColumn(modelClass, 0));
+    protected <M extends Model> List<M> sortModels(Collection<M> models, Class<M> modelClass, LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders) throws UnimplementedModelTableException {
+        Comparator<M> combinedComparator = null;
+
+        for (var entry : sortOrders.entrySet()) {
+            Comparator<M> columnComparator = ModelTableFormatter.comparatorForColumn(modelClass, entry.getKey() - 1);
+
+            if (entry.getValue() == SortColumnCommand.SortOrder.DESCENDING) {
+                columnComparator = columnComparator.reversed();
+            }
+
+            combinedComparator = (combinedComparator == null) ? columnComparator : combinedComparator.thenComparing(columnComparator);
+        }
+
+        if (combinedComparator == null) {
+            combinedComparator = ModelTableFormatter.comparatorForColumn(modelClass, 0);
+        }
 
         return models.stream().sorted(combinedComparator).toList();
     }

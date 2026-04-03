@@ -37,7 +37,7 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
 
     public void addCountry(Country country) throws ModelException, DataManagerException {
         if (!country.isValid()) {
-            throw new ModelException("L'objet Country qui a voulu être ajouté n'est pas valide");
+            throw new ModelException("Le pays qui a voulu être ajouté n'est pas valide");
         }
 
         if (this.countries.containsKey(country.getIso3())) {

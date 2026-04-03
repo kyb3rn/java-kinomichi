@@ -7,7 +7,10 @@ import app.events.FormResultEvent;
 import app.events.GoBackBackEvent;
 import app.events.GoBackEvent;
 import app.models.Camp;
+import app.models.formatting.EmptyContentModelTableFormatterException;
 import app.models.formatting.ModelTableFormatter;
+import app.models.formatting.table.ModelTableInstanciationException;
+import app.models.formatting.table.UnimplementedModelTableException;
 import app.models.managers.CampDataManager;
 import app.utils.helpers.KinomichiFunctions;
 import app.utils.menus.InvalidMenuInputException;
@@ -18,6 +21,8 @@ import utils.io.commands.list.BackBackCommand;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
 import utils.io.commands.list.SortColumnCommand;
+import utils.io.helpers.Functions;
+import utils.io.helpers.tables.Table;
 import utils.io.helpers.texts.formatting.TextFormatter;
 
 import java.util.List;
@@ -44,8 +49,18 @@ public class SelectCampView extends View {
     public Event render() {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println();
-        ModelTableFormatter.forList(this.sortedCamps).display();
+        try {
+            Table table = ModelTableFormatter.forList(this.sortedCamps);
+            System.out.println();
+            table.display();
+        } catch (EmptyContentModelTableFormatterException e) {
+            System.out.println(Functions.styleAsErrorMessage("Impossible d'afficher la table listée des modèles car la liste est vide ou nul"));
+        } catch (UnimplementedModelTableException e) {
+            System.out.println(Functions.styleAsErrorMessage("Impossible d'afficher la table listée des modèles car aucun ModelTable n'est défini pour ce modèle"));
+        } catch (ModelTableInstanciationException e) {
+            System.out.println(Functions.styleAsErrorMessage("Impossible d'afficher la table listée des modèles car l'instanciation du ModelTable a échoué"));
+        }
+
         System.out.println(TextFormatter.italic("Entrez l'identifiant (#) d'un stage pour le sélectionner."));
 
         try {
@@ -63,7 +78,14 @@ public class SelectCampView extends View {
                         return backBackCommand;
                     }
                     case SortColumnCommand sortColumnCommand -> {
-                        int columnCount = ModelTableFormatter.getColumnCount(Camp.class);
+                        int columnCount;
+                        try {
+                            columnCount = ModelTableFormatter.getColumnCount(Camp.class);
+                        } catch (UnimplementedModelTableException e) {
+                            System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
+                            return null;
+                        }
+
                         for (int columnIndex : sortColumnCommand.getSortOrders().keySet()) {
                             if (columnIndex < 1 || columnIndex > columnCount) {
                                 System.out.println("L'index de colonne '%d' est invalide. Veuillez entrer un nombre entre 1 et %d.".formatted(columnIndex, columnCount));

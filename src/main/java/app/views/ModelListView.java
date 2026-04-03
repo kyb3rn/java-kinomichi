@@ -3,8 +3,11 @@ package app.views;
 import app.events.CallUrlEvent;
 import app.events.Event;
 import app.models.Model;
+import app.models.formatting.EmptyContentModelTableFormatterException;
+import app.models.formatting.table.UnimplementedModelTableException;
 import app.utils.menus.ModelListMenu;
 import utils.io.commands.list.SortColumnCommand;
+import utils.io.helpers.Functions;
 import utils.io.helpers.texts.formatting.TextFormatter;
 import utils.io.menus.MenuResponse;
 import utils.io.menus.UnhandledMenuResponseType;
@@ -34,7 +37,17 @@ public class ModelListView<M extends Model> extends View {
 
     @Override
     public Event render() {
-        ModelListMenu<M> modelListMenu = new ModelListMenu<>(this.modelClass, this.models);
+        ModelListMenu<M> modelListMenu;
+        try {
+            modelListMenu = new ModelListMenu<>(this.models);
+        } catch (UnimplementedModelTableException | EmptyContentModelTableFormatterException e) {
+            System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
+            return new CallUrlEvent("/");
+        }
+
+        if (!modelListMenu.generateTable()) {
+            return new CallUrlEvent("/");
+        }
 
         if (this.hasUnsavedChanges) {
             System.out.println(TextFormatter.italic(TextFormatter.yellow(TextFormatter.bold("ATTENTION !"), " Des modifications dans cette liste n'ont pas encore été sauvegardées. Rendez-vous dans le menu principal pour résoudre ce problème.")));

@@ -1,0 +1,69 @@
+{
+  "affiliations": [
+    {
+      "personId": 1,
+      "clubId": 1,
+      "affiliationNumber": "2018-DKMVR"
+    },
+    {
+      "personId": 3,
+      "clubId": 1,
+      "affiliationNumber": "2019-PLHWT"
+    },
+    {
+      "personId": 4,
+      "clubId": 2,
+      "affiliationNumber": "2020-BQNXF"
+    },
+    {
+      "personId": 6,
+      "clubId": 2,
+      "affiliationNumber": "2017-GRJMS"
+    },
+    {
+      "personId": 7,
+      "clubId": 6,
+      "affiliationNumber": "2021-YCWPT"
+    },
+    {
+      "personId": 10,
+      "clubId": 2,
+      "affiliationNumber": "2022-FTLNQ"
+    },
+    {
+      "personId": 12,
+      "clubId": 1,
+      "affiliationNumber": "2023-HXBVD"
+    },
+    {
+      "personId": 14,
+      "clubId": 3,
+      "affiliationNumber": "2019-MWRKZ"
+    },
+    {
+      "personId": 17,
+      "clubId": 6,
+      "affiliationNumber": "2024-JSNPG"
+    },
+    {
+      "personId": 20,
+      "clubId": 5,
+      "affiliationNumber": "2025-CVQTW"
+    },
+    {
+      "personId": 22,
+      "clubId": 3,
+      "affiliationNumber": "dsqdqs"
+    },
+    {
+      "personId": 23,
+      "clubId": 7,
+      "affiliationNumber": "2005-MFKAN"
+    },
+    {
+      "personId": 26,
+      "clubId": 7,
+      "affiliationNumber": "2001-YAASJ"
+    }
+  ]
+}

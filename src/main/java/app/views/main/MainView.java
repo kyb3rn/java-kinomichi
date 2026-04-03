@@ -69,8 +69,9 @@ public class MainView extends View {
         boolean campsInitialized = DataManagers.isInitialized(CampDataManager.class);
 
         if (!campsInitialized) {
-            String campsOptionLabel = TextFormatter.strikethrough("Stages") + " " + TextFormatter.red(TextFormatter.italic("(stages non chargés)"));
+            String campsOptionLabel = TextFormatter.strikethrough("Ajouter un stage") + " " + TextFormatter.red(TextFormatter.italic("(stages non chargés)"));
             mainMenu.addOption(campsOptionLabel, new CallUrlEvent("/"));
+            mainMenu.addSectionSeparationIndex();
             return;
         }
 

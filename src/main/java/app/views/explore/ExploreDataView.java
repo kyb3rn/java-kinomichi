@@ -19,7 +19,7 @@ public class ExploreDataView extends View {
 
         this.addDataManagerOption(exploreMenu, "Stages", CampDataManager.class, "/camps/list", "stages non chargés");
         this.addDataManagerOption(exploreMenu, "Personnes", PersonDataManager.class, "/persons/list", "personnes non chargées");
-        this.addDataManagerOption(exploreMenu, "Affiliés", AffiliatedDataManager.class, "/affiliateds/list", "affiliés non chargés");
+        this.addDataManagerOption(exploreMenu, "Affiliations", AffiliationDataManager.class, "/affiliations/list", "affiliés non chargés");
         this.addDataManagerOption(exploreMenu, "Clubs", ClubDataManager.class, "/clubs/list", "clubs non chargés");
         this.addDataManagerOption(exploreMenu, "Adresses", AddressDataManager.class, "/addresses/list", "adresses non chargées");
         this.addDataManagerOption(exploreMenu, "Pays", CountryDataManager.class, "/countries/list", "pays non chargés");

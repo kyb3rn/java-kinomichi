@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface TableDisplayFormattingOptions {
     Class<? extends TextFormattingPreset> preset() default TextFormattingPreset.class;
-    TextAlignment alignment() default TextAlignment.LEFT;
+    TextAlignment alignment() default TextAlignment.NONE;
     TextColor color() default TextColor.NONE;
     TextBackgroundColor backgroundColor() default TextBackgroundColor.NONE;
     TextStyle[] styles() default {};

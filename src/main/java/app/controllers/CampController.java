@@ -10,6 +10,7 @@ import app.models.ModelException;
 import app.models.managers.AddressDataManager;
 import app.models.managers.CampDataManager;
 import app.models.managers.DataManagerException;
+import app.models.formatting.table.UnimplementedModelTableException;
 import app.models.managers.DataManagers;
 import app.routing.Request;
 import app.views.ModelListView;
@@ -67,11 +68,18 @@ public class CampController extends Controller {
             campDataManager = DataManagers.get(CampDataManager.class);
         } catch (DataManagerException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage("Les stages n'ont pas pu être chargés dans l'application."));
-            return new CallUrlEvent("/");
+            return new CallUrlEvent("/explore");
         }
 
         LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders = this.parseSortParameter(request);
-        List<Camp> sortedCamps = this.sortModels(campDataManager.getModels(), Camp.class, sortOrders);
+        List<Camp> sortedCamps;
+
+        try {
+            sortedCamps = this.sortModels(campDataManager.getModels(), Camp.class, sortOrders);
+        } catch (UnimplementedModelTableException e) {
+            System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
+            return new CallUrlEvent("/explore");
+        }
 
         SelectCampView selectCampView = new SelectCampView(sortedCamps, campDataManager);
         Event event = selectCampView.render();
@@ -89,11 +97,18 @@ public class CampController extends Controller {
             campDataManager = DataManagers.get(CampDataManager.class);
         } catch (DataManagerException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage("Les données des stages n'ont pas pu être chargées."));
-            return new CallUrlEvent("/");
+            return new CallUrlEvent("/explore");
         }
 
         LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders = this.parseSortParameter(request);
-        List<Camp> sortedCamps = this.sortModels(campDataManager.getModels(), Camp.class, sortOrders);
+        List<Camp> sortedCamps;
+
+        try {
+            sortedCamps = this.sortModels(campDataManager.getModels(), Camp.class, sortOrders);
+        } catch (UnimplementedModelTableException e) {
+            System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
+            return new CallUrlEvent("/explore");
+        }
 
         ModelListView<Camp> campListView = new ModelListView<>(Camp.class, sortedCamps, campDataManager.hasUnsavedChanges(), "/camps/list");
         return campListView.render();

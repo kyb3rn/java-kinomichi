@@ -8,9 +8,6 @@ import utils.data_management.converters.CustomSerializable;
 import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
-import utils.io.helpers.tables.TableDisplay;
-import utils.io.helpers.tables.TableDisplayFormattingOptions;
-import utils.io.helpers.texts.formatting.TextStyle;
 
 public class Person extends IdentifiedModel implements CustomSerializable, JsonConvertible {
 
@@ -23,22 +20,18 @@ public class Person extends IdentifiedModel implements CustomSerializable, JsonC
 
     // ─── Getters ─── //
 
-    @TableDisplay(name = "Prénom", format = @TableDisplayFormattingOptions(styles = {TextStyle.ITALIC}), order = 2)
     public String getFirstName() {
         return this.firstName;
     }
 
-    @TableDisplay(name = "Nom", format = @TableDisplayFormattingOptions(styles = {TextStyle.ITALIC}), order = 3)
     public String getLastName() {
         return this.lastName;
     }
 
-    @TableDisplay(name = "Téléphone", order = 4)
     public String getPhone() {
         return this.phone;
     }
 
-    @TableDisplay(name = "Email", order = 5)
     public String getEmail() {
         return this.email;
     }
@@ -47,7 +40,7 @@ public class Person extends IdentifiedModel implements CustomSerializable, JsonC
 
     public void setFirstName(String firstName) throws ModelException {
         if (firstName == null || firstName.isBlank()) {
-            throw new ModelException("Le prénom d'une personne ne peut pas être vide");
+            throw new ModelException("Le prénom d'une personne ne peut pas être vide ou nul");
         }
 
         this.firstName = firstName.strip();
@@ -55,7 +48,7 @@ public class Person extends IdentifiedModel implements CustomSerializable, JsonC
 
     public void setLastName(String lastName) throws ModelException {
         if (lastName == null || lastName.isBlank()) {
-            throw new ModelException("Le nom d'une personne ne peut pas être vide");
+            throw new ModelException("Le nom d'une personne ne peut pas être vide ou nul");
         }
 
         this.lastName = lastName.strip();
@@ -63,7 +56,7 @@ public class Person extends IdentifiedModel implements CustomSerializable, JsonC
 
     public void setPhone(String phone) throws ModelException {
         if (phone == null || phone.isBlank()) {
-            throw new ModelException("Le téléphone d'une personne ne peut pas être vide");
+            throw new ModelException("Le téléphone d'une personne ne peut pas être vide ou nul");
         }
 
         this.phone = phone.strip();
@@ -71,7 +64,7 @@ public class Person extends IdentifiedModel implements CustomSerializable, JsonC
 
     public void setEmail(String email) throws ModelException {
         if (email == null || email.isBlank()) {
-            throw new ModelException("L'email d'une personne ne peut pas être vide");
+            throw new ModelException("L'email d'une personne ne peut pas être vide ou nul");
         }
 
         this.email = email.strip();

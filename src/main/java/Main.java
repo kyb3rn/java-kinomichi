@@ -1,10 +1,7 @@
 import app.AppState;
 import app.controllers.*;
 import app.events.*;
-import app.models.managers.AffiliatedDataManager;
-import app.models.managers.CampDataManager;
 import app.models.managers.DataManagers;
-import app.models.managers.PersonDataManager;
 import app.routing.Route;
 import app.routing.RouteNotFoundException;
 import app.routing.Router;
@@ -15,9 +12,7 @@ import utils.io.helpers.texts.formatting.TextFormatter;
 public class Main {
 
     public static void main(String[] args) {
-        DataManagers.initAndResolveReferencesOf(
-            AffiliatedDataManager.class
-        );
+        DataManagers.initAll();
 
         CommandManager.loadCommands();
 
@@ -28,7 +23,7 @@ public class Main {
         PersonController personController = new PersonController();
         CampController campController = new CampController();
         ClubController clubController = new ClubController();
-        AffiliatedController affiliatedController = new AffiliatedController();
+        AffiliationController affiliationController = new AffiliationController();
         AddressController addressController = new AddressController();
         CountryController countryController = new CountryController();
         DataManagerController dataManagerController = new DataManagerController();
@@ -56,8 +51,8 @@ public class Main {
         router.register(new Route("clubs.add", "/clubs/add", clubController::add));
         router.register(new Route("clubs.dashboard", "/clubs/dashboard", clubController::dashboard));
 
-        // Affiliateds
-        router.register(new Route("affiliateds.list", "/affiliateds/list(?:/sort/(?<sort>.+))?", affiliatedController::list));
+        // Affiliations
+        router.register(new Route("affiliations.list", "/affiliations/list(?:/sort/(?<sort>.+))?", affiliationController::list));
 
         // Addresses
         router.register(new Route("addresses.list", "/addresses/list(?:/sort/(?<sort>.+))?", addressController::list));

@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface TableDisplay {
+public @interface ModelTableDisplay {
     String name();
     TableDisplayFormattingOptions format() default @TableDisplayFormattingOptions;
     int order();

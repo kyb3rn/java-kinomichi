@@ -1,6 +1,5 @@
 package app.models;
 
-import app.models.formatting.ModelKeyTextFormattingPreset;
 import app.models.managers.AddressDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
@@ -13,10 +12,6 @@ import utils.data_management.converters.Hydratable;
 import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
-import utils.io.helpers.tables.TableDisplay;
-import utils.io.helpers.tables.TableDisplayFormattingOptions;
-import utils.io.helpers.texts.formatting.TextAlignment;
-import utils.io.helpers.texts.formatting.TextStyle;
 import utils.time.TimeSlot;
 
 import java.time.DateTimeException;
@@ -33,7 +28,6 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
 
     // ─── Getters ─── //
 
-    @TableDisplay(name = "Nom", format = @TableDisplayFormattingOptions(styles = {TextStyle.ITALIC}), order = 2)
     public String getName() {
         return this.name;
     }
@@ -42,23 +36,25 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
         return this.address;
     }
 
-    @TableDisplay(name = "Début et fin", order = 4)
     public TimeSlot getTimeSlot() {
         return this.timeSlot;
     }
 
     // ─── Special getters ─── //
 
-    @TableDisplay(name = "#& (adresse)", format = @TableDisplayFormattingOptions(preset = ModelKeyTextFormattingPreset.class, alignment = TextAlignment.CENTER), order = 3)
-    public int getAddressId() {
-        return this.address != null ? this.address.getId() : -1;
+    public int getAddressId() throws ModelException {
+        if (this.address == null) {
+            throw new ModelException("L'adresse de référence est nulle");
+        }
+
+        return this.address.getId();
     }
 
     // ─── Setters ─── //
 
     public void setName(String name) throws ModelException {
         if (name == null || name.isBlank()) {
-            throw new ModelException("Le nom d'un stage ne peut pas être vide");
+            throw new ModelException("Le nom d'un stage ne peut pas être vide ou nul");
         }
 
         this.name = name.strip();
@@ -74,7 +70,7 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
 
     public void setTimeSlot(TimeSlot timeSlot) throws ModelException {
         if (timeSlot == null) {
-            throw new ModelException("La période de temps d'un stage ne peut pas être vide");
+            throw new ModelException("La période de temps d'un stage ne peut pas être nulle");
         }
 
         this.timeSlot = timeSlot;
@@ -193,7 +189,7 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
 
         public void setName(String name) throws ModelException {
             if (name == null || name.isBlank()) {
-                throw new ModelException("Le nom d'un stage ne peut pas être vide");
+                throw new ModelException("Le nom d'un stage ne peut pas être vide ou nul");
             }
 
             this.name = name.strip();
@@ -201,7 +197,7 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
 
         public void setTimeSlotStart(String timeSlotStart) throws ModelException {
             if (timeSlotStart == null || timeSlotStart.isBlank()) {
-                throw new ModelException("La date de début d'un stage ne peut pas être vide");
+                throw new ModelException("La date de début d'un stage ne peut pas être vide ou nulle");
             }
 
             timeSlotStart = timeSlotStart.strip();
@@ -217,7 +213,7 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
 
         public void setTimeSlotEnd(String timeSlotEnd) throws ModelException {
             if (timeSlotEnd == null || timeSlotEnd.isBlank()) {
-                throw new ModelException("La date de fin d'un stage ne peut pas être vide");
+                throw new ModelException("La date de fin d'un stage ne peut pas être vide ou nulle");
             }
 
             timeSlotEnd = timeSlotEnd.strip();

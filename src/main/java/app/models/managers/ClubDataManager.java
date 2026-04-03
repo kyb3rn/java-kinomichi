@@ -48,7 +48,7 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
 
     public void addClub(Club club) throws ModelException, DataManagerException {
         if (!club.isValid()) {
-            throw new ModelException("L'objet Club qui a voulu être ajouté n'est pas valide");
+            throw new ModelException("Le club qui a voulu être ajouté n'est pas valide");
         }
 
         if (this.clubs.containsKey(club.getId())) {

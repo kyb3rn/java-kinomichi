@@ -53,7 +53,7 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
 
     public void addAddress(Address address) throws ModelException, DataManagerException {
         if (!address.isValid()) {
-            throw new ModelException("L'objet Address qui a voulu être ajouté n'est pas valide");
+            throw new ModelException("L'adresse qui a voulue être ajoutée n'est pas valide");
         }
 
         if (this.addresses.containsKey(address.getId())) {

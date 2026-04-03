@@ -49,7 +49,7 @@ public class CampDataManager extends DataManager<CampDataManager.Data> {
 
     public void addCamp(Camp camp) throws ModelException, DataManagerException {
         if (!camp.isValid()) {
-            throw new ModelException("L'objet Camp qui a voulu être ajouté n'est pas valide");
+            throw new ModelException("Le stage qui a voulu être ajouté n'est pas valide");
         }
 
         if (this.camps.containsKey(camp.getId())) {

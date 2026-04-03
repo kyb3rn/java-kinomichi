@@ -1,6 +1,6 @@
 package app.views.persons;
 
-import app.models.Affiliated;
+import app.models.Affiliation;
 import app.models.Person;
 
-public record AddPersonFormData(Person person, Affiliated.Data affiliatedData) {}
+public record AddPersonFormData(Person person, Affiliation affiliation) {}

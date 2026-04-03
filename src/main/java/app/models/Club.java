@@ -13,12 +13,6 @@ import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 
-import app.models.formatting.ModelKeyTextFormattingPreset;
-import utils.io.helpers.tables.TableDisplay;
-import utils.io.helpers.tables.TableDisplayFormattingOptions;
-import utils.io.helpers.texts.formatting.TextAlignment;
-import utils.io.helpers.texts.formatting.TextStyle;
-
 import java.util.regex.Pattern;
 
 public class Club extends IdentifiedModel implements Hydratable<Club.Data> {
@@ -32,7 +26,6 @@ public class Club extends IdentifiedModel implements Hydratable<Club.Data> {
 
     // ─── Getters ─── //
 
-    @TableDisplay(name = "Nom", format = @TableDisplayFormattingOptions(styles = {TextStyle.ITALIC}), order = 2)
     public String getName() {
         return this.name;
     }
@@ -41,23 +34,25 @@ public class Club extends IdentifiedModel implements Hydratable<Club.Data> {
         return this.address;
     }
 
-    @TableDisplay(name = "Lien Google Maps", order = 4)
     public String getGoogleMapsLink() {
         return this.googleMapsLink;
     }
 
     // ─── Special getters ─── //
 
-    @TableDisplay(name = "#& (adresse)", format = @TableDisplayFormattingOptions(preset = ModelKeyTextFormattingPreset.class, alignment = TextAlignment.CENTER), order = 3)
-    public int getAddressId() {
-        return this.address != null ? this.address.getId() : -1;
+    public int getAddressId() throws ModelException {
+        if (this.address == null) {
+            throw new ModelException("L'adresse de référence est nulle");
+        }
+
+        return this.address.getId();
     }
 
     // ─── Setters ─── //
 
     public void setName(String name) throws ModelException {
         if (name == null || name.isBlank()) {
-            throw new ModelException("Le nom d'un club ne peut pas être vide");
+            throw new ModelException("Le nom d'un club ne peut pas être vide ou nul");
         }
 
         this.name = name.strip();
@@ -171,7 +166,7 @@ public class Club extends IdentifiedModel implements Hydratable<Club.Data> {
 
         public void setName(String name) throws ModelException {
             if (name == null || name.isBlank()) {
-                throw new ModelException("Le nom d'un club ne peut pas être vide");
+                throw new ModelException("Le nom d'un club ne peut pas être vide ou nul");
             }
 
             this.name = name.strip();

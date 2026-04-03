@@ -47,6 +47,17 @@ public class DataManagers {
         manager.resolveReferences();
     }
 
+    public static void initAll() {
+        initAndResolveReferencesOf(
+                CountryDataManager.class,
+                PersonDataManager.class,
+                AddressDataManager.class,
+                ClubDataManager.class,
+                CampDataManager.class,
+                AffiliationDataManager.class
+        );
+    }
+
     @SafeVarargs
     public static void initAndResolveReferencesOf(Class<? extends DataManager<?>>... classes) {
         // Pass 1: instantiate managers (primitive data only)

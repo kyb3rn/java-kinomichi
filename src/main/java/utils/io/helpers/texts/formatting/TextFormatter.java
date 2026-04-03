@@ -178,6 +178,7 @@ public class TextFormatter {
 
     public static FormattedText align(int lineLength, Object text, TextAlignment alignment) {
         return switch (alignment) {
+            case NONE -> (text instanceof FormattedText formattedText) ? formattedText : new FormattedText(toSegments(text));
             case LEFT -> alignLeft(lineLength, text);
             case RIGHT -> alignRight(lineLength, text);
             case CENTER -> center(lineLength, text);

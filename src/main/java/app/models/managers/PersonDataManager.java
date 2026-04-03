@@ -52,31 +52,14 @@ public class PersonDataManager extends DataManager<PersonDataManager.Data> {
             person.setId(maxId + 1);
         }
 
-        if (!person.isValid()) {
-            throw new ModelException("L'objet Person qui a voulu être ajouté n'est pas valide");
-        }
-
-        if (this.persons.containsKey(person.getId())) {
-            throw new DataManagerException("Une personne portant l'identifiant '%d' existe déjà".formatted(person.getId()));
-        }
-
-        this.persons.put(person.getId(), person);
-
-        if (this.isInitialized()) {
-            this.unsavedChanges = true;
-
-            try {
-                this.export();
-            } catch (DataManagerException _) {
-            }
-        }
+        this.addPerson(person);
 
         return person;
     }
 
     public void addPerson(Person person) throws ModelException, DataManagerException {
         if (!person.isValid()) {
-            throw new ModelException("L'objet Person qui a voulu être ajouté n'est pas valide");
+            throw new ModelException("La personne qui a voulu être ajouté n'est pas valide");
         }
 
         if (this.persons.containsKey(person.getId())) {

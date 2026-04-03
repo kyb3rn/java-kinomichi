@@ -18,7 +18,7 @@
       "firstName": "Sophie",
       "lastName": "Lemaire",
       "phone": "0495 78 90 12",
-      "email": "sophie.Lemaire@outlook.be",
+      "email": "sophie.lemaire@outlook.be",
       "id": 3
     },
     {
@@ -60,7 +60,7 @@
       "firstName": "Amandine",
       "lastName": "Lemaire",
       "phone": "0491 56 78 90",
-      "email": "amandine.Lemaire@hotmail.com",
+      "email": "amandine.lemaire@hotmail.com",
       "id": 9
     },
     {
@@ -162,11 +162,18 @@
       "id": 23
     },
     {
-      "firstName": "1",
-      "lastName": "1",
-      "phone": "1",
-      "email": "1",
-      "id": 24
+      "firstName": "Marc",
+      "lastName": "André",
+      "phone": "0491 48 75 10",
+      "email": "marcand@outlook.com",
+      "id": 25
+    },
+    {
+      "firstName": "Pascal",
+      "lastName": "Toncat",
+      "phone": "0451 24 71 15",
+      "email": "pascal.toncat@gmail.com",
+      "id": 26
     }
   ]
 }

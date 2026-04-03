@@ -1,6 +1,5 @@
 package app.models;
 
-import app.models.formatting.ModelKeyTextFormattingPreset;
 import app.models.managers.ClubDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
@@ -14,12 +13,8 @@ import utils.data_management.converters.Hydratable;
 import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
-import utils.io.helpers.tables.TableDisplay;
-import utils.io.helpers.tables.TableDisplayFormattingOptions;
-import utils.io.helpers.texts.formatting.TextAlignment;
-import utils.io.helpers.texts.formatting.TextStyle;
 
-public class Affiliated extends Person implements Hydratable<Affiliated.Data> {
+public class Affiliation extends Model implements Hydratable<Affiliation.Data> {
 
     // ─── Properties ─── //
 
@@ -39,16 +34,26 @@ public class Affiliated extends Person implements Hydratable<Affiliated.Data> {
         return this.club;
     }
 
-    @TableDisplay(name = "N° affiliation", format = @TableDisplayFormattingOptions(styles = {TextStyle.ITALIC}), order = 7)
     public String getAffiliationNumber() {
         return this.affiliationNumber;
     }
 
     // ─── Special getters ─── //
 
-    @TableDisplay(name = "#& (club)", format = @TableDisplayFormattingOptions(preset = ModelKeyTextFormattingPreset.class, alignment = TextAlignment.CENTER), order = 6)
-    public int getClubId() {
-        return this.club != null ? this.club.getId() : -1;
+    public int getPersonId() throws ModelException {
+        if (this.person == null) {
+            throw new ModelException("La personne de référence est nulle");
+        }
+
+        return this.person.getId();
+    }
+
+    public int getClubId() throws ModelException {
+        if (this.club == null) {
+            throw new ModelException("Le club de référence est nul");
+        }
+
+        return this.club.getId();
     }
 
     // ─── Setters ─── //
@@ -71,7 +76,7 @@ public class Affiliated extends Person implements Hydratable<Affiliated.Data> {
 
     public void setAffiliationNumber(String affiliationNumber) throws ModelException {
         if (affiliationNumber == null || affiliationNumber.isBlank()) {
-            throw new ModelException("Le numéro d'affiliation ne peut pas être vide");
+            throw new ModelException("Le numéro d'affiliation ne peut pas être vide ou nul");
         }
 
         this.affiliationNumber = affiliationNumber.strip();
@@ -92,10 +97,6 @@ public class Affiliated extends Person implements Hydratable<Affiliated.Data> {
         }
 
         this.person = person;
-        this.setFirstName(person.getFirstName());
-        this.setLastName(person.getLastName());
-        this.setPhone(person.getPhone());
-        this.setEmail(person.getEmail());
     }
 
     public void setClubFromPk(int clubId) throws ModelException {
@@ -117,17 +118,18 @@ public class Affiliated extends Person implements Hydratable<Affiliated.Data> {
 
     @Override
     public String toString() {
-        return "#%d %s %s (%s)".formatted(this.getId(), this.getFirstName(), this.getLastName(), this.affiliationNumber);
+        String personId = this.person != null ? "#" + this.person.getId() : "null";
+        String clubId = this.club != null ? "#" + this.club.getId() : "null";
+        return "%s %s %s".formatted(personId, clubId, this.affiliationNumber);
     }
 
     @Override
     public boolean isValid() {
-        return super.isValid() && this.person != null && this.club != null && this.affiliationNumber != null;
+        return this.person != null && this.club != null && this.affiliationNumber != null;
     }
 
     @Override
     public void hydrate(Data dataObject) throws ModelException {
-        this.setId(dataObject.getId());
         this.pendingPersonPk = dataObject.getPersonId();
         this.pendingClubPk = dataObject.getClubId();
         this.setAffiliationNumber(dataObject.getAffiliationNumber());
@@ -135,12 +137,12 @@ public class Affiliated extends Person implements Hydratable<Affiliated.Data> {
 
     @Override
     public Data dehydrate() throws ModelException {
-        return new Affiliated.Data(this);
+        return new Affiliation.Data(this);
     }
 
     // ─── Sub classes ─── //
 
-    public static class Data extends IdentifiedModelData implements CustomSerializable, JsonConvertible {
+    public static class Data implements CustomSerializable, JsonConvertible {
 
         // ─── Properties ─── //
 
@@ -153,11 +155,10 @@ public class Affiliated extends Person implements Hydratable<Affiliated.Data> {
         public Data() {
         }
 
-        public Data(Affiliated affiliated) throws ModelException {
-            this.setId(affiliated.getId());
-            this.setPersonId(affiliated.getPerson().getId());
-            this.setClubId(affiliated.getClub().getId());
-            this.setAffiliationNumber(affiliated.getAffiliationNumber());
+        public Data(Affiliation affiliation) throws ModelException {
+            this.setPersonId(affiliation.getPersonId());
+            this.setClubId(affiliation.getClub().getId());
+            this.setAffiliationNumber(affiliation.getAffiliationNumber());
         }
 
         // ─── Getters ─── //
@@ -216,7 +217,7 @@ public class Affiliated extends Person implements Hydratable<Affiliated.Data> {
 
         public void setAffiliationNumber(String affiliationNumber) throws ModelException {
             if (affiliationNumber == null || affiliationNumber.isBlank()) {
-                throw new ModelException("Le numéro d'affiliation ne peut pas être vide");
+                throw new ModelException("Le numéro d'affiliation ne peut pas être vide ou nul");
             }
 
             this.affiliationNumber = affiliationNumber.strip();
@@ -233,9 +234,6 @@ public class Affiliated extends Person implements Hydratable<Affiliated.Data> {
                 throw new StringParserException("Le JSON reçu n'est pas un objet valide (%s)".formatted(e.getMessage()), e);
             }
 
-            if (!obj.has("id")) {
-                throw new StringParserException("Le champ 'id' est manquant");
-            }
             if (!obj.has("personId")) {
                 throw new StringParserException("Le champ 'personId' est manquant");
             }
@@ -247,7 +245,6 @@ public class Affiliated extends Person implements Hydratable<Affiliated.Data> {
             }
 
             try {
-                this.setId(obj.get("id").getAsString());
                 this.setPersonId(obj.get("personId").getAsString());
                 this.setClubId(obj.get("clubId").getAsString());
                 this.setAffiliationNumber(obj.get("affiliationNumber").getAsString());

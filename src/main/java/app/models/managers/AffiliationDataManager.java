@@ -1,6 +1,6 @@
 package app.models.managers;
 
-import app.models.Affiliated;
+import app.models.Affiliation;
 import app.models.Model;
 import app.models.ModelException;
 import app.models.NotResultForPrimaryKeyException;
@@ -18,44 +18,44 @@ import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
 
-public class AffiliatedDataManager extends DataManager<AffiliatedDataManager.Data> {
+public class AffiliationDataManager extends DataManager<AffiliationDataManager.Data> {
 
     // ─── Properties ─── //
 
-    private final TreeMap<Integer, Affiliated> affiliateds = new TreeMap<>();
+    private final TreeMap<Integer, Affiliation> affiliations = new TreeMap<>();
 
     // ─── Getters ─── //
 
-    public TreeMap<Integer, Affiliated> getAffiliateds() {
-        return this.affiliateds;
+    public TreeMap<Integer, Affiliation> getAffiliations() {
+        return this.affiliations;
     }
 
     // ─── Utility methods ─── //
 
-    public Affiliated getAffiliated(Integer id) {
-        return this.affiliateds.get(id);
+    public Affiliation getAffiliation(Integer personId) {
+        return this.affiliations.get(personId);
     }
 
-    public Affiliated getAffiliatedWithExceptions(int id) throws NotResultForPrimaryKeyException {
-        Affiliated affiliated = this.getAffiliated(id);
+    public Affiliation getAffiliationWithExceptions(int personId) throws NotResultForPrimaryKeyException {
+        Affiliation affiliation = this.getAffiliation(personId);
 
-        if (affiliated == null) {
-            throw new NotResultForPrimaryKeyException("Aucun des affiliés enregistrés ne porte l'identifiant '%d'".formatted(id));
+        if (affiliation == null) {
+            throw new NotResultForPrimaryKeyException("Aucun des affiliés enregistrés ne porte l'identifiant '%d'".formatted(personId));
         }
 
-        return affiliated;
+        return affiliation;
     }
 
-    public void addAffiliated(Affiliated affiliated) throws ModelException, DataManagerException {
-        if (!affiliated.isValid()) {
-            throw new ModelException("L'objet Affiliated qui a voulu être ajouté n'est pas valide");
+    public void addAffiliation(Affiliation affiliation) throws ModelException, DataManagerException {
+        if (!affiliation.isValid()) {
+            throw new ModelException("L'affiliation qui a voulu être ajoutée n'est pas valide");
         }
 
-        if (this.affiliateds.containsKey(affiliated.getId())) {
-            throw new DataManagerException("Un affilié portant l'identifiant '%d' existe déjà".formatted(affiliated.getId()));
+        if (this.affiliations.containsKey(affiliation.getPerson().getId())) {
+            throw new DataManagerException("Un affilié portant l'identifiant '%d' existe déjà".formatted(affiliation.getPersonId()));
         }
 
-        this.affiliateds.put(affiliated.getId(), affiliated);
+        this.affiliations.put(affiliation.getPersonId(), affiliation);
 
         if (this.isInitialized()) {
             this.unsavedChanges = true;
@@ -67,24 +67,21 @@ public class AffiliatedDataManager extends DataManager<AffiliatedDataManager.Dat
         }
     }
 
-    public Affiliated addAffiliated(Affiliated.Data affiliatedData) throws ModelException, DataManagerException {
-        Affiliated affiliated = new Affiliated();
-        affiliated.hydrate(affiliatedData);
-        DataManagers.resolveModelReferences(affiliated);
+    public Affiliation addAffiliation(Affiliation.Data affiliationData) throws ModelException, DataManagerException {
+        Affiliation affiliation = new Affiliation();
+        affiliation.hydrate(affiliationData);
+        DataManagers.resolveModelReferences(affiliation);
 
-        int maxId = this.affiliateds.values().stream().mapToInt(Affiliated::getId).max().orElse(0);
-        affiliated.setId(maxId + 1);
+        this.addAffiliation(affiliation);
 
-        this.addAffiliated(affiliated);
-
-        return affiliated;
+        return affiliation;
     }
 
     // ─── Overrides & inheritance ─── //
 
     @Override
-    public Collection<Affiliated> getModels() {
-        return this.affiliateds.values();
+    public Collection<Affiliation> getModels() {
+        return this.affiliations.values();
     }
 
     @Override
@@ -128,27 +125,27 @@ public class AffiliatedDataManager extends DataManager<AffiliatedDataManager.Dat
 
     @Override
     public int count() {
-        return this.affiliateds.size();
+        return this.affiliations.size();
     }
 
     @Override
     public void hydrate(Data dataObject) throws ModelException {
         this.pendingModels = new ArrayList<>();
 
-        for (Affiliated.Data affiliatedData : dataObject.affiliateds) {
-            Affiliated affiliated = new Affiliated();
-            affiliated.hydrate(affiliatedData);
-            this.pendingModels.add(affiliated);
+        for (Affiliation.Data affiliationData : dataObject.affiliations) {
+            Affiliation affiliation = new Affiliation();
+            affiliation.hydrate(affiliationData);
+            this.pendingModels.add(affiliation);
         }
     }
 
     @Override
     protected void addResolvedModel(Model model) throws ModelException, DataManagerException {
-        if (!(model instanceof Affiliated affiliated)) {
-            throw new ModelException("Le manager '%s' attend un objet de type Affiliated, mais a reçu '%s'".formatted(this.getClass().getSimpleName(), model.getClass().getSimpleName()));
+        if (!(model instanceof Affiliation affiliation)) {
+            throw new ModelException("Le manager '%s' attend un objet de type Affiliation, mais a reçu '%s'".formatted(this.getClass().getSimpleName(), model.getClass().getSimpleName()));
         }
 
-        this.addAffiliated(affiliated);
+        this.addAffiliation(affiliation);
     }
 
     @Override
@@ -162,13 +159,13 @@ public class AffiliatedDataManager extends DataManager<AffiliatedDataManager.Dat
 
         // ─── Properties ─── //
 
-        private final List<Affiliated.Data> affiliateds = new ArrayList<>();
+        private final List<Affiliation.Data> affiliations = new ArrayList<>();
 
         // ─── Constructors ─── //
 
-        public Data(AffiliatedDataManager affiliatedDataManager) throws ModelException {
-            for (Affiliated affiliated : affiliatedDataManager.getAffiliateds().values()) {
-                this.affiliateds.add(affiliated.dehydrate());
+        public Data(AffiliationDataManager affiliationDataManager) throws ModelException {
+            for (Affiliation affiliation : affiliationDataManager.getAffiliations().values()) {
+                this.affiliations.add(affiliation.dehydrate());
             }
         }
 
@@ -191,17 +188,17 @@ public class AffiliatedDataManager extends DataManager<AffiliatedDataManager.Dat
                 throw new StringParserException("Le JSON reçu n'est pas un objet valide (%s)".formatted(e.getMessage()), e);
             }
 
-            if (!obj.has("affiliateds")) {
-                throw new StringParserException("Le champ 'affiliateds' est manquant");
-            } else if (!obj.get("affiliateds").isJsonArray()) {
-                throw new StringParserException("Le champ 'affiliateds' doit être un tableau");
+            if (!obj.has("affiliations")) {
+                throw new StringParserException("Le champ 'affiliations' est manquant");
+            } else if (!obj.get("affiliations").isJsonArray()) {
+                throw new StringParserException("Le champ 'affiliations' doit être un tableau");
             }
 
-            JsonArray affiliatedsArray = obj.getAsJsonArray("affiliateds");
-            for (JsonElement element : affiliatedsArray) {
-                Affiliated.Data affiliatedData = new Affiliated.Data();
-                affiliatedData.parseJson(element.toString());
-                this.affiliateds.add(affiliatedData);
+            JsonArray affiliationsArray = obj.getAsJsonArray("affiliations");
+            for (JsonElement element : affiliationsArray) {
+                Affiliation.Data affiliationData = new Affiliation.Data();
+                affiliationData.parseJson(element.toString());
+                this.affiliations.add(affiliationData);
             }
         }
 

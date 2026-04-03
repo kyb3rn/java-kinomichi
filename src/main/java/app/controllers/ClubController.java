@@ -10,6 +10,7 @@ import app.models.ModelException;
 import app.models.managers.AddressDataManager;
 import app.models.managers.ClubDataManager;
 import app.models.managers.DataManagerException;
+import app.models.formatting.table.UnimplementedModelTableException;
 import app.models.managers.DataManagers;
 import app.routing.Request;
 import app.views.ModelListView;
@@ -73,11 +74,18 @@ public class ClubController extends Controller {
             clubDataManager = DataManagers.get(ClubDataManager.class);
         } catch (DataManagerException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage("Les données des clubs n'ont pas pu être chargées."));
-            return new CallUrlEvent("/");
+            return new CallUrlEvent("/explore");
         }
 
         LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders = this.parseSortParameter(request);
-        List<Club> sortedClubs = this.sortModels(clubDataManager.getModels(), Club.class, sortOrders);
+        List<Club> sortedClubs;
+
+        try {
+            sortedClubs = this.sortModels(clubDataManager.getModels(), Club.class, sortOrders);
+        } catch (UnimplementedModelTableException e) {
+            System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
+            return new CallUrlEvent("/explore");
+        }
 
         ModelListView<Club> clubListView = new ModelListView<>(Club.class, sortedClubs, clubDataManager.hasUnsavedChanges(), "/clubs/list");
         return clubListView.render();

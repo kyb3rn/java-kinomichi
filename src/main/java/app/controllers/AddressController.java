@@ -5,6 +5,7 @@ import app.events.Event;
 import app.events.GoBackEvent;
 import app.models.Address;
 import app.models.ModelException;
+import app.models.formatting.table.UnimplementedModelTableException;
 import app.models.managers.AddressDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
@@ -26,11 +27,18 @@ public class AddressController extends Controller {
             addressDataManager = DataManagers.get(AddressDataManager.class);
         } catch (DataManagerException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage("Les données des adresses n'ont pas pu être chargées."));
-            return new CallUrlEvent("/");
+            return new CallUrlEvent("/explore");
         }
 
         LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders = this.parseSortParameter(request);
-        List<Address> sortedAddresses = this.sortModels(addressDataManager.getModels(), Address.class, sortOrders);
+        List<Address> sortedAddresses;
+
+        try {
+            sortedAddresses = this.sortModels(addressDataManager.getModels(), Address.class, sortOrders);
+        } catch (UnimplementedModelTableException e) {
+            System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
+            return new CallUrlEvent("/explore");
+        }
 
         ModelListView<Address> addressListView = new ModelListView<>(Address.class, sortedAddresses, addressDataManager.hasUnsavedChanges(), "/addresses/list");
         return addressListView.render();

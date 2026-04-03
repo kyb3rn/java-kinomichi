@@ -9,7 +9,11 @@ public class ModelKeyTextFormattingPreset extends ModelTextFormattingPreset {
 
     public ModelKeyTextFormattingPreset() {
         super(new TextFormattingOptions()
-                .addStyle(TextStyle.UNDERLINE));
+            .addStyle(TextStyle.UNDERLINE));
+    }
+
+    public ModelKeyTextFormattingPreset(TextFormattingOptions textFormattingOptions) {
+        super(textFormattingOptions);
     }
 
 }

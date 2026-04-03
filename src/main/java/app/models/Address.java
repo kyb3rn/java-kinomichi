@@ -12,10 +12,6 @@ import utils.data_management.converters.Hydratable;
 import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
-import app.models.formatting.ModelKeyTextFormattingPreset;
-import utils.io.helpers.tables.TableDisplay;
-import utils.io.helpers.tables.TableDisplayFormattingOptions;
-import utils.io.helpers.texts.formatting.TextAlignment;
 
 import java.util.regex.Pattern;
 
@@ -37,34 +33,34 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
         return this.country;
     }
 
-    @TableDisplay(name = "#& (pays)", format = @TableDisplayFormattingOptions(preset = ModelKeyTextFormattingPreset.class, alignment = TextAlignment.CENTER), order = 2)
-    public String getCountryIso3() {
-        return this.country != null ? this.country.getIso3() : null;
-    }
-
-    @TableDisplay(name = "Code postal", order = 3)
     public int getZipCode() {
         return this.zipCode;
     }
 
-    @TableDisplay(name = "Ville", order = 4)
     public String getCity() {
         return this.city;
     }
 
-    @TableDisplay(name = "Rue", order = 5)
     public String getStreet() {
         return this.street;
     }
 
-    @TableDisplay(name = "Numéro", order = 6)
     public String getNumber() {
         return this.number;
     }
 
-    @TableDisplay(name = "Boîte", order = 7)
     public Integer getBoxNumber() {
         return this.boxNumber;
+    }
+
+    // ─── Special getters ─── //
+
+    public String getCountryIso3() throws ModelException {
+        if (this.country == null) {
+            throw new ModelException("Le pays de référence est nul");
+        }
+
+        return this.country.getIso3();
     }
 
     // ─── Setters ─── //
@@ -89,7 +85,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
 
     public void setCity(String city) throws ModelException {
         if (city == null || city.isBlank()) {
-            throw new ModelException("Le nom de la ville ne peut pas être vide");
+            throw new ModelException("Le nom de la ville ne peut pas être vide ou nul");
         }
 
         this.city = city.strip();
@@ -97,7 +93,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
 
     public void setStreet(String street) throws ModelException {
         if (street == null || street.isBlank()) {
-            throw new ModelException("Le nom de la rue ne peut pas être vide");
+            throw new ModelException("Le nom de la rue ne peut pas être vide ou nul");
         }
 
         this.street = street.strip();
@@ -105,7 +101,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
 
     public void setNumber(String number) throws ModelException {
         if (number == null || number.isBlank()) {
-            throw new ModelException("Le numéro ne peut pas être vide");
+            throw new ModelException("Le numéro ne peut pas être vide ou nul");
         }
 
         this.number = number.strip();
@@ -139,7 +135,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
 
     private static String verifyCountryIso3(String iso3) throws ModelException {
         if (iso3 == null || iso3.isBlank()) {
-            throw new ModelException("L'ISO3 ne peut pas être vide");
+            throw new ModelException("L'ISO3 ne peut pas être vide ou nul");
         }
 
         iso3 = iso3.strip();
@@ -263,7 +259,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
 
         public void setZipCode(String zipCode) throws ModelException {
             if (zipCode == null || zipCode.isBlank()) {
-                throw new ModelException("Le code postal ne peut pas être vide");
+                throw new ModelException("Le code postal ne peut pas être vide ou nul");
             }
 
             int intZipCode;
@@ -278,7 +274,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
 
         public void setCity(String city) throws ModelException {
             if (city == null || city.isBlank()) {
-                throw new ModelException("Le nom de la ville ne peut pas être vide");
+                throw new ModelException("Le nom de la ville ne peut pas être vide ou nul");
             }
 
             this.city = city.strip();
@@ -286,7 +282,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
 
         public void setStreet(String street) throws ModelException {
             if (street == null || street.isBlank()) {
-                throw new ModelException("Le nom de la rue ne peut pas être vide");
+                throw new ModelException("Le nom de la rue ne peut pas être vide ou nul");
             }
 
             this.street = street.strip();
@@ -294,7 +290,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
 
         public void setNumber(String number) throws ModelException {
             if (number == null || number.isBlank()) {
-                throw new ModelException("Le numéro ne peut pas être vide");
+                throw new ModelException("Le numéro ne peut pas être vide ou nul");
             }
 
             this.number = number.strip();

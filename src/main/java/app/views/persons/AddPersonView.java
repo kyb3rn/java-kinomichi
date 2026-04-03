@@ -1,13 +1,11 @@
 package app.views.persons;
 
 import app.events.*;
-import app.models.Affiliated;
-import app.models.ModelException;
-import app.models.Person;
+import app.models.*;
+import app.models.formatting.EmptyContentModelTableFormatterException;
 import app.models.formatting.ModelTableFormatter;
-import app.models.managers.ClubDataManager;
-import app.models.managers.DataManagerException;
-import app.models.managers.DataManagers;
+import app.models.formatting.table.ModelTableInstanciationException;
+import app.models.formatting.table.UnimplementedModelTableException;
 import app.utils.ThrowingConsumer;
 import app.utils.ThrowingConsumerException;
 import app.utils.helpers.KinomichiFunctions;
@@ -20,11 +18,9 @@ import utils.io.helpers.Functions;
 import utils.io.helpers.tables.SimpleBox;
 import utils.io.helpers.tables.Table;
 import utils.io.helpers.texts.formatting.TextFormatter;
-import utils.io.menus.MenuResponse;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 
 public class AddPersonView extends View {
@@ -36,7 +32,7 @@ public class AddPersonView extends View {
         Scanner scanner = new Scanner(System.in);
 
         Person person = new Person();
-        Affiliated.Data affiliatedData = null;
+        Affiliation affiliation = new Affiliation();
 
         SimpleBox sectionHeaderSimpleBox = new SimpleBox();
         sectionHeaderSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Ajout d'une personne")));
@@ -63,37 +59,43 @@ public class AddPersonView extends View {
             }
         }));
 
-        Affiliated.Data newAffiliatedData = new Affiliated.Data();
+        Affiliation newAffiliation = new Affiliation();
         fieldHandlers.put(Field.CLUB_ID, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("5.1.")) + " Identifiant du club", input -> {
-            newAffiliatedData.setClubId(input);
-            int clubId = newAffiliatedData.getClubId();
+            Club.Data tempClubData = new Club.Data();
+            tempClubData.setId(input);
 
-            ClubDataManager clubDataManager;
-            try {
-                clubDataManager = DataManagers.get(ClubDataManager.class);
-            } catch (DataManagerException | ModelException e) {
-                throw new DataManagerException("Impossible de vérifier l'identifiant de club '%s'".formatted(input), e);
-            }
+            Club temp = new Club();
+            temp.setId(tempClubData.getId());
 
-            clubDataManager.getClubWithExceptions(clubId);
+            newAffiliation.setClubFromPk(temp.getId());
         }));
-        fieldHandlers.put(Field.AFFILIATION_NUMBER, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("5.2.")) + " Numéro d'affiliation", newAffiliatedData::setAffiliationNumber));
+        fieldHandlers.put(Field.AFFILIATION_NUMBER, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("5.2.")) + " Numéro d'affiliation", newAffiliation::setAffiliationNumber));
 
         try {
-            this.promptField(scanner, fieldHandlers, Field.FIRSTNAME);
-            this.promptField(scanner, fieldHandlers, Field.LASTNAME);
-            this.promptField(scanner, fieldHandlers, Field.PHONE);
-            this.promptField(scanner, fieldHandlers, Field.EMAIL);
-            this.promptField(scanner, fieldHandlers, Field.AFFILIATED_QUESTION);
+            promptField(scanner, fieldHandlers, Field.FIRSTNAME);
+            promptField(scanner, fieldHandlers, Field.LASTNAME);
+            promptField(scanner, fieldHandlers, Field.PHONE);
+            promptField(scanner, fieldHandlers, Field.EMAIL);
+            promptField(scanner, fieldHandlers, Field.AFFILIATED_QUESTION);
 
             if (isAffiliated.get()) {
-                this.promptField(scanner, fieldHandlers, Field.CLUB_ID);
-                this.promptField(scanner, fieldHandlers, Field.AFFILIATION_NUMBER);
+                promptField(scanner, fieldHandlers, Field.CLUB_ID);
+                promptField(scanner, fieldHandlers, Field.AFFILIATION_NUMBER);
 
-                affiliatedData = newAffiliatedData;
+                affiliation = newAffiliation;
             }
 
-            Table modelTable = ModelTableFormatter.forDetail(person);
+            Table personModelTable = getModelTable(person);
+
+            if (personModelTable == null) {
+                return new CallUrlEvent("/");
+            }
+
+            Table affiliationModelTable = getModelTable(affiliation);
+
+            if (affiliationModelTable == null) {
+                return new CallUrlEvent("/");
+            }
 
             SimpleBox simpleBox = new SimpleBox();
             simpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Voulez-vous ajouter cette personne ?")));
@@ -104,7 +106,13 @@ public class AddPersonView extends View {
 
             // Treat M
             do {
-                modelTable.display();
+                System.out.println();
+                personModelTable.display();
+
+                if (isAffiliated.get()) {
+                    affiliationModelTable.display();
+                }
+
                 simpleBox.display();
 
                 while (true) {
@@ -139,15 +147,15 @@ public class AddPersonView extends View {
                     if (editFieldMenuResponse instanceof Field field) {
                         boolean wasAffiliated = isAffiliated.get();
 
-                        this.promptField(scanner, fieldHandlers, field);
+                        promptField(scanner, fieldHandlers, field);
 
                         if (field == Field.AFFILIATED_QUESTION && !wasAffiliated && isAffiliated.get()) {
-                            this.promptField(scanner, fieldHandlers, Field.CLUB_ID);
-                            this.promptField(scanner, fieldHandlers, Field.AFFILIATION_NUMBER);
+                            promptField(scanner, fieldHandlers, Field.CLUB_ID);
+                            promptField(scanner, fieldHandlers, Field.AFFILIATION_NUMBER);
 
-                            affiliatedData = newAffiliatedData;
+                            affiliation = newAffiliation;
                         } else {
-                            affiliatedData = null;
+                            affiliation = null;
                         }
                     } else if (editFieldMenuResponse instanceof String cancelOption) {
                         if (cancelOption.equals("CANCEL_ADD")) {
@@ -164,7 +172,7 @@ public class AddPersonView extends View {
             }
 
             // Only O left
-            return new FormResultEvent<>(new AddPersonFormData(person, affiliatedData));
+            return new FormResultEvent<>(new AddPersonFormData(person, affiliation));
         } catch (CommandResponseException commandResponseException) {
             Object response = commandResponseException.getResponse();
 
@@ -182,7 +190,7 @@ public class AddPersonView extends View {
         }
     }
 
-    private void promptField(Scanner scanner, HashMap<Field, FieldHandler> fieldHandlers, Field field) throws CommandResponseException, UnimplementedFieldException {
+    private static void promptField(Scanner scanner, HashMap<Field, FieldHandler> fieldHandlers, Field field) throws CommandResponseException, UnimplementedFieldException {
         FieldHandler fieldHandler = fieldHandlers.get(field);
         if (fieldHandler != null) {
             System.out.println();
@@ -190,6 +198,21 @@ public class AddPersonView extends View {
             KinomichiFunctions.promptFieldWithExitAndBackCommands(scanner, fieldHandler.inputConsumer);
         } else {
             throw new UnimplementedFieldException(field);
+        }
+    }
+
+    private static Table getModelTable(Model model) {
+        try {
+            return ModelTableFormatter.forDetail(model);
+        } catch (EmptyContentModelTableFormatterException e) {
+            System.out.println(Functions.styleAsErrorMessage("Impossible d'afficher la table détaillée du modèle 'Person' car le modèle envoyé est nul"));
+            return null;
+        } catch (UnimplementedModelTableException e) {
+            System.out.println(Functions.styleAsErrorMessage("Impossible d'afficher la table détaillée du modèle 'Person' car aucun ModelTable n'est défini pour ce modèle"));
+            return null;
+        } catch (ModelTableInstanciationException e) {
+            System.out.println(Functions.styleAsErrorMessage("Impossible d'afficher la table détaillée du modèle 'Person' car l'instanciation du ModelTable a échoué"));
+            return null;
         }
     }
 
