@@ -13,8 +13,6 @@ import utils.data_management.converters.Hydratable;
 import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
-import utils.helpers.validation.BlankOrNullValueValidatorException;
-import utils.helpers.validation.Validators;
 
 public class Affiliation extends Model implements Hydratable<Affiliation.Data> {
 
@@ -127,6 +125,18 @@ public class Affiliation extends Model implements Hydratable<Affiliation.Data> {
         String personId = this.person != null ? "#" + this.person.getId() : "null";
         String clubId = this.club != null ? "#" + this.club.getId() : "null";
         return "%s %s %s".formatted(personId, clubId, this.affiliationNumber);
+    }
+
+    @Override
+    public Affiliation clone() {
+        Affiliation clone = new Affiliation();
+        clone.person = this.person;
+        clone.pendingPersonPk = this.pendingPersonPk;
+        clone.club = this.club;
+        clone.pendingClubPk = this.pendingClubPk;
+        clone.affiliationNumber = this.affiliationNumber;
+
+        return clone;
     }
 
     @Override

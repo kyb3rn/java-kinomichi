@@ -10,8 +10,10 @@ import app.models.managers.DataManagers;
 import app.utils.ThrowingConsumer;
 import app.utils.helpers.KinomichiFunctions;
 import app.utils.menus.KinomichiStandardMenu;
+import app.views.FormView;
 import app.views.View;
 import utils.io.commands.exceptions.CommandResponseException;
+import utils.io.commands.list.BackBackCommand;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
 import utils.helpers.Functions;
@@ -19,8 +21,9 @@ import utils.io.tables.SimpleBox;
 import utils.io.text_formatting.TextFormatter;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class AddClubView extends View {
+public class AddClubView extends FormView {
 
     // ─── Overrides & inheritance ─── //
 
@@ -38,7 +41,7 @@ public class AddClubView extends View {
         System.out.println();
         sectionHeaderSimpleBox.display();
 
-        HashMap<Field, FieldHandler> fieldHandlers = new HashMap<>();
+        HashMap<FormViewField, FieldHandler> fieldHandlers = new HashMap<>();
         fieldHandlers.put(Field.NAME, new FieldHandler(TextFormatter.bold(TextFormatter.green("1.")) + " Nom", clubData::setName));
         fieldHandlers.put(Field.ADDRESS_COUNTRY_ISO3, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.1.")) + " Adresse - Pays (ISO 3)", input -> {
             clubAddressData.setCountryIso3(input);
@@ -61,18 +64,18 @@ public class AddClubView extends View {
         fieldHandlers.put(Field.GOOGLE_MAPS_LINK, new FieldHandler(TextFormatter.bold(TextFormatter.green("3.")) + " Lien Google Maps " + TextFormatter.italic("(optionnel)"), clubData::setGoogleMapsLink));
 
         try {
-            this.promptField(scanner, fieldHandlers, Field.NAME);
+            promptField(scanner, fieldHandlers, Field.NAME);
 
             System.out.println();
             System.out.print(TextFormatter.bold(TextFormatter.green("2.")) + " Adresse");
 
-            this.promptField(scanner, fieldHandlers, Field.ADDRESS_COUNTRY_ISO3);
-            this.promptField(scanner, fieldHandlers, Field.ADDRESS_ZIP_CODE);
-            this.promptField(scanner, fieldHandlers, Field.ADDRESS_CITY);
-            this.promptField(scanner, fieldHandlers, Field.ADDRESS_STREET);
-            this.promptField(scanner, fieldHandlers, Field.ADDRESS_NUMBER);
-            this.promptField(scanner, fieldHandlers, Field.ADDRESS_BOX_NUMBER);
-            this.promptField(scanner, fieldHandlers, Field.GOOGLE_MAPS_LINK);
+            promptField(scanner, fieldHandlers, Field.ADDRESS_COUNTRY_ISO3);
+            promptField(scanner, fieldHandlers, Field.ADDRESS_ZIP_CODE);
+            promptField(scanner, fieldHandlers, Field.ADDRESS_CITY);
+            promptField(scanner, fieldHandlers, Field.ADDRESS_STREET);
+            promptField(scanner, fieldHandlers, Field.ADDRESS_NUMBER);
+            promptField(scanner, fieldHandlers, Field.ADDRESS_BOX_NUMBER);
+            promptField(scanner, fieldHandlers, Field.GOOGLE_MAPS_LINK);
 
             SimpleBox confirmationSimpleBox = new SimpleBox();
             confirmationSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Voulez-vous ajouter ce club ?")));
@@ -95,16 +98,15 @@ public class AddClubView extends View {
                 summarySimpleBox.display();
                 confirmationSimpleBox.display();
 
-                while (true) {
-                    input = scanner.nextLine();
+                AtomicReference<String> formattedInput = new AtomicReference<>();
+                KinomichiFunctions.promptInputWithDefaultCommandHandling(scanner, rawInput -> {
+                    formattedInput.set(rawInput.strip().toUpperCase());
 
-                    if (validOptions.contains(input.toUpperCase())) {
-                        input = input.toUpperCase();
-                        break;
-                    } else {
-                        System.out.println(Functions.styleAsErrorMessage("L'entrée '%s' est invalide. Veuillez entrer 'O', 'N' ou 'M'."));
+                    if (!validOptions.contains(formattedInput.get())) {
+                        throw new Exception("L'entrée '%s' est invalide. Veuillez entrer 'O', 'N' ou 'M'".formatted(rawInput));
                     }
-                }
+                });
+                input = formattedInput.get();
 
                 if (input.equals("M")) {
                     KinomichiStandardMenu editFieldMenu = new KinomichiStandardMenu("Modifier un champ", null);
@@ -124,7 +126,7 @@ public class AddClubView extends View {
 
                     Object editFieldMenuResponse = editFieldMenu.use().getResponse();
                     if (editFieldMenuResponse instanceof Field field) {
-                        this.promptField(scanner, fieldHandlers, field);
+                        promptField(scanner, fieldHandlers, field);
                     } else if (editFieldMenuResponse instanceof String cancelOption) {
                         if (cancelOption.equals("CANCEL_ADD")) {
                             input = "N";
@@ -148,6 +150,8 @@ public class AddClubView extends View {
                 return new ExitProgramEvent();
             } else if (response instanceof BackCommand) {
                 return new GoBackEvent();
+            } else if (response instanceof BackBackCommand) {
+                return new GoBackBackEvent();
             }
 
             System.out.println(Functions.styleAsErrorMessage("Il y a eu un problème durant le processus de gestion des commandes."));
@@ -158,35 +162,8 @@ public class AddClubView extends View {
         }
     }
 
-    private void promptField(Scanner scanner, HashMap<Field, FieldHandler> fieldHandlers, Field field) throws CommandResponseException, UnimplementedFieldException {
-        FieldHandler fieldHandler = fieldHandlers.get(field);
-        if (fieldHandler != null) {
-            System.out.println();
-            System.out.println(fieldHandler.label);
-            KinomichiFunctions.promptFieldWithExitAndBackCommands(scanner, fieldHandler.inputConsumer);
-        } else {
-            throw new UnimplementedFieldException(field);
-        }
-    }
-
-    private enum Field {
+    private enum Field implements FormViewField {
         NAME, ADDRESS_COUNTRY_ISO3, ADDRESS_ZIP_CODE, ADDRESS_CITY, ADDRESS_STREET, ADDRESS_NUMBER, ADDRESS_BOX_NUMBER, GOOGLE_MAPS_LINK
-    }
-
-    private record FieldHandler(String label, ThrowingConsumer<String> inputConsumer) {}
-
-    private static class UnimplementedFieldException extends Exception {
-
-        private final Field field;
-
-        public UnimplementedFieldException(Field field) {
-            this.field = field;
-        }
-
-        public Field getField() {
-            return field;
-        }
-
     }
 
 }

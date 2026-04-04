@@ -43,17 +43,6 @@ public class PersonDataManager extends DataManager<PersonDataManager.Data> {
         return person;
     }
 
-    public Person addPerson(Person person, boolean autoAssignId) throws ModelException, DataManagerException {
-        if (autoAssignId) {
-            int maxId = this.persons.values().stream().mapToInt(Person::getId).max().orElse(0);
-            person.setId(maxId + 1);
-        }
-
-        this.addPerson(person);
-
-        return person;
-    }
-
     public void addPerson(Person person) throws ModelException, DataManagerException {
         if (!person.isValid()) {
             throw new ModelException("La personne qui a voulu être ajouté n'est pas valide");
@@ -67,11 +56,37 @@ public class PersonDataManager extends DataManager<PersonDataManager.Data> {
 
         if (this.isInitialized()) {
             this.unsavedChanges = true;
+            this.export();
+        }
+    }
 
-            try {
-                this.export();
-            } catch (DataManagerException _) {
-            }
+    public Person addPerson(Person person, boolean autoAssignId) throws ModelException, DataManagerException {
+        if (autoAssignId) {
+            int maxId = this.persons.values().stream().mapToInt(Person::getId).max().orElse(0);
+            person.setId(maxId + 1);
+        }
+
+        this.addPerson(person);
+
+        return person;
+    }
+
+    public void updatePerson(Person modifiedPerson) throws ModelException, DataManagerException {
+        if (modifiedPerson == null) {
+            throw new ModelException("La personne modifiée ne peut pas être nul");
+        }
+
+        if (!modifiedPerson.isValid()) {
+            throw new ModelException("La personne modifiée reçue n'est pas valide");
+        }
+
+        Person personToModify = this.getPersonWithExceptions(modifiedPerson.getId());
+
+        personToModify.hydrate(modifiedPerson);
+
+        if (this.isInitialized()) {
+            this.unsavedChanges = true;
+            this.export();
         }
     }
 
@@ -89,19 +104,14 @@ public class PersonDataManager extends DataManager<PersonDataManager.Data> {
 
     @Override
     public void export() throws DataManagerException {
-        if (this.isInitialized()) {
-            Data data = new Data(this);
-            super.export(data);
-            this.unsavedChanges = false;
-        }
+        Data data = new Data(this);
+        super.export(data);
     }
 
     @Override
     public void export(FileType fileType) throws DataManagerException {
-        if (this.isInitialized()) {
-            Data data = new Data(this);
-            super.export(fileType, data);
-        }
+        Data data = new Data(this);
+        super.export(fileType, data);
     }
 
     @Override

@@ -8,11 +8,19 @@ public class Validators {
 
     public static final Pattern REGEX_EMAIL_PATTERN = Pattern.compile("^[\\\\w+-]+(\\\\.[\\\\w+-]+)*@[\\\\w-]+(\\\\.[\\\\w-]+)*\\\\.[a-zA-Z]{2,}$");
 
-    public static String validateNotNullOrEmpty(String value) throws BlankOrNullValueValidatorException {
-        return validateNotNullOrEmpty(value, true);
+    public static String validateNotNullOrStrictlyEmpty(String value) throws StrictlyEmptyOrNullValueValidatorException {
+        if (value == null || value.isEmpty()) {
+            throw new StrictlyEmptyOrNullValueValidatorException();
+        }
+
+        return value;
     }
 
-    public static String validateNotNullOrEmpty(String value, boolean strip) throws BlankOrNullValueValidatorException {
+    public static String validateNotNullOrBlank(String value) throws BlankOrNullValueValidatorException {
+        return validateNotNullOrBlank(value, true);
+    }
+
+    public static String validateNotNullOrBlank(String value, boolean strip) throws BlankOrNullValueValidatorException {
         if (value == null || value.isBlank()) {
             throw new BlankOrNullValueValidatorException();
         }

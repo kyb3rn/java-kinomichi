@@ -12,6 +12,9 @@ import utils.data_management.converters.Hydratable;
 import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
+import utils.helpers.validation.BlankOrNullValueValidatorException;
+import utils.helpers.validation.StrictlyEmptyOrNullValueValidatorException;
+import utils.helpers.validation.Validators;
 
 import java.util.regex.Pattern;
 
@@ -91,7 +94,9 @@ public class Club extends IdentifiedModel implements Hydratable<Club.Data> {
     }
 
     public static String verifyGoogleMapsLink(String googleMapsLink) throws ModelException {
-        if (googleMapsLink == null || googleMapsLink.isEmpty()) {
+        try {
+            googleMapsLink = Validators.validateNotNullOrStrictlyEmpty(googleMapsLink);
+        } catch (StrictlyEmptyOrNullValueValidatorException e) {
             return null;
         }
 

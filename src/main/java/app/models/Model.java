@@ -14,7 +14,7 @@ public abstract class Model {
 
     protected static String verifyNotNullOrEmpty(String value, String errorMessage) throws ModelException {
         try {
-            return Validators.validateNotNullOrEmpty(value);
+            return Validators.validateNotNullOrBlank(value);
         } catch (BlankOrNullValueValidatorException e) {
             throw new ModelException(errorMessage, e);
         }

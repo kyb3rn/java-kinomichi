@@ -47,7 +47,7 @@ public class Country extends Model implements CustomSerializable, CsvConvertible
 
     public void setName(String name) throws ModelException {
         try {
-            this.name = Validators.validateNotNullOrEmpty(name);
+            this.name = Validators.validateNotNullOrBlank(name);
         } catch (BlankOrNullValueValidatorException e) {
             throw new ModelException("Le nom d'un pays ne peut pas être vide ou nul", e);
         }
@@ -61,7 +61,7 @@ public class Country extends Model implements CustomSerializable, CsvConvertible
         }
 
         try {
-            value = Validators.validateNotNullOrEmpty(value);
+            value = Validators.validateNotNullOrBlank(value);
         } catch (BlankOrNullValueValidatorException e) {
             throw new ModelVerificationException("L'ISO " + size + " d'un pays ne peut pas être vide ou nul", e);
         }

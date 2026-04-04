@@ -39,6 +39,8 @@ public class Main {
         router.register(new Route("persons.dashboard", "/persons/dashboard", personController::dashboard));
         router.register(new Route("persons.list", "/persons/list(?:/sort/(?<sort>.+))?", personController::list));
         router.register(new Route("persons.add", "/persons/add", personController::add));
+        router.register(new Route("persons.modify.select", "/persons/modify/select(?:/sort/(?<sort>.+))?", personController::modifySelect));
+        router.register(new Route("persons.modify", "/persons/modify/(?<id>\\d+)", personController::modify));
 
         // Camps
         router.register(new Route("camps.list", "/camps/list(?:/sort/(?<sort>.+))?", campController::list));
@@ -50,6 +52,7 @@ public class Main {
         router.register(new Route("clubs.list", "/clubs/list(?:/sort/(?<sort>.+))?", clubController::list));
         router.register(new Route("clubs.add", "/clubs/add", clubController::add));
         router.register(new Route("clubs.dashboard", "/clubs/dashboard", clubController::dashboard));
+        router.register(new Route("clubs.delete.select", "/clubs/delete/select(?:/sort/(?<sort>.+))?", clubController::delete));
 
         // Affiliations
         router.register(new Route("affiliations.list", "/affiliations/list(?:/sort/(?<sort>.+))?", affiliationController::list));

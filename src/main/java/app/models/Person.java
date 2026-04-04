@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import utils.data_management.converters.CustomSerializable;
+import utils.data_management.converters.Hydratable;
 import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
@@ -17,7 +18,7 @@ import utils.helpers.validation.BlankOrNullValueValidatorException;
 import utils.helpers.validation.PatternMatchingValidatorException;
 import utils.helpers.validation.Validators;
 
-public class Person extends IdentifiedModel implements CustomSerializable, JsonConvertible, ChargeableElement {
+public class Person extends IdentifiedModel implements Hydratable<Person>, CustomSerializable, JsonConvertible, ChargeableElement {
 
     // ─── Properties ─── //
 
@@ -94,8 +95,40 @@ public class Person extends IdentifiedModel implements CustomSerializable, JsonC
     }
 
     @Override
+    public Person clone() {
+        Person clone = new Person();
+
+        try {
+            clone.setId(this.getId());
+        } catch (ModelException e) {
+            // Impossible case scenario (for IdentifiedModel at least)
+        }
+
+        clone.firstName = this.firstName;
+        clone.lastName = this.lastName;
+        clone.phone = this.phone;
+        clone.email = this.email;
+
+        return clone;
+    }
+
+    @Override
     public boolean isValid() {
         return this.getId() > 0 && this.firstName != null && this.lastName != null && this.phone != null && this.email != null;
+    }
+
+    @Override
+    public void hydrate(Person dataObject) throws ModelException {
+        this.setId(dataObject.getId());
+        this.setFirstName(dataObject.getFirstName());
+        this.setLastName(dataObject.getLastName());
+        this.setPhone(dataObject.getPhone());
+        this.setEmail(dataObject.getEmail());
+    }
+
+    @Override
+    public Person dehydrate() throws Exception {
+        return this.clone();
     }
 
     @Override

@@ -36,6 +36,18 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
         return this.countries.get(iso3);
     }
 
+    public Country getCountryWithExceptions(String iso3) throws DataManagerException, ModelException {
+        iso3 = Country.verifyIso3(iso3);
+
+        Country country = this.getCountry(iso3);
+
+        if (country == null) {
+            throw new NoResultForPrimaryKeyException("Aucun des pays enregistrés ne porte l'ISO3 '%s'".formatted(iso3));
+        }
+
+        return country;
+    }
+
     public void addCountry(Country country) throws ModelException, DataManagerException {
         if (!country.isValid()) {
             throw new ModelException("Le pays qui a voulu être ajouté n'est pas valide");
@@ -49,24 +61,8 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
 
         if (this.isInitialized()) {
             this.unsavedChanges = true;
-
-            try {
-                this.export();
-            } catch (DataManagerException _) {
-            }
+            this.export();
         }
-    }
-
-    public Country getCountryWithExceptions(String iso3) throws DataManagerException, ModelException {
-        iso3 = Country.verifyIso3(iso3);
-
-        Country country = this.getCountry(iso3);
-
-        if (country == null) {
-            throw new NoResultForPrimaryKeyException("Aucun des pays enregistrés ne porte l'ISO3 '%s'".formatted(iso3));
-        }
-
-        return country;
     }
 
     // ─── Overrides & inheritance ─── //
@@ -102,19 +98,14 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
 
     @Override
     public void export() throws DataManagerException {
-        if (this.isInitialized()) {
-            Data data = new Data(this);
-            super.export(data);
-            this.unsavedChanges = false;
-        }
+        Data data = new Data(this);
+        super.export(data);
     }
 
     @Override
     public void export(FileType fileType) throws DataManagerException {
-        if (this.isInitialized()) {
-            Data data = new Data(this);
-            super.export(fileType, data);
-        }
+        Data data = new Data(this);
+        super.export(fileType, data);
     }
 
     @Override

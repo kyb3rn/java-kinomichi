@@ -12,12 +12,9 @@ import utils.data_management.converters.Hydratable;
 import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
-import utils.helpers.validation.BelowBoundaryValidatorException;
-import utils.helpers.validation.BlankOrNullValueValidatorException;
-import utils.helpers.validation.ParsingValidatorException;
-import utils.helpers.validation.Validators;
+import utils.helpers.validation.*;
 
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Address extends IdentifiedModel implements Hydratable<Address.Data> {
 
@@ -149,9 +146,17 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
     }
 
     public static Integer verifyBoxNumber(String boxNumber) throws ModelException {
-        if (boxNumber == null) {
+        try {
+            boxNumber = Validators.validateNotNullOrStrictlyEmpty(boxNumber);
+        } catch (StrictlyEmptyOrNullValueValidatorException e) {
             return null;
         }
+
+        if (boxNumber.isBlank()) {
+            throw new ModelVerificationException("Le numéro de boîte d'une adresse ne peut pas être vide (null accepté)");
+        }
+
+        boxNumber = boxNumber.strip();
 
         try {
             return Validators.validateStrictlyPositiveInteger(boxNumber);
@@ -277,7 +282,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
         }
 
         public void setBoxNumber(Integer boxNumber) throws ModelException {
-            this.setBoxNumber(String.valueOf(boxNumber));
+            this.setBoxNumber(boxNumber == null ? null : boxNumber.toString());
         }
 
         // ─── Overrides & inheritance ─── //

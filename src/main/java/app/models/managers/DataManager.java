@@ -98,9 +98,7 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
     public abstract void export(FileType fileType) throws DataManagerException, ModelException;
 
     protected void export(T data) throws DataManagerException {
-        if (this.isInitialized()) {
-            this.export(this.defaultFileType, data);
-        }
+        this.export(this.defaultFileType, data);
     }
 
     @SuppressWarnings("unchecked")
@@ -128,17 +126,20 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
                         throw new DataManagerException("La classe de données de type '%s' n'implémente pas l'interface XmlConvertible".formatted(data.getClass().getSimpleName()));
                     }
                 }
-                default ->
-                    throw new DataManagerException("Ce type de fichier ('%s') n'est pas implémenté pour la classe de données '%s'".formatted(fileType.getExtension(), data.getClass().getSimpleName()));
+                case null -> throw new DataManagerException("Le type de fichier ne peut pas être nul");
+                default -> throw new DataManagerException("Ce type de fichier ('%s') n'est pas implémenté pour la classe de données '%s'".formatted(fileType.getExtension(), data.getClass().getSimpleName()));
             };
 
             fileWriter.write(data);
 
             try {
                 fileWriter.writeFile(this.getFilePath().toString());
+                this.unsavedChanges = false;
             } catch (IOException e) {
                 throw new DataManagerException("Impossible d'écrire dans le fichier '%s'".formatted(this.getFilePath()), e);
             }
+        } else {
+            throw new OverridingUninitializedDataManagerDataException(AddressDataManager.class);
         }
     }
 

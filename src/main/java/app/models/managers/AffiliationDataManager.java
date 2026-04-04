@@ -1,9 +1,6 @@
 package app.models.managers;
 
-import app.models.Affiliation;
-import app.models.Model;
-import app.models.ModelException;
-import app.models.NoResultForPrimaryKeyException;
+import app.models.*;
 import com.google.gson.*;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
@@ -38,7 +35,7 @@ public class AffiliationDataManager extends DataManager<AffiliationDataManager.D
         Affiliation affiliation = this.getAffiliation(personId);
 
         if (affiliation == null) {
-            throw new NoResultForPrimaryKeyException("Aucun des affiliés enregistrés ne porte l'identifiant '%d'".formatted(personId));
+            throw new NoResultForPrimaryKeyException("Aucune des affiliations enregistrées ne référence une personne portant l'identifiant '%d'".formatted(personId));
         }
 
         return affiliation;
@@ -50,18 +47,14 @@ public class AffiliationDataManager extends DataManager<AffiliationDataManager.D
         }
 
         if (this.affiliations.containsKey(affiliation.getPerson().getId())) {
-            throw new DataManagerException("Un affilié portant l'identifiant '%d' existe déjà".formatted(affiliation.getPersonId()));
+            throw new DataManagerException("Une affiliation référençant une personne portant l'identifiant '%d' existe déjà".formatted(affiliation.getPersonId()));
         }
 
         this.affiliations.put(affiliation.getPersonId(), affiliation);
 
         if (this.isInitialized()) {
             this.unsavedChanges = true;
-
-            try {
-                this.export();
-            } catch (DataManagerException _) {
-            }
+            this.export();
         }
     }
 
@@ -73,6 +66,50 @@ public class AffiliationDataManager extends DataManager<AffiliationDataManager.D
         this.addAffiliation(affiliation);
 
         return affiliation;
+    }
+
+    public void updateAffiliation(Affiliation modifiedAffiliation) throws ModelException, DataManagerException {
+        if (modifiedAffiliation == null) {
+            throw new ModelException("L'affiliation modifiée ne peut pas être nul");
+        }
+
+        if (!modifiedAffiliation.isValid()) {
+            throw new ModelException("L'affiliation modifiée reçue n'est pas valide");
+        }
+
+        Affiliation affiliationToModify = this.getAffiliationWithExceptions(modifiedAffiliation.getPersonId());
+
+        affiliationToModify.hydrate(modifiedAffiliation.dehydrate());
+
+        if (this.isInitialized()) {
+            this.unsavedChanges = true;
+            this.export();
+        }
+    }
+
+    public void deleteAffiliation(int personId) throws ModelException, DataManagerException {
+        Affiliation affiliationToDelete = this.getAffiliationWithExceptions(personId);
+
+        this.affiliations.remove(affiliationToDelete.getPersonId());
+
+        if (this.isInitialized()) {
+            this.unsavedChanges = true;
+            this.export();
+        }
+    }
+
+    public boolean isClubUsed(Club clubToDelete) throws ModelException {
+        if (clubToDelete == null) {
+            throw new ModelException("Le club à chercher ne peut pas être nul");
+        }
+
+        return this.affiliations.values().stream().anyMatch(affiliation -> {
+            try {
+                return affiliation.getClubId() == clubToDelete.getId();
+            } catch (ModelException _) {
+                return false;
+            }
+        });
     }
 
     // ─── Overrides & inheritance ─── //
@@ -89,19 +126,14 @@ public class AffiliationDataManager extends DataManager<AffiliationDataManager.D
 
     @Override
     public void export() throws DataManagerException, ModelException {
-        if (this.isInitialized()) {
-            Data data = new Data(this);
-            super.export(data);
-            this.unsavedChanges = false;
-        }
+        Data data = new Data(this);
+        super.export(data);
     }
 
     @Override
     public void export(FileType fileType) throws DataManagerException, ModelException {
-        if (this.isInitialized()) {
-            Data data = new Data(this);
-            super.export(fileType, data);
-        }
+        Data data = new Data(this);
+        super.export(fileType, data);
     }
 
     @Override

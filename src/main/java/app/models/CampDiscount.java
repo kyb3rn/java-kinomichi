@@ -152,7 +152,7 @@ public class CampDiscount extends IdentifiedModel implements Hydratable<CampDisc
 
     public static ChargeableElementType verifyChargeableElementType(String chargeableElementTypeName) throws ModelException {
         try {
-            chargeableElementTypeName = Validators.validateNotNullOrEmpty(chargeableElementTypeName);
+            chargeableElementTypeName = Validators.validateNotNullOrBlank(chargeableElementTypeName);
         } catch (BlankOrNullValueValidatorException e) {
             throw new ModelVerificationException("Le nom du type d'élément facturable ne peut pas être vide ou nul", e);
         }
@@ -167,7 +167,7 @@ public class CampDiscount extends IdentifiedModel implements Hydratable<CampDisc
     @SuppressWarnings("unchecked")
     public static EChargeableCategory verifyEChargeableCategory(String chargeableCategoryName, ChargeableElementType chargeableElementType) throws ModelException {
         try {
-            chargeableCategoryName = Validators.validateNotNullOrEmpty(chargeableCategoryName);
+            chargeableCategoryName = Validators.validateNotNullOrBlank(chargeableCategoryName);
         } catch (BlankOrNullValueValidatorException e) {
             throw new ModelVerificationException("Le nom de la catégorie facturable ne peut pas être vide ou nul", e);
         }
@@ -206,7 +206,7 @@ public class CampDiscount extends IdentifiedModel implements Hydratable<CampDisc
 
     public static ChargingElementType verifyChargingElementType(String chargingElementTypeName) throws ModelException {
         try {
-            chargingElementTypeName = Validators.validateNotNullOrEmpty(chargingElementTypeName);
+            chargingElementTypeName = Validators.validateNotNullOrBlank(chargingElementTypeName);
         } catch (BlankOrNullValueValidatorException e) {
             throw new ModelVerificationException("Le nom du type d'élément facturant ne peut pas être vide ou nul", e);
         }

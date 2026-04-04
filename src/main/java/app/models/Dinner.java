@@ -138,7 +138,7 @@ public class Dinner extends IdentifiedModel implements Hydratable<Dinner.Data>, 
 
     public static Currency verifyPriceCurrency(String priceCurrencyName) throws ModelException {
         try {
-            priceCurrencyName = Validators.validateNotNullOrEmpty(priceCurrencyName);
+            priceCurrencyName = Validators.validateNotNullOrBlank(priceCurrencyName);
         } catch (BlankOrNullValueValidatorException e) {
             throw new ModelVerificationException("La monnaie du prix d'un repas ne peut pas être vide ou nul", e);
         }
@@ -154,7 +154,7 @@ public class Dinner extends IdentifiedModel implements Hydratable<Dinner.Data>, 
 
     public static double verifyPriceAmount(String priceAmount) throws ModelException {
         try {
-            priceAmount = Validators.validateNotNullOrEmpty(priceAmount);
+            priceAmount = Validators.validateNotNullOrBlank(priceAmount);
         } catch (BlankOrNullValueValidatorException e) {
             throw new ModelVerificationException("Le montant du prix d'un repas ne peut pas être vide ou nul", e);
         }

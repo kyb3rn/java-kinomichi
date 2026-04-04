@@ -57,11 +57,7 @@ public class CampDiscountDataManager extends DataManager<CampDiscountDataManager
 
         if (this.isInitialized()) {
             this.unsavedChanges = true;
-
-            try {
-                this.export();
-            } catch (DataManagerException _) {
-            }
+            this.export();
         }
     }
 
@@ -92,19 +88,14 @@ public class CampDiscountDataManager extends DataManager<CampDiscountDataManager
 
     @Override
     public void export() throws DataManagerException, ModelException {
-        if (this.isInitialized()) {
-            Data data = new Data(this);
-            super.export(data);
-            this.unsavedChanges = false;
-        }
+        Data data = new Data(this);
+        super.export(data);
     }
 
     @Override
     public void export(FileType fileType) throws DataManagerException, ModelException {
-        if (this.isInitialized()) {
-            Data data = new Data(this);
-            super.export(fileType, data);
-        }
+        Data data = new Data(this);
+        super.export(fileType, data);
     }
 
     @Override

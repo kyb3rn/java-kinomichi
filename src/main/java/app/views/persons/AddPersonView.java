@@ -10,8 +10,10 @@ import app.utils.ThrowingConsumer;
 import app.utils.ThrowingConsumerException;
 import app.utils.helpers.KinomichiFunctions;
 import app.utils.menus.KinomichiStandardMenu;
+import app.views.FormView;
 import app.views.View;
 import utils.io.commands.exceptions.CommandResponseException;
+import utils.io.commands.list.BackBackCommand;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
 import utils.helpers.Functions;
@@ -21,9 +23,10 @@ import utils.io.text_formatting.TextFormatter;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 
-public class AddPersonView extends View {
+public class AddPersonView extends FormView {
 
     // ─── Overrides & inheritance ─── //
 
@@ -41,7 +44,7 @@ public class AddPersonView extends View {
         System.out.println();
         sectionHeaderSimpleBox.display();
 
-        HashMap<Field, FieldHandler> fieldHandlers = new HashMap<>();
+        HashMap<FormViewField, FieldHandler> fieldHandlers = new HashMap<>();
         fieldHandlers.put(Field.FIRSTNAME, new FieldHandler(TextFormatter.bold(TextFormatter.green("1.")) + " Prénom", person::setFirstName));
         fieldHandlers.put(Field.LASTNAME, new FieldHandler(TextFormatter.bold(TextFormatter.green("2.")) + " Nom", person::setLastName));
         fieldHandlers.put(Field.PHONE, new FieldHandler(TextFormatter.bold(TextFormatter.green("3.")) + " Téléphone", person::setPhone));
@@ -115,16 +118,15 @@ public class AddPersonView extends View {
 
                 simpleBox.display();
 
-                while (true) {
-                    input = scanner.nextLine();
+                AtomicReference<String> formattedInput = new AtomicReference<>();
+                KinomichiFunctions.promptInputWithDefaultCommandHandling(scanner, rawInput -> {
+                    formattedInput.set(rawInput.strip().toUpperCase());
 
-                    if (validOptions.contains(input.toUpperCase())) {
-                        input = input.toUpperCase();
-                        break;
-                    } else {
-                        System.out.println(Functions.styleAsErrorMessage("L'entrée '%s' est invalide. Veuillez entrer 'O', 'N' ou 'M'."));
+                    if (!validOptions.contains(formattedInput.get())) {
+                        throw new Exception("L'entrée '%s' est invalide. Veuillez entrer 'O', 'N' ou 'M'".formatted(rawInput));
                     }
-                }
+                });
+                input = formattedInput.get();
 
                 if (input.equals("M")) {
                     KinomichiStandardMenu editFieldMenu = new KinomichiStandardMenu("Modifier un champs", null);
@@ -180,6 +182,8 @@ public class AddPersonView extends View {
                 return new ExitProgramEvent();
             } else if (response instanceof BackCommand) {
                 return new GoBackEvent();
+            } else if (response instanceof BackBackCommand) {
+                return new GoBackBackEvent();
             }
 
             System.out.println(Functions.styleAsErrorMessage("Il y a eu un problème durant le processus de gestion des commandes."));
@@ -190,50 +194,8 @@ public class AddPersonView extends View {
         }
     }
 
-    private static void promptField(Scanner scanner, HashMap<Field, FieldHandler> fieldHandlers, Field field) throws CommandResponseException, UnimplementedFieldException {
-        FieldHandler fieldHandler = fieldHandlers.get(field);
-        if (fieldHandler != null) {
-            System.out.println();
-            System.out.println(fieldHandler.label);
-            KinomichiFunctions.promptFieldWithExitAndBackCommands(scanner, fieldHandler.inputConsumer);
-        } else {
-            throw new UnimplementedFieldException(field);
-        }
-    }
-
-    private static Table getModelTable(Model model) {
-        try {
-            return ModelTableFormatter.forDetail(model);
-        } catch (EmptyContentModelTableFormatterException e) {
-            System.out.println(Functions.styleAsErrorMessage("Impossible d'afficher la table détaillée du modèle 'Person' car le modèle envoyé est nul"));
-            return null;
-        } catch (UnimplementedModelTableException e) {
-            System.out.println(Functions.styleAsErrorMessage("Impossible d'afficher la table détaillée du modèle 'Person' car aucun ModelTable n'est défini pour ce modèle"));
-            return null;
-        } catch (ModelTableInstanciationException e) {
-            System.out.println(Functions.styleAsErrorMessage("Impossible d'afficher la table détaillée du modèle 'Person' car l'instanciation du ModelTable a échoué"));
-            return null;
-        }
-    }
-
-    private enum Field {
+    private enum Field implements FormViewField {
         FIRSTNAME, LASTNAME, PHONE, EMAIL, AFFILIATED_QUESTION, CLUB_ID, AFFILIATION_NUMBER
-    }
-
-    private record FieldHandler(String label, ThrowingConsumer<String> inputConsumer) {}
-
-    private static class UnimplementedFieldException extends Exception {
-
-        private final Field field;
-
-        public UnimplementedFieldException(Field field) {
-            this.field = field;
-        }
-
-        public Field getField() {
-            return field;
-        }
-
     }
 
 }

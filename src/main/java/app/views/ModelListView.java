@@ -20,15 +20,15 @@ public class ModelListView<M extends Model> extends View {
     // ─── Properties ─── //
 
     private final Class<M> modelClass;
-    private final Collection<M> models;
+    private final Collection<M> sortedModels;
     private final boolean hasUnsavedChanges;
     private final String sortBasePath;
 
     // ─── Constructors ─── //
 
-    public ModelListView(Class<M> modelClass, Collection<M> models, boolean hasUnsavedChanges, String sortBasePath) {
+    public ModelListView(Class<M> modelClass, Collection<M> sortedModels, boolean hasUnsavedChanges, String sortBasePath) {
         this.modelClass = modelClass;
-        this.models = models;
+        this.sortedModels = sortedModels;
         this.hasUnsavedChanges = hasUnsavedChanges;
         this.sortBasePath = sortBasePath;
     }
@@ -39,7 +39,7 @@ public class ModelListView<M extends Model> extends View {
     public Event render() {
         ModelListMenu<M> modelListMenu;
         try {
-            modelListMenu = new ModelListMenu<>(this.models);
+            modelListMenu = new ModelListMenu<>(this.sortedModels);
         } catch (UnimplementedModelTableException | EmptyContentModelTableFormatterException e) {
             System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
             return new CallUrlEvent("/");

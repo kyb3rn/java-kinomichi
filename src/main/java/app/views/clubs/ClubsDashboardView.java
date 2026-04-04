@@ -31,6 +31,7 @@ public class ClubsDashboardView extends View {
 
         manageClubsMenu.addOption("Liste des clubs", new CallUrlEvent("/clubs/list"));
         manageClubsMenu.addOption("Ajouter un club", new CallUrlEvent("/clubs/add"));
+        manageClubsMenu.addOption("Supprimer un club", new CallUrlEvent("/clubs/delete/select"));
 
         MenuResponse menuResponse = manageClubsMenu.use();
 

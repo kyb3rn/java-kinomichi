@@ -7,20 +7,24 @@ import app.models.ModelException;
 import app.models.managers.CountryDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
-import app.utils.ThrowingConsumer;
 import app.utils.helpers.KinomichiFunctions;
 import app.utils.menus.KinomichiStandardMenu;
-import app.views.View;
+import app.views.FormView;
+import utils.helpers.Functions;
 import utils.io.commands.exceptions.CommandResponseException;
+import utils.io.commands.list.BackBackCommand;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
-import utils.helpers.Functions;
 import utils.io.tables.SimpleBox;
 import utils.io.text_formatting.TextFormatter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class AddCampView extends View {
+public class AddCampView extends FormView {
 
     // ─── Overrides & inheritance ─── //
 
@@ -38,7 +42,7 @@ public class AddCampView extends View {
         System.out.println();
         sectionHeaderSimpleBox.display();
 
-        HashMap<Field, FieldHandler> fieldHandlers = new HashMap<>();
+        HashMap<FormViewField, FieldHandler> fieldHandlers = new HashMap<>();
         fieldHandlers.put(Field.NAME, new FieldHandler(TextFormatter.bold(TextFormatter.green("1.")) + " Nom", campData::setName));
         fieldHandlers.put(Field.ADDRESS_COUNTRY_ISO3, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.1.")) + " Pays (ISO 3)", input -> {
             campAddressData.setCountryIso3(input);
@@ -62,19 +66,19 @@ public class AddCampView extends View {
         fieldHandlers.put(Field.TIME_SLOT_END, new FieldHandler(TextFormatter.bold(TextFormatter.green("4.")) + " Date de fin " + TextFormatter.italic("(format: yyyy-MM-ddTHH:mm:ssZ)"), campData::setTimeSlotEnd));
 
         try {
-            this.promptField(scanner, fieldHandlers, Field.NAME);
+            promptField(scanner, fieldHandlers, Field.NAME);
 
             System.out.println();
             System.out.print(TextFormatter.bold(TextFormatter.green("2.")) + " Adresse");
 
-            this.promptField(scanner, fieldHandlers, Field.ADDRESS_COUNTRY_ISO3);
-            this.promptField(scanner, fieldHandlers, Field.ADDRESS_ZIP_CODE);
-            this.promptField(scanner, fieldHandlers, Field.ADDRESS_CITY);
-            this.promptField(scanner, fieldHandlers, Field.ADDRESS_STREET);
-            this.promptField(scanner, fieldHandlers, Field.ADDRESS_NUMBER);
-            this.promptField(scanner, fieldHandlers, Field.ADDRESS_BOX_NUMBER);
-            this.promptField(scanner, fieldHandlers, Field.TIME_SLOT_START);
-            this.promptField(scanner, fieldHandlers, Field.TIME_SLOT_END);
+            promptField(scanner, fieldHandlers, Field.ADDRESS_COUNTRY_ISO3);
+            promptField(scanner, fieldHandlers, Field.ADDRESS_ZIP_CODE);
+            promptField(scanner, fieldHandlers, Field.ADDRESS_CITY);
+            promptField(scanner, fieldHandlers, Field.ADDRESS_STREET);
+            promptField(scanner, fieldHandlers, Field.ADDRESS_NUMBER);
+            promptField(scanner, fieldHandlers, Field.ADDRESS_BOX_NUMBER);
+            promptField(scanner, fieldHandlers, Field.TIME_SLOT_START);
+            promptField(scanner, fieldHandlers, Field.TIME_SLOT_END);
 
             SimpleBox confirmationSimpleBox = new SimpleBox();
             confirmationSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Voulez-vous ajouter ce stage ?")));
@@ -98,16 +102,15 @@ public class AddCampView extends View {
                 summarySimpleBox.display();
                 confirmationSimpleBox.display();
 
-                while (true) {
-                    input = scanner.nextLine();
+                AtomicReference<String> formattedInput = new AtomicReference<>();
+                KinomichiFunctions.promptInputWithDefaultCommandHandling(scanner, rawInput -> {
+                    formattedInput.set(rawInput.strip().toUpperCase());
 
-                    if (validOptions.contains(input.toUpperCase())) {
-                        input = input.toUpperCase();
-                        break;
-                    } else {
-                        System.out.println(Functions.styleAsErrorMessage("L'entrée '%s' est invalide. Veuillez entrer 'O', 'N' ou 'M'."));
+                    if (!validOptions.contains(formattedInput.get())) {
+                        throw new Exception("L'entrée '%s' est invalide. Veuillez entrer 'O', 'N' ou 'M'".formatted(rawInput));
                     }
-                }
+                });
+                input = formattedInput.get();
 
                 if (input.equals("M")) {
                     KinomichiStandardMenu editFieldMenu = new KinomichiStandardMenu("Modifier un champ", null);
@@ -128,7 +131,7 @@ public class AddCampView extends View {
 
                     Object editFieldMenuResponse = editFieldMenu.use().getResponse();
                     if (editFieldMenuResponse instanceof Field field) {
-                        this.promptField(scanner, fieldHandlers, field);
+                        promptField(scanner, fieldHandlers, field);
                     } else if (editFieldMenuResponse instanceof String cancelOption) {
                         if (cancelOption.equals("CANCEL_ADD")) {
                             input = "N";
@@ -152,6 +155,8 @@ public class AddCampView extends View {
                 return new ExitProgramEvent();
             } else if (response instanceof BackCommand) {
                 return new GoBackEvent();
+            } else if (response instanceof BackBackCommand) {
+                return new GoBackBackEvent();
             }
 
             System.out.println(Functions.styleAsErrorMessage("Il y a eu un problème durant le processus de gestion des commandes."));
@@ -162,35 +167,8 @@ public class AddCampView extends View {
         }
     }
 
-    private void promptField(Scanner scanner, HashMap<Field, FieldHandler> fieldHandlers, Field field) throws CommandResponseException, UnimplementedFieldException {
-        FieldHandler fieldHandler = fieldHandlers.get(field);
-        if (fieldHandler != null) {
-            System.out.println();
-            System.out.println(fieldHandler.label);
-            KinomichiFunctions.promptFieldWithExitAndBackCommands(scanner, fieldHandler.inputConsumer);
-        } else {
-            throw new UnimplementedFieldException(field);
-        }
-    }
-
-    private enum Field {
+    private enum Field implements FormViewField {
         NAME, ADDRESS_COUNTRY_ISO3, ADDRESS_ZIP_CODE, ADDRESS_CITY, ADDRESS_STREET, ADDRESS_NUMBER, ADDRESS_BOX_NUMBER, TIME_SLOT_START, TIME_SLOT_END
-    }
-
-    private record FieldHandler(String label, ThrowingConsumer<String> inputConsumer) {}
-
-    private static class UnimplementedFieldException extends Exception {
-
-        private final Field field;
-
-        public UnimplementedFieldException(Field field) {
-            this.field = field;
-        }
-
-        public Field getField() {
-            return field;
-        }
-
     }
 
 }

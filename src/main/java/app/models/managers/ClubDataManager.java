@@ -1,9 +1,6 @@
 package app.models.managers;
 
-import app.models.Club;
-import app.models.Model;
-import app.models.ModelException;
-import app.models.NoResultForPrimaryKeyException;
+import app.models.*;
 import com.google.gson.*;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
@@ -57,11 +54,7 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
 
         if (this.isInitialized()) {
             this.unsavedChanges = true;
-
-            try {
-                this.export();
-            } catch (DataManagerException _) {
-            }
+            this.export();
         }
     }
 
@@ -78,6 +71,21 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
         return club;
     }
 
+    public void deleteClub(int clubId) throws ModelException, DataManagerException {
+        Club clubToDelete = this.getClubWithExceptions(clubId);
+
+        if (DataManagers.get(AffiliationDataManager.class).isClubUsed(clubToDelete)) {
+            throw new DeletingReferencedDataManagerDataException("Ce club est référencé par au moins une affiliation et est donc impossible à supprimer.");
+        }
+
+        this.clubs.remove(clubToDelete.getId());
+
+        if (this.isInitialized()) {
+            this.unsavedChanges = true;
+            this.export();
+        }
+    }
+
     // ─── Overrides & inheritance ─── //
 
     @Override
@@ -92,19 +100,14 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
 
     @Override
     public void export() throws DataManagerException, ModelException {
-        if (this.isInitialized()) {
-            Data data = new Data(this);
-            super.export(data);
-            this.unsavedChanges = false;
-        }
+        Data data = new Data(this);
+        super.export(data);
     }
 
     @Override
     public void export(FileType fileType) throws DataManagerException, ModelException {
-        if (this.isInitialized()) {
-            Data data = new Data(this);
-            super.export(fileType, data);
-        }
+        Data data = new Data(this);
+        super.export(fileType, data);
     }
 
     @Override

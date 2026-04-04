@@ -1,5 +1,8 @@
 package app.utils.helpers;
 
+import app.models.Camp;
+import app.models.formatting.ModelTableFormatter;
+import app.models.formatting.table.UnimplementedModelTableException;
 import app.utils.ThrowingConsumer;
 import app.utils.ThrowingConsumerException;
 import utils.io.commands.Command;
@@ -10,6 +13,7 @@ import utils.io.commands.list.BackBackCommand;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
 import utils.helpers.Functions;
+import utils.io.commands.list.SortColumnCommand;
 import utils.io.menus.HookInterruptException;
 import utils.io.menus.MenuResponse;
 
@@ -20,6 +24,23 @@ import java.util.function.Supplier;
 public class KinomichiFunctions extends Functions {
 
     // ─── Utility methods ─── //
+
+    public static void promptInputWithDefaultCommandHandling(Scanner scanner, ThrowingConsumer<String> inputConsumer) throws CommandResponseException {
+        promptInputWithCommandHandling(scanner, (_, command) -> {
+            switch (command) {
+                case ExitCommand exitCommand -> {
+                    return exitCommand;
+                }
+                case BackCommand backCommand -> {
+                    return backCommand;
+                }
+                case BackBackCommand backBackCommand -> {
+                    return backBackCommand;
+                }
+                default -> throw new UnhandledCommandException(command);
+            }
+        }, inputConsumer, null, null);
+    }
 
     public static void promptInputWithCommandHandling(Scanner scanner, CommandHandler commandHandler, ThrowingConsumer<String> inputConsumer) throws CommandResponseException {
         promptInputWithCommandHandling(scanner, commandHandler, inputConsumer, null, null);
