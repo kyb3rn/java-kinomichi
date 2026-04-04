@@ -13,6 +13,8 @@ import utils.data_management.converters.Hydratable;
 import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
+import utils.helpers.validation.BlankOrNullValueValidatorException;
+import utils.helpers.validation.Validators;
 
 public class Affiliation extends Model implements Hydratable<Affiliation.Data> {
 
@@ -42,7 +44,7 @@ public class Affiliation extends Model implements Hydratable<Affiliation.Data> {
 
     public int getPersonId() throws ModelException {
         if (this.person == null) {
-            throw new ModelException("La personne de référence est nulle");
+            throw new ModelException("La personne de référence de l'affiliation est nulle");
         }
 
         return this.person.getId();
@@ -50,7 +52,7 @@ public class Affiliation extends Model implements Hydratable<Affiliation.Data> {
 
     public int getClubId() throws ModelException {
         if (this.club == null) {
-            throw new ModelException("Le club de référence est nul");
+            throw new ModelException("Le club de référence de l'affiliation est nul");
         }
 
         return this.club.getId();
@@ -60,58 +62,62 @@ public class Affiliation extends Model implements Hydratable<Affiliation.Data> {
 
     public void setPerson(Person person) throws ModelException {
         if (person == null) {
-            throw new ModelException("La personne est requise pour un affilié (valeur null reçue)");
+            throw new ModelVerificationException("La personne de réference d'une affiliation ne peut pas être nulle");
         }
 
-        this.setPersonFromPk(person.getId());
+        try {
+            this.person = DataManagers.get(PersonDataManager.class).getPersonWithExceptions(person.getId());
+        } catch (NoResultForPrimaryKeyException e) {
+            throw new ModelVerificationException(e.getMessage(), e);
+        } catch (DataManagerException | ModelException e) {
+            throw new ModelVerificationException("Impossible de vérifier l'identifiant de personne '%d'".formatted(person.getId()), e);
+        }
     }
 
     public void setClub(Club club) throws ModelException {
         if (club == null) {
-            throw new ModelException("Le club est requis pour un affilié (valeur null reçue)");
+            throw new ModelVerificationException("Le club de réference d'une affiliation ne peut pas être nul");
         }
 
-        this.setClubFromPk(club.getId());
+        try {
+            this.club = DataManagers.get(ClubDataManager.class).getClubWithExceptions(club.getId());
+        } catch (NoResultForPrimaryKeyException e) {
+            throw new ModelVerificationException(e.getMessage(), e);
+        } catch (DataManagerException | ModelException e) {
+            throw new ModelVerificationException("Impossible de vérifier l'identifiant de club '%d'".formatted(club.getId()), e);
+        }
     }
 
     public void setAffiliationNumber(String affiliationNumber) throws ModelException {
-        if (affiliationNumber == null || affiliationNumber.isBlank()) {
-            throw new ModelException("Le numéro d'affiliation ne peut pas être vide ou nul");
-        }
-
-        this.affiliationNumber = affiliationNumber.strip();
+        this.affiliationNumber = verifyAffiliationNumber(affiliationNumber);
     }
 
     // ─── Special setters ─── //
 
     public void setPersonFromPk(int personId) throws ModelException {
-        Person person;
         try {
-            person = DataManagers.get(PersonDataManager.class).getPerson(personId);
+            this.person = DataManagers.get(PersonDataManager.class).getPersonWithExceptions(personId);
+        } catch (NoResultForPrimaryKeyException e) {
+            throw e;
         } catch (DataManagerException | ModelException e) {
             throw new ModelException("Impossible de vérifier l'identifiant de personne '%d' (les personnes n'ont pas pu être chargées dans l'application)".formatted(personId), e);
         }
-
-        if (person == null) {
-            throw new ModelException("Aucune des personnes enregistrées ne porte l'identifiant '%d'".formatted(personId));
-        }
-
-        this.person = person;
     }
 
     public void setClubFromPk(int clubId) throws ModelException {
-        Club club;
         try {
-            club = DataManagers.get(ClubDataManager.class).getClub(clubId);
+            this.club = DataManagers.get(ClubDataManager.class).getClubWithExceptions(clubId);
+        } catch (NoResultForPrimaryKeyException e) {
+            throw e;
         } catch (DataManagerException | ModelException e) {
             throw new ModelException("Impossible de vérifier l'identifiant de club '%d' (les clubs n'ont pas pu être chargés dans l'application)".formatted(clubId), e);
         }
+    }
 
-        if (club == null) {
-            throw new ModelException("Aucun des clubs enregistrés ne porte l'identifiant '%d'".formatted(clubId));
-        }
+    // ─── Utility methods ─── //
 
-        this.club = club;
+    public static String verifyAffiliationNumber(String affiliationNumber) throws ModelException {
+        return verifyNotNullOrEmpty(affiliationNumber, "Le numéro d'affiliation d'une affiliation ne peut pas être vide ou nul");
     }
 
     // ─── Overrides & inheritance ─── //
@@ -177,50 +183,24 @@ public class Affiliation extends Model implements Hydratable<Affiliation.Data> {
 
         // ─── Setters ─── //
 
-        public void setPersonId(int personId) throws ModelException {
-            if (personId <= 0 && personId != -1) {
-                throw new ModelException("L'identifiant référant à une personne doit être un entier strictement positif (ou -1)");
-            }
-
-            this.personId = personId;
-        }
-
         public void setPersonId(String personId) throws ModelException {
-            int personIdAsInt;
-            try {
-                personIdAsInt = Integer.parseInt(personId);
-            } catch (NumberFormatException e) {
-                throw new ModelException("L'identifiant référant à une personne doit être un entier strictement positif (ou -1)", e);
-            }
-
-            this.setPersonId(personIdAsInt);
+            this.personId = IdentifiedModel.verifyId(personId);
         }
 
-        public void setClubId(int clubId) throws ModelException {
-            if (clubId <= 0 && clubId != -1) {
-                throw new ModelException("L'identifiant référant à un club doit être un entier strictement positif (ou -1)");
-            }
-
-            this.clubId = clubId;
+        public void setPersonId(int personId) throws ModelException {
+            this.setPersonId(String.valueOf(personId));
         }
 
         public void setClubId(String clubId) throws ModelException {
-            int clubIdAsInt;
-            try {
-                clubIdAsInt = Integer.parseInt(clubId);
-            } catch (NumberFormatException e) {
-                throw new ModelException("L'identifiant référant à un club doit être un entier strictement positif (ou -1)", e);
-            }
+            this.clubId = IdentifiedModel.verifyId(clubId);
+        }
 
-            this.setClubId(clubIdAsInt);
+        public void setClubId(int clubId) throws ModelException {
+            this.setClubId(String.valueOf(clubId));
         }
 
         public void setAffiliationNumber(String affiliationNumber) throws ModelException {
-            if (affiliationNumber == null || affiliationNumber.isBlank()) {
-                throw new ModelException("Le numéro d'affiliation ne peut pas être vide ou nul");
-            }
-
-            this.affiliationNumber = affiliationNumber.strip();
+            this.affiliationNumber = verifyAffiliationNumber(affiliationNumber);
         }
 
         // ─── Overrides & inheritance ─── //

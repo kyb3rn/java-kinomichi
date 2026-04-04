@@ -3,7 +3,7 @@ package utils.io.menus;
 import app.utils.menus.InvalidMenuInputException;
 import utils.io.commands.*;
 import utils.io.commands.exceptions.*;
-import utils.io.helpers.Functions;
+import utils.helpers.Functions;
 
 import java.util.Scanner;
 import java.util.TreeMap;

@@ -3,13 +3,11 @@ package app.models.managers;
 import app.models.Club;
 import app.models.Model;
 import app.models.ModelException;
-import app.models.NotResultForPrimaryKeyException;
+import app.models.NoResultForPrimaryKeyException;
 import com.google.gson.*;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
 import utils.data_management.converters.convertibles.JsonConvertible;
-import utils.data_management.converters.readers.JsonReader;
-import utils.data_management.converters.writers.DataWriter;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 
@@ -36,11 +34,11 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
         return this.clubs.get(id);
     }
 
-    public Club getClubWithExceptions(int id) throws NotResultForPrimaryKeyException {
+    public Club getClubWithExceptions(int id) throws NoResultForPrimaryKeyException {
         Club club = this.getClub(id);
 
         if (club == null) {
-            throw new NotResultForPrimaryKeyException("Aucun des clubs enregistrés ne porte l'identifiant '%d'".formatted(id));
+            throw new NoResultForPrimaryKeyException("Aucun des clubs enregistrés ne porte l'identifiant '%d'".formatted(id));
         }
 
         return club;
@@ -89,24 +87,7 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
 
     @Override
     public void init() throws LoadDataManagerDataException {
-        if (!this.isInitialized()) {
-            DataWriter<Data> dataWriter = new DataWriter<>();
-            JsonReader<Data> jsonReader = new JsonReader<>(dataWriter);
-
-            Data modelData = new Data();
-            String filePath = this.getFilePath().toString();
-            try {
-                jsonReader.readFile(filePath, modelData);
-            } catch (Exception e) {
-                throw new LoadDataManagerDataException("Les données du manager '%s' n'ont pas pu être lues dans le fichier '%s'".formatted(this.getClass().getSimpleName(), filePath), e);
-            }
-
-            try {
-                dataWriter.write(modelData, this);
-            } catch (Exception e) {
-                throw new LoadDataManagerDataException("Les données lues du manager '%s' dans le fichier '%s' n'ont pas pu être enregistrées dans le manager '%s'".formatted(this.getClass().getSimpleName(), filePath, e));
-            }
-        }
+        this.defaultJsonInit(new Data());
     }
 
     @Override

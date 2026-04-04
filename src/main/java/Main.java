@@ -6,8 +6,8 @@ import app.routing.Route;
 import app.routing.RouteNotFoundException;
 import app.routing.Router;
 import utils.io.commands.CommandManager;
-import utils.io.helpers.Functions;
-import utils.io.helpers.texts.formatting.TextFormatter;
+import utils.helpers.Functions;
+import utils.io.text_formatting.TextFormatter;
 
 public class Main {
 

@@ -2,13 +2,12 @@ package app.utils.menus;
 
 import app.models.Model;
 import app.models.formatting.EmptyContentModelTableFormatterException;
-import app.models.formatting.ModelTableFormatter;
 import app.models.formatting.table.ModelTableInstanciationException;
 import app.models.formatting.table.UnimplementedModelTableException;
 import utils.io.commands.Command;
 import utils.io.commands.exceptions.UnhandledCommandException;
-import utils.io.helpers.Functions;
-import utils.io.helpers.tables.Table;
+import utils.helpers.Functions;
+import utils.io.tables.Table;
 import utils.io.menus.OrderedMenu;
 
 public abstract class ModelMenu<M extends Model> extends OrderedMenu {

@@ -1,8 +1,8 @@
 package app.models.formatting.table;
 
 import app.models.Model;
-import utils.io.helpers.texts.formatting.FormattedText;
-import utils.io.helpers.texts.formatting.TextFormatter;
+import utils.io.text_formatting.FormattedText;
+import utils.io.text_formatting.TextFormatter;
 
 import java.lang.reflect.Constructor;
 

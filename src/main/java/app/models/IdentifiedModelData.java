@@ -14,23 +14,12 @@ public abstract class IdentifiedModelData {
 
     // ─── Setters ─── //
 
-    public void setId(int id) throws ModelException {
-        if (id <= 0 && id != -1) {
-            throw new ModelException("L'identifiant doit être un entier strictement positif (ou -1)");
-        }
-
-        this.id = id;
+    public void setId(String id) throws ModelException {
+        this.id = IdentifiedModel.verifyId(id);
     }
 
-    public void setId(String id) throws ModelException {
-        int idAsInt;
-        try {
-            idAsInt = Integer.parseInt(id);
-        } catch (NumberFormatException e) {
-            throw new ModelException("L'identifiant doit être un entier strictement positif (ou -1)", e);
-        }
-
-        this.setId(idAsInt);
+    public void setId(int id) throws ModelException {
+        this.setId(String.valueOf(id));
     }
 
 }

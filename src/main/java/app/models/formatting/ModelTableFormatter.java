@@ -4,14 +4,14 @@ import app.models.Model;
 import app.models.formatting.table.ModelTable;
 import app.models.formatting.table.ModelTableInstanciationException;
 import app.models.formatting.table.UnimplementedModelTableException;
-import utils.io.helpers.tables.Table;
-import utils.io.helpers.tables.ModelTableDisplay;
-import utils.io.helpers.tables.TableDisplayFormattingOptions;
-import utils.io.helpers.tables.TableOptions;
-import utils.io.helpers.texts.formatting.TextAlignment;
-import utils.io.helpers.texts.formatting.TextFormattingOptions;
-import utils.io.helpers.texts.formatting.TextFormattingPreset;
-import utils.io.helpers.texts.formatting.TextStyle;
+import utils.io.tables.Table;
+import utils.io.tables.ModelTableDisplay;
+import utils.io.tables.TableDisplayFormattingOptions;
+import utils.io.tables.TableOptions;
+import utils.io.text_formatting.TextAlignment;
+import utils.io.text_formatting.TextFormattingOptions;
+import utils.io.text_formatting.TextFormattingPreset;
+import utils.io.text_formatting.TextStyle;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -157,11 +157,11 @@ public class ModelTableFormatter {
             options.setAlignment(annotation.alignment());
         }
 
-        if (annotation.color() != utils.io.helpers.texts.formatting.TextColor.NONE) {
+        if (annotation.color() != utils.io.text_formatting.TextColor.NONE) {
             options.setColor(annotation.color());
         }
 
-        if (annotation.backgroundColor() != utils.io.helpers.texts.formatting.TextBackgroundColor.NONE) {
+        if (annotation.backgroundColor() != utils.io.text_formatting.TextBackgroundColor.NONE) {
             options.setBackgroundColor(annotation.backgroundColor());
         }
 

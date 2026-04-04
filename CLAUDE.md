@@ -1,3 +1,5 @@
+> Dernière mise à jour : 2026-04-02 22:44
+
 # Projet
 
 Application CLI d'administration pour le Kinomichi. Java 21, Maven, terminal ANSI.

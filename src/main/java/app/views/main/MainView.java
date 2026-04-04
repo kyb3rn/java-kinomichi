@@ -8,7 +8,7 @@ import app.models.managers.DataManager;
 import app.models.managers.DataManagers;
 import app.models.managers.PersonDataManager;
 import app.views.View;
-import utils.io.helpers.texts.formatting.TextFormatter;
+import utils.io.text_formatting.TextFormatter;
 import utils.io.menus.MenuResponse;
 import app.utils.menus.KinomichiStandardMenu;
 import utils.io.menus.UnhandledMenuResponseType;

@@ -5,8 +5,7 @@ import app.events.Event;
 import app.models.Model;
 import app.models.formatting.table.UnimplementedModelTableException;
 import app.utils.menus.ModelDetailMenu;
-import app.utils.menus.ModelListMenu;
-import utils.io.helpers.Functions;
+import utils.helpers.Functions;
 import utils.io.menus.MenuResponse;
 import utils.io.menus.UnhandledMenuResponseType;
 

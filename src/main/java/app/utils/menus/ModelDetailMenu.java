@@ -14,9 +14,6 @@ import utils.io.commands.exceptions.UnhandledCommandException;
 import utils.io.commands.list.BackBackCommand;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
-import utils.io.helpers.Functions;
-import utils.io.helpers.tables.Table;
-import utils.io.menus.OrderedMenu;
 
 public class ModelDetailMenu<M extends Model> extends ModelMenu<M> {
 

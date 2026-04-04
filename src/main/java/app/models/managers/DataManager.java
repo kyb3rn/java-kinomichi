@@ -9,11 +9,9 @@ import utils.data_management.converters.Hydratable;
 import utils.data_management.converters.convertibles.CsvConvertible;
 import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.converters.convertibles.XmlConvertible;
-import utils.data_management.converters.writers.CsvWriter;
-import utils.data_management.converters.writers.FileWriter;
-import utils.data_management.converters.writers.JsonWriter;
-import utils.data_management.converters.writers.XmlWriter;
-import utils.io.helpers.Functions;
+import utils.data_management.converters.readers.JsonReader;
+import utils.data_management.converters.writers.*;
+import utils.helpers.Functions;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,6 +71,27 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
     public abstract Collection<? extends Model> getModels();
 
     public abstract void init() throws LoadDataManagerDataException;
+
+    @SuppressWarnings("unchecked")
+    protected <D extends CustomSerializable & JsonConvertible> void defaultJsonInit(D modelData) throws LoadDataManagerDataException {
+        if (!this.isInitialized()) {
+            DataWriter<D> dataWriter = new DataWriter<>();
+            JsonReader<D> jsonReader = new JsonReader<>(dataWriter);
+
+            String filePath = this.getFilePath().toString();
+            try {
+                jsonReader.readFile(filePath, modelData);
+            } catch (Exception e) {
+                throw new LoadDataManagerDataException("Les données du manager '%s' n'ont pas pu être lues dans le fichier '%s'".formatted(this.getClass().getSimpleName(), filePath), e);
+            }
+
+            try {
+                dataWriter.write(modelData, (Hydratable<D>) this);
+            } catch (Exception e) {
+                throw new LoadDataManagerDataException("Les données lues dans le fichier '%s' n'ont pas pu être enregistrées dans le manager '%s'".formatted(this.getClass().getSimpleName(), filePath), e);
+            }
+        }
+    }
 
     public abstract void export() throws DataManagerException, ModelException;
 

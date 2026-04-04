@@ -2,8 +2,8 @@ package app.models.formatting.table;
 
 import app.models.IdentifiedModel;
 import app.models.formatting.ModelPrimaryKeyTextFormattingPreset;
-import utils.io.helpers.tables.ModelTableDisplay;
-import utils.io.helpers.tables.TableDisplayFormattingOptions;
+import utils.io.tables.ModelTableDisplay;
+import utils.io.tables.TableDisplayFormattingOptions;
 
 public abstract class IdentifiedModelTable<T extends IdentifiedModel> extends ModelTable<T> {
 

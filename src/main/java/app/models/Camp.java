@@ -12,9 +12,11 @@ import utils.data_management.converters.Hydratable;
 import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
-import utils.time.TimeSlot;
+import utils.helpers.validation.BlankOrNullValueValidatorException;
+import utils.helpers.validation.ParsingValidatorException;
+import utils.helpers.validation.Validators;
+import app.utils.elements.time.TimeSlot;
 
-import java.time.DateTimeException;
 import java.time.Instant;
 
 public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
@@ -53,24 +55,26 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
     // ─── Setters ─── //
 
     public void setName(String name) throws ModelException {
-        if (name == null || name.isBlank()) {
-            throw new ModelException("Le nom d'un stage ne peut pas être vide ou nul");
-        }
-
-        this.name = name.strip();
+        this.name = verifyName(name);
     }
 
     public void setAddress(Address address) throws ModelException {
         if (address == null) {
-            throw new ModelException("L'adresse est requise pour un stage (valeur null reçue)");
+            throw new ModelVerificationException("L'adresse de réference ne peut pas être nulle");
         }
 
-        this.setAddressFromPk(address.getId());
+        try {
+            this.address = DataManagers.get(AddressDataManager.class).getAddressWithExceptions(address.getId());
+        } catch (NoResultForPrimaryKeyException e) {
+            throw new ModelVerificationException(e.getMessage(), e);
+        } catch (DataManagerException | ModelException e) {
+            throw new ModelVerificationException("Impossible de vérifier l'identifiant d'adresse '%d'".formatted(address.getId()), e);
+        }
     }
 
     public void setTimeSlot(TimeSlot timeSlot) throws ModelException {
         if (timeSlot == null) {
-            throw new ModelException("La période de temps d'un stage ne peut pas être nulle");
+            throw new ModelVerificationException("La période de temps d'un stage ne peut pas être nulle");
         }
 
         this.timeSlot = timeSlot;
@@ -79,18 +83,39 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
     // ─── Special setters ─── //
 
     public void setAddressFromPk(int addressId) throws ModelException {
-        Address address;
         try {
-            address = DataManagers.get(AddressDataManager.class).getAddress(addressId);
+            this.address = DataManagers.get(AddressDataManager.class).getAddressWithExceptions(addressId);
+        } catch (NoResultForPrimaryKeyException e) {
+            throw e;
         } catch (DataManagerException | ModelException e) {
             throw new ModelException("Impossible de vérifier l'identifiant d'adresse '%d' (les adresses n'ont pas pu être chargées dans l'application)".formatted(addressId), e);
         }
+    }
 
-        if (address == null) {
-            throw new ModelException("Aucune des adresses enregistrées ne porte l'identifiant '%d'".formatted(addressId));
+    // ─── Utility methods ─── //
+
+    public static String verifyName(String name) throws ModelException {
+        return verifyNotNullOrEmpty(name, "Le nom d'un stage ne peut pas être vide ou nul");
+    }
+
+    public static Instant verifyTimeSlotStart(String timeSlotStart) throws ModelException {
+        try {
+            return Validators.validateInstant(timeSlotStart);
+        } catch (BlankOrNullValueValidatorException e) {
+            throw new ModelVerificationException("La date de début d'un stage ne peut pas être vide ou nulle", e);
+        } catch (ParsingValidatorException e) {
+            throw new ModelVerificationException("La date de début a un format de date invalide (attendu: yyyy-MM-ddTHH:mm:ssZ)", e);
         }
+    }
 
-        this.address = address;
+    public static Instant verifyTimeSlotEnd(String timeSlotEnd) throws ModelException {
+        try {
+            return Validators.validateInstant(timeSlotEnd);
+        } catch (BlankOrNullValueValidatorException e) {
+            throw new ModelVerificationException("La date de fin d'un stage ne peut pas être vide ou nulle", e);
+        } catch (ParsingValidatorException e) {
+            throw new ModelVerificationException("La date de fin a un format de date invalide (attendu: yyyy-MM-ddTHH:mm:ssZ)", e);
+        }
     }
 
     // ─── Overrides & inheritance ─── //
@@ -126,8 +151,8 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
 
         private String name;
         private int addressId = -1;
-        private String timeSlotStart;
-        private String timeSlotEnd;
+        private Instant timeSlotStart;
+        private Instant timeSlotEnd;
 
         // ─── Constructors ─── //
 
@@ -152,11 +177,11 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
             return this.addressId;
         }
 
-        public String getTimeSlotStart() {
+        public Instant getTimeSlotStart() {
             return this.timeSlotStart;
         }
 
-        public String getTimeSlotEnd() {
+        public Instant getTimeSlotEnd() {
             return this.timeSlotEnd;
         }
 
@@ -168,63 +193,36 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
 
         // ─── Setters ─── //
 
-        public void setAddressId(int addressId) throws ModelException {
-            if (addressId <= 0 && addressId != -1) {
-                throw new ModelException("L'identifiant référant à une adresse doit être un entier strictement positif (ou -1)");
-            }
-
-            this.addressId = addressId;
+        public void setAddressId(String addressId) throws ModelException {
+            this.addressId = verifyId(addressId);
         }
 
-        public void setAddressId(String addressId) throws ModelException {
-            int addressIdAsInt;
-            try {
-                addressIdAsInt = Integer.parseInt(addressId);
-            } catch (NumberFormatException e) {
-                throw new ModelException("L'identifiant référant à une adresse doit être un entier strictement positif (ou -1)", e);
-            }
-
-            this.setAddressId(addressIdAsInt);
+        public void setAddressId(int addressId) throws ModelException {
+            this.setAddressId(String.valueOf(addressId));
         }
 
         public void setName(String name) throws ModelException {
-            if (name == null || name.isBlank()) {
-                throw new ModelException("Le nom d'un stage ne peut pas être vide ou nul");
-            }
-
-            this.name = name.strip();
+            this.name = verifyName(name);
         }
 
         public void setTimeSlotStart(String timeSlotStart) throws ModelException {
-            if (timeSlotStart == null || timeSlotStart.isBlank()) {
-                throw new ModelException("La date de début d'un stage ne peut pas être vide ou nulle");
+            Instant timeSlotStartInstant = verifyTimeSlotStart(timeSlotStart);
+
+            if (this.timeSlotEnd != null && (timeSlotStartInstant.isAfter(this.timeSlotEnd) || timeSlotStartInstant.equals(this.timeSlotEnd))) {
+                throw new ModelVerificationException("La date de début d'un stage doit être strictement antérieure à sa date de fin");
             }
 
-            timeSlotStart = timeSlotStart.strip();
-
-            try {
-                Instant.parse(timeSlotStart);
-            } catch (DateTimeException e) {
-                throw new ModelException("La date de début n'est pas un Instant valide (attendu: yyyy-MM-ddTHH:mm:ssZ)", e);
-            }
-
-            this.timeSlotStart = timeSlotStart;
+            this.timeSlotStart = timeSlotStartInstant;
         }
 
         public void setTimeSlotEnd(String timeSlotEnd) throws ModelException {
-            if (timeSlotEnd == null || timeSlotEnd.isBlank()) {
-                throw new ModelException("La date de fin d'un stage ne peut pas être vide ou nulle");
+            Instant timeSlotEndInstant = verifyTimeSlotEnd(timeSlotEnd);
+
+            if (this.timeSlotStart != null && (timeSlotEndInstant.isBefore(this.timeSlotStart) || timeSlotEndInstant.equals(this.timeSlotStart))) {
+                throw new ModelVerificationException("La date de fin d'un stage doit être strictement postérieure à sa date de début");
             }
 
-            timeSlotEnd = timeSlotEnd.strip();
-
-            try {
-                Instant.parse(timeSlotEnd);
-            } catch (DateTimeException e) {
-                throw new ModelException("La date de fin n'est pas un Instant valide (attendu: yyyy-MM-ddTHH:mm:ssZ)", e);
-            }
-
-            this.timeSlotEnd = timeSlotEnd;
+            this.timeSlotEnd = timeSlotEndInstant;
         }
 
         // ─── Overrides & inheritance ─── //

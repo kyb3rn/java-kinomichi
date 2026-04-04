@@ -3,7 +3,7 @@ package app.models.managers;
 import app.models.Address;
 import app.models.Model;
 import app.models.ModelException;
-import app.models.NotResultForPrimaryKeyException;
+import app.models.NoResultForPrimaryKeyException;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -13,8 +13,6 @@ import com.google.gson.JsonSyntaxException;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
 import utils.data_management.converters.convertibles.JsonConvertible;
-import utils.data_management.converters.readers.JsonReader;
-import utils.data_management.converters.writers.DataWriter;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 
@@ -41,11 +39,11 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
         return this.addresses.get(id);
     }
 
-    public Address getAddressWithExceptions(int id) throws NotResultForPrimaryKeyException {
+    public Address getAddressWithExceptions(int id) throws NoResultForPrimaryKeyException {
         Address address = this.getAddress(id);
 
         if (address == null) {
-            throw new NotResultForPrimaryKeyException("Aucune des adresses enregistrées ne porte l'identifiant '%d'".formatted(id));
+            throw new NoResultForPrimaryKeyException("Aucune des adresses enregistrées ne porte l'identifiant '%d'".formatted(id));
         }
 
         return address;
@@ -94,24 +92,7 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
 
     @Override
     public void init() throws LoadDataManagerDataException {
-        if (!this.isInitialized()) {
-            DataWriter<Data> dataWriter = new DataWriter<>();
-            JsonReader<Data> jsonReader = new JsonReader<>(dataWriter);
-
-            Data modelData = new Data();
-            String filePath = this.getFilePath().toString();
-            try {
-                jsonReader.readFile(filePath, modelData);
-            } catch (Exception e) {
-                throw new LoadDataManagerDataException("Les données du manager '%s' n'ont pas pu être lues dans le fichier '%s'".formatted(this.getClass().getSimpleName(), filePath), e);
-            }
-
-            try {
-                dataWriter.write(modelData, this);
-            } catch (Exception e) {
-                throw new LoadDataManagerDataException("Les données lues du manager '%s' dans le fichier '%s' n'ont pas pu être enregistrées dans le manager '%s'".formatted(this.getClass().getSimpleName(), filePath, e));
-            }
-        }
+        this.defaultJsonInit(new Data());
     }
 
     @Override

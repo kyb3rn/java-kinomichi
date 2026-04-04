@@ -11,7 +11,7 @@ import app.models.managers.DataManagers;
 import app.routing.Request;
 import app.views.ModelListView;
 import utils.io.commands.list.SortColumnCommand;
-import utils.io.helpers.Functions;
+import utils.helpers.Functions;
 
 import java.util.List;
 import java.util.LinkedHashMap;

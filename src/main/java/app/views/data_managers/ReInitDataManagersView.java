@@ -2,12 +2,11 @@ package app.views.data_managers;
 
 import app.events.CallUrlEvent;
 import app.events.Event;
-import app.events.GoBackEvent;
 import app.events.ReInitDataManagerEvent;
 import app.models.managers.DataManager;
 import app.models.managers.DataManagers;
 import app.views.View;
-import utils.io.helpers.Functions;
+import utils.helpers.Functions;
 import utils.io.menus.MenuResponse;
 import app.utils.menus.KinomichiStandardMenu;
 import utils.io.menus.UnhandledMenuResponseType;

@@ -1,14 +1,13 @@
 package app.models.formatting.table;
 
-import app.models.Address;
 import app.models.Camp;
 import app.models.ModelException;
 import app.models.formatting.ModelKeyTextFormattingPreset;
-import utils.io.helpers.tables.ModelTableDisplay;
-import utils.io.helpers.tables.TableDisplayFormattingOptions;
-import utils.io.helpers.texts.formatting.TextAlignment;
-import utils.io.helpers.texts.formatting.TextStyle;
-import utils.time.TimeSlot;
+import utils.io.tables.ModelTableDisplay;
+import utils.io.tables.TableDisplayFormattingOptions;
+import utils.io.text_formatting.TextAlignment;
+import utils.io.text_formatting.TextStyle;
+import app.utils.elements.time.TimeSlot;
 
 public class CampModelTable extends IdentifiedModelTable<Camp> {
 

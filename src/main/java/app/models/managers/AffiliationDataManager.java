@@ -3,13 +3,11 @@ package app.models.managers;
 import app.models.Affiliation;
 import app.models.Model;
 import app.models.ModelException;
-import app.models.NotResultForPrimaryKeyException;
+import app.models.NoResultForPrimaryKeyException;
 import com.google.gson.*;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
 import utils.data_management.converters.convertibles.JsonConvertible;
-import utils.data_management.converters.readers.JsonReader;
-import utils.data_management.converters.writers.DataWriter;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 
@@ -36,11 +34,11 @@ public class AffiliationDataManager extends DataManager<AffiliationDataManager.D
         return this.affiliations.get(personId);
     }
 
-    public Affiliation getAffiliationWithExceptions(int personId) throws NotResultForPrimaryKeyException {
+    public Affiliation getAffiliationWithExceptions(int personId) throws NoResultForPrimaryKeyException {
         Affiliation affiliation = this.getAffiliation(personId);
 
         if (affiliation == null) {
-            throw new NotResultForPrimaryKeyException("Aucun des affiliés enregistrés ne porte l'identifiant '%d'".formatted(personId));
+            throw new NoResultForPrimaryKeyException("Aucun des affiliés enregistrés ne porte l'identifiant '%d'".formatted(personId));
         }
 
         return affiliation;
@@ -86,24 +84,7 @@ public class AffiliationDataManager extends DataManager<AffiliationDataManager.D
 
     @Override
     public void init() throws LoadDataManagerDataException {
-        if (!this.isInitialized()) {
-            DataWriter<Data> dataWriter = new DataWriter<>();
-            JsonReader<Data> jsonReader = new JsonReader<>(dataWriter);
-
-            Data modelData = new Data();
-            String filePath = this.getFilePath().toString();
-            try {
-                jsonReader.readFile(filePath, modelData);
-            } catch (Exception e) {
-                throw new LoadDataManagerDataException("Les données du manager '%s' n'ont pas pu être lues dans le fichier '%s'".formatted(this.getClass().getSimpleName(), filePath), e);
-            }
-
-            try {
-                dataWriter.write(modelData, this);
-            } catch (Exception e) {
-                throw new LoadDataManagerDataException("Les données lues du manager '%s' dans le fichier '%s' n'ont pas pu être enregistrées dans le manager '%s'".formatted(this.getClass().getSimpleName(), filePath, e));
-            }
-        }
+        this.defaultJsonInit(new Data());
     }
 
     @Override

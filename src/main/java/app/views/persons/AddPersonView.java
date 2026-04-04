@@ -14,10 +14,10 @@ import app.views.View;
 import utils.io.commands.exceptions.CommandResponseException;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
-import utils.io.helpers.Functions;
-import utils.io.helpers.tables.SimpleBox;
-import utils.io.helpers.tables.Table;
-import utils.io.helpers.texts.formatting.TextFormatter;
+import utils.helpers.Functions;
+import utils.io.tables.SimpleBox;
+import utils.io.tables.Table;
+import utils.io.text_formatting.TextFormatter;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;

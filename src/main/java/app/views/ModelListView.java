@@ -7,8 +7,8 @@ import app.models.formatting.EmptyContentModelTableFormatterException;
 import app.models.formatting.table.UnimplementedModelTableException;
 import app.utils.menus.ModelListMenu;
 import utils.io.commands.list.SortColumnCommand;
-import utils.io.helpers.Functions;
-import utils.io.helpers.texts.formatting.TextFormatter;
+import utils.helpers.Functions;
+import utils.io.text_formatting.TextFormatter;
 import utils.io.menus.MenuResponse;
 import utils.io.menus.UnhandledMenuResponseType;
 

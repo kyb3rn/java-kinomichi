@@ -21,9 +21,9 @@ import utils.io.commands.list.BackBackCommand;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
 import utils.io.commands.list.SortColumnCommand;
-import utils.io.helpers.Functions;
-import utils.io.helpers.tables.Table;
-import utils.io.helpers.texts.formatting.TextFormatter;
+import utils.helpers.Functions;
+import utils.io.tables.Table;
+import utils.io.text_formatting.TextFormatter;
 
 import java.util.List;
 import java.util.Map;

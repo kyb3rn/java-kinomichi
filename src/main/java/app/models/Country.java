@@ -1,5 +1,7 @@
 package app.models;
 
+import utils.helpers.validation.BlankOrNullValueValidatorException;
+import utils.helpers.validation.Validators;
 import utils.data_management.converters.CustomSerializable;
 import utils.data_management.converters.convertibles.CsvConvertible;
 import utils.data_management.parsing.ParserException;
@@ -9,6 +11,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class Country extends Model implements CustomSerializable, CsvConvertible {
+
+    public static final Pattern REGEX_ISO3_PATTERN = Pattern.compile("^[A-Z]{3}$");
+    public static final Pattern REGEX_ISO2_PATTERN = Pattern.compile("^[A-Z]{2}$");
 
     // ─── Properties ─── //
 
@@ -33,53 +38,55 @@ public class Country extends Model implements CustomSerializable, CsvConvertible
     // ─── Setters ─── //
 
     public void setIso3(String iso3) throws ModelException {
-        if (iso3 == null || iso3.isBlank()) {
-            throw new ModelException("L'ISO3 d'un pays ne peut pas être vide ou nul");
-        }
-
-        iso3 = iso3.strip();
-
-        if (iso3.length() != 3) {
-            throw new ModelException("L'ISO3 d'un pays doit être long de 3 caractères");
-        }
-
-        iso3 = iso3.toUpperCase();
-
-        Pattern iso3Pattern = Pattern.compile("^[A-Z]{3}$");
-        if (!iso3Pattern.matcher(iso3).matches()) {
-            throw new ModelException("L'ISO3 d'un pays doit être composé uniquement de lettres");
-        }
-
-        this.iso3 = iso3;
+        this.iso3 = verifyIso3(iso3);
     }
 
     public void setIso2(String iso2) throws ModelException {
-        if (iso2 == null || iso2.isBlank()) {
-            throw new ModelException("L'ISO2 d'un pays ne peut pas être vide ou nul");
-        }
-
-        iso2 = iso2.strip();
-
-        if (iso2.length() != 2) {
-            throw new ModelException("L'ISO2 d'un pays doit être long de 2 caractères");
-        }
-
-        iso2 = iso2.toUpperCase();
-
-        Pattern iso2Pattern = Pattern.compile("^[A-Z]{2}$");
-        if (!iso2Pattern.matcher(iso2).matches()) {
-            throw new ModelException("L'ISO2 d'un pays doit être composé uniquement de lettres");
-        }
-
-        this.iso2 = iso2;
+        this.iso2 = verifyIso2(iso2);
     }
 
     public void setName(String name) throws ModelException {
-        if (name == null || name.isBlank()) {
-            throw new ModelException("Le nom d'un pays ne peut pas être vide ou nul");
+        try {
+            this.name = Validators.validateNotNullOrEmpty(name);
+        } catch (BlankOrNullValueValidatorException e) {
+            throw new ModelException("Le nom d'un pays ne peut pas être vide ou nul", e);
+        }
+    }
+
+    // ─── Utility methods ─── //
+
+    public static String verifyIsoBase(String value, int size) throws ModelException {
+        if (size != 2 && size != 3) {
+            throw new IllegalArgumentException("L'ISO d'un pays doit toujours faire 2 ou 3 caractères");
         }
 
-        this.name = name.strip();
+        try {
+            value = Validators.validateNotNullOrEmpty(value);
+        } catch (BlankOrNullValueValidatorException e) {
+            throw new ModelVerificationException("L'ISO " + size + " d'un pays ne peut pas être vide ou nul", e);
+        }
+
+        if (value.length() != size) {
+            throw new ModelVerificationException("L'ISO " + size + " d'un pays doit être long de " + size + " caractères");
+        }
+
+        value = value.toUpperCase();
+
+        Pattern pattern = size == 2 ? REGEX_ISO2_PATTERN : REGEX_ISO3_PATTERN;
+
+        if (!pattern.matcher(value).matches()) {
+            throw new ModelVerificationException("L'ISO " + size + " d'un pays doit être composé de " + size + " lettres majuscules");
+        }
+
+        return value;
+    }
+
+    public static String verifyIso2(String value) throws ModelException {
+        return verifyIsoBase(value, 2);
+    }
+
+    public static String verifyIso3(String value) throws ModelException {
+        return verifyIsoBase(value, 3);
     }
 
     // ─── Overrides & inheritance ─── //

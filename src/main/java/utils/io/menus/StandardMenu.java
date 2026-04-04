@@ -1,12 +1,12 @@
 package utils.io.menus;
 
-import utils.io.helpers.tables.Table;
-import utils.io.helpers.tables.TableOptions;
-import utils.io.helpers.texts.formatting.TextAlignment;
-import utils.io.helpers.texts.formatting.TextColor;
-import utils.io.helpers.texts.formatting.TextFormatter;
-import utils.io.helpers.texts.formatting.TextFormattingOptions;
-import utils.io.helpers.texts.formatting.TextStyle;
+import utils.io.tables.Table;
+import utils.io.tables.TableOptions;
+import utils.io.text_formatting.TextAlignment;
+import utils.io.text_formatting.TextColor;
+import utils.io.text_formatting.TextFormatter;
+import utils.io.text_formatting.TextFormattingOptions;
+import utils.io.text_formatting.TextStyle;
 
 public abstract class StandardMenu extends OrderedMenu {
 

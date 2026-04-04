@@ -12,6 +12,10 @@ import utils.data_management.converters.Hydratable;
 import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
+import utils.helpers.validation.BelowBoundaryValidatorException;
+import utils.helpers.validation.BlankOrNullValueValidatorException;
+import utils.helpers.validation.ParsingValidatorException;
+import utils.helpers.validation.Validators;
 
 import java.util.regex.Pattern;
 
@@ -57,7 +61,7 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
 
     public String getCountryIso3() throws ModelException {
         if (this.country == null) {
-            throw new ModelException("Le pays de référence est nul");
+            throw new ModelException("Le pays de référence de l'adresse est nul");
         }
 
         return this.country.getIso3();
@@ -67,90 +71,93 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
 
     public void setCountry(Country country) throws ModelException {
         if (country == null) {
-            throw new ModelException("Le pays est requis pour une adresse (valeur null reçue)");
+            throw new ModelVerificationException("Le pays de réference d'une adresse ne peut pas être nul");
         }
 
-        this.setCountryFromPk(country.getIso3());
+        try {
+            this.country = DataManagers.get(CountryDataManager.class).getCountryWithExceptions(country.getIso3());
+        } catch (NoResultForPrimaryKeyException e) {
+            throw new ModelVerificationException(e.getMessage(), e);
+        } catch (DataManagerException | ModelException e) {
+            throw new ModelVerificationException("Impossible de vérifier l'ISO3 '%s'".formatted(country.getIso3()), e);
+        }
     }
 
     public void setZipCode(int zipCode) throws ModelException {
-        if (zipCode <= 0) {
-            throw new ModelException("Le code postal doit être un entier strictement positif");
-        } else if (zipCode > 99999) {
-            throw new ModelException("Le code postal doit contenir au maximum 5 chiffres");
-        }
-
-        this.zipCode = zipCode;
+        this.zipCode = verifyZipCode(String.valueOf(zipCode));
     }
 
     public void setCity(String city) throws ModelException {
-        if (city == null || city.isBlank()) {
-            throw new ModelException("Le nom de la ville ne peut pas être vide ou nul");
-        }
-
-        this.city = city.strip();
+        this.city = verifyCity(city);
     }
 
     public void setStreet(String street) throws ModelException {
-        if (street == null || street.isBlank()) {
-            throw new ModelException("Le nom de la rue ne peut pas être vide ou nul");
-        }
-
-        this.street = street.strip();
+        this.street = verifyStreet(street);
     }
 
     public void setNumber(String number) throws ModelException {
-        if (number == null || number.isBlank()) {
-            throw new ModelException("Le numéro ne peut pas être vide ou nul");
-        }
-
-        this.number = number.strip();
+        this.number = verifyNumber(number);
     }
 
     public void setBoxNumber(Integer boxNumber) throws ModelException {
-        if (boxNumber == null) {
-            this.boxNumber = null;
-        } else {
-            if (boxNumber <= 0) {
-                throw new ModelException("Le numéro de boîte doit être un entier strictement positif");
-            }
-
-            this.boxNumber = boxNumber;
-        }
+        this.boxNumber = verifyBoxNumber(boxNumber == null ? null : boxNumber.toString());
     }
 
     // ─── Special setters ─── //
 
     public void setCountryFromPk(String iso3) throws ModelException {
-        iso3 = verifyCountryIso3(iso3);
+        iso3 = Country.verifyIso3(iso3);
 
         try {
             this.country = DataManagers.get(CountryDataManager.class).getCountryWithExceptions(iso3);
-        } catch (NotResultForPrimaryKeyException e) {
+        } catch (NoResultForPrimaryKeyException e) {
             throw e;
         } catch (DataManagerException | ModelException e) {
             throw new ModelException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3), e);
         }
     }
 
-    private static String verifyCountryIso3(String iso3) throws ModelException {
-        if (iso3 == null || iso3.isBlank()) {
-            throw new ModelException("L'ISO3 ne peut pas être vide ou nul");
+    // ─── Utility methods ─── //
+
+    public static int verifyZipCode(String zipCode) throws ModelException {
+        int zipCodeAsInt;
+        try {
+            zipCodeAsInt = Validators.validateStrictlyPositiveInt(zipCode);
+        } catch (BlankOrNullValueValidatorException e) {
+            throw new ModelVerificationException("Le code postal d'une adresse ne peut pas être vide ou nul", e);
+        } catch (ParsingValidatorException | BelowBoundaryValidatorException e) {
+            throw new ModelVerificationException("Le code postal d'une adresse doit être un entier strictement positif");
         }
 
-        iso3 = iso3.strip();
-
-        if (iso3.length() != 3) {
-            throw new ModelException("L'ISO3 d'un pays doit être long de 3 caractères");
+        if (zipCodeAsInt > 99999) {
+            throw new ModelVerificationException("Le code postal d'une adresse doit contenir au maximum 5 chiffres");
         }
 
-        iso3 = iso3.toUpperCase();
+        return zipCodeAsInt;
+    }
 
-        Pattern iso3Pattern = Pattern.compile("^[A-Z]{3}$");
-        if (!iso3Pattern.matcher(iso3).matches()) {
-            throw new ModelException("L'ISO3 d'un pays doit être composé uniquement de lettres");
+    public static String verifyCity(String city) throws ModelException {
+        return verifyNotNullOrEmpty(city, "Le nom de la ville d'une adresse ne peut pas être vide ou nul");
+    }
+
+    public static String verifyStreet(String street) throws ModelException {
+        return verifyNotNullOrEmpty(street, "Le nom de la rue d'une adresse ne peut pas être vide ou nul");
+    }
+
+    public static String verifyNumber(String number) throws ModelException {
+        return verifyNotNullOrEmpty(number, "Le numéro d'une adresse ne peut pas être vide ou nul");
+    }
+
+    public static Integer verifyBoxNumber(String boxNumber) throws ModelException {
+        if (boxNumber == null) {
+            return null;
         }
-        return iso3;
+
+        try {
+            return Validators.validateStrictlyPositiveInteger(boxNumber);
+        } catch (BlankOrNullValueValidatorException | ParsingValidatorException | BelowBoundaryValidatorException e) {
+            throw new ModelVerificationException("Le numéro de boîte d'une adresse doit être un entier strictement positif", e);
+        }
     }
 
     // ─── Overrides & inheritance ─── //
@@ -242,91 +249,35 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
         // ─── Setters ─── //
 
         public void setCountryIso3(String countryIso3) throws ModelException {
-            countryIso3 = verifyCountryIso3(countryIso3);
-
-            this.countryIso3 = countryIso3.strip();
-        }
-
-        public void setZipCode(int zipCode) throws ModelException {
-            if (zipCode <= 0) {
-                throw new ModelException("Le code postal doit être un entier strictement positif");
-            } else if (zipCode > 99999) {
-                throw new ModelException("Le code postal doit contenir au maximum 5 chiffres");
-            }
-
-            this.zipCode = zipCode;
+            this.countryIso3 = Country.verifyIso3(countryIso3);
         }
 
         public void setZipCode(String zipCode) throws ModelException {
-            if (zipCode == null || zipCode.isBlank()) {
-                throw new ModelException("Le code postal ne peut pas être vide ou nul");
-            }
+            this.zipCode = verifyZipCode(zipCode);
+        }
 
-            int intZipCode;
-            try {
-                intZipCode = Integer.parseInt(zipCode);
-            } catch (NumberFormatException e) {
-                throw new ModelException("Le code postal doit être un entier strictement positif", e);
-            }
-
-            this.setZipCode(intZipCode);
+        public void setZipCode(int zipCode) throws ModelException {
+            this.setZipCode(String.valueOf(zipCode));
         }
 
         public void setCity(String city) throws ModelException {
-            if (city == null || city.isBlank()) {
-                throw new ModelException("Le nom de la ville ne peut pas être vide ou nul");
-            }
-
-            this.city = city.strip();
+            this.city = verifyCity(city);
         }
 
         public void setStreet(String street) throws ModelException {
-            if (street == null || street.isBlank()) {
-                throw new ModelException("Le nom de la rue ne peut pas être vide ou nul");
-            }
-
-            this.street = street.strip();
+            this.street = verifyStreet(street);
         }
 
         public void setNumber(String number) throws ModelException {
-            if (number == null || number.isBlank()) {
-                throw new ModelException("Le numéro ne peut pas être vide ou nul");
-            }
-
-            this.number = number.strip();
-        }
-
-        public void setBoxNumber(Integer boxNumber) throws ModelException {
-            if (boxNumber == null) {
-                this.boxNumber = null;
-            } else {
-                if (boxNumber <= 0) {
-                    throw new ModelException("Le numéro de boîte doit être un entier strictement positif");
-                }
-
-                this.boxNumber = boxNumber;
-            }
+            this.number = verifyNumber(number);
         }
 
         public void setBoxNumber(String boxNumber) throws ModelException {
-            if (boxNumber == null || boxNumber.isEmpty()) {
-                this.boxNumber = null;
-            } else {
-                if (boxNumber.isBlank()) {
-                    throw new ModelException("Le numéro de boîte ne peut pas être vide");
-                }
+            this.boxNumber = verifyBoxNumber(boxNumber);
+        }
 
-                boxNumber = boxNumber.strip();
-
-                int intBoxNumber;
-                try {
-                    intBoxNumber = Integer.parseInt(boxNumber);
-                } catch (NumberFormatException e) {
-                    throw new ModelException("Le numéro de boîte doit être un entier strictement positif", e);
-                }
-
-                this.setBoxNumber(intBoxNumber);
-            }
+        public void setBoxNumber(Integer boxNumber) throws ModelException {
+            this.setBoxNumber(String.valueOf(boxNumber));
         }
 
         // ─── Overrides & inheritance ─── //

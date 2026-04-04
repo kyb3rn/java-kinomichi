@@ -42,7 +42,7 @@ public class Club extends IdentifiedModel implements Hydratable<Club.Data> {
 
     public int getAddressId() throws ModelException {
         if (this.address == null) {
-            throw new ModelException("L'adresse de référence est nulle");
+            throw new ModelException("L'adresse de référence du club est nulle");
         }
 
         return this.address.getId();
@@ -51,55 +51,62 @@ public class Club extends IdentifiedModel implements Hydratable<Club.Data> {
     // ─── Setters ─── //
 
     public void setName(String name) throws ModelException {
-        if (name == null || name.isBlank()) {
-            throw new ModelException("Le nom d'un club ne peut pas être vide ou nul");
-        }
-
-        this.name = name.strip();
+        this.name = verifyName(name);
     }
 
     public void setAddress(Address address) throws ModelException {
         if (address == null) {
-            throw new ModelException("L'adresse est requise pour un club (valeur null reçue)");
+            throw new ModelVerificationException("L'adresse de réference d'un club ne peut pas être nulle");
         }
 
-        this.setAddressFromPk(address.getId());
+        try {
+            this.address = DataManagers.get(AddressDataManager.class).getAddressWithExceptions(address.getId());
+        } catch (NoResultForPrimaryKeyException e) {
+            throw new ModelVerificationException(e.getMessage(), e);
+        } catch (DataManagerException | ModelException e) {
+            throw new ModelVerificationException("Impossible de vérifier l'identifiant d'adresse '%d'".formatted(address.getId()), e);
+        }
     }
 
     public void setGoogleMapsLink(String googleMapsLink) throws ModelException {
-        if (googleMapsLink == null || googleMapsLink.isEmpty()) {
-            this.googleMapsLink = null;
-        } else {
-            if (googleMapsLink.isBlank()) {
-                throw new ModelException("Le lien Google Maps d'un club ne peut pas être vide (null accepté)");
-            }
-
-            googleMapsLink = googleMapsLink.strip();
-
-            Pattern googleMapsLinkPattern = Pattern.compile("^https://maps\\.app\\.goo\\.gl/[A-Za-z0-9]{17}$");
-            if (!googleMapsLinkPattern.matcher(googleMapsLink).matches()) {
-                throw new ModelException("Le format du lien Google Maps est invalide");
-            }
-
-            this.googleMapsLink = googleMapsLink;
-        }
+        this.googleMapsLink = verifyGoogleMapsLink(googleMapsLink);
     }
 
     // ─── Special setters ─── //
 
     public void setAddressFromPk(int addressId) throws ModelException {
-        Address address;
         try {
-            address = DataManagers.get(AddressDataManager.class).getAddress(addressId);
+            this.address = DataManagers.get(AddressDataManager.class).getAddressWithExceptions(addressId);
+        } catch (NoResultForPrimaryKeyException e) {
+            throw e;
         } catch (DataManagerException | ModelException e) {
             throw new ModelException("Impossible de vérifier l'identifiant d'adresse '%d' (les adresses n'ont pas pu être chargées dans l'application)".formatted(addressId), e);
         }
+    }
 
-        if (address == null) {
-            throw new ModelException("Aucune des adresses enregistrées ne porte l'identifiant '%d'".formatted(addressId));
+    // ─── Utility methods ─── //
+
+    public static String verifyName(String name) throws ModelException {
+        return verifyNotNullOrEmpty(name, "Le nom d'un club ne peut pas être vide ou nul");
+    }
+
+    public static String verifyGoogleMapsLink(String googleMapsLink) throws ModelException {
+        if (googleMapsLink == null || googleMapsLink.isEmpty()) {
+            return null;
         }
 
-        this.address = address;
+        if (googleMapsLink.isBlank()) {
+            throw new ModelVerificationException("Le lien Google Maps d'un club ne peut pas être vide (null accepté)");
+        }
+
+        googleMapsLink = googleMapsLink.strip();
+
+        Pattern googleMapsLinkPattern = Pattern.compile("^https://maps\\.app\\.goo\\.gl/[A-Za-z0-9]{17}$");
+        if (!googleMapsLinkPattern.matcher(googleMapsLink).matches()) {
+            throw new ModelVerificationException("Le format du lien Google Maps est invalide");
+        }
+
+        return googleMapsLink;
     }
 
     // ─── Overrides & inheritance ─── //
@@ -165,49 +172,19 @@ public class Club extends IdentifiedModel implements Hydratable<Club.Data> {
         // ─── Setters ─── //
 
         public void setName(String name) throws ModelException {
-            if (name == null || name.isBlank()) {
-                throw new ModelException("Le nom d'un club ne peut pas être vide ou nul");
-            }
-
-            this.name = name.strip();
-        }
-
-        public void setAddressId(int addressId) throws ModelException {
-            if (addressId <= 0 && addressId != -1) {
-                throw new ModelException("L'identifiant référant à une adresse doit être un entier strictement positif (ou -1)");
-            }
-
-            this.addressId = addressId;
+            this.name = verifyName(name);
         }
 
         public void setAddressId(String addressId) throws ModelException {
-            int addressIdAsInt;
-            try {
-                addressIdAsInt = Integer.parseInt(addressId);
-            } catch (NumberFormatException e) {
-                throw new ModelException("L'identifiant référant à une adresse doit être un entier strictement positif (ou -1)", e);
-            }
+            this.addressId = verifyId(addressId);
+        }
 
-            this.setAddressId(addressIdAsInt);
+        public void setAddressId(int addressId) throws ModelException {
+            this.setAddressId(String.valueOf(addressId));
         }
 
         public void setGoogleMapsLink(String googleMapsLink) throws ModelException {
-            if (googleMapsLink == null || googleMapsLink.isEmpty()) {
-                this.googleMapsLink = null;
-            } else {
-                if (googleMapsLink.isBlank()) {
-                    throw new ModelException("Le lien Google Maps d'un club ne peut pas être vide (null accepté)");
-                }
-
-                googleMapsLink = googleMapsLink.strip();
-
-                Pattern googleMapsLinkPattern = Pattern.compile("^https://maps\\.app\\.goo\\.gl/[A-Za-z0-9]{17}$");
-                if (!googleMapsLinkPattern.matcher(googleMapsLink).matches()) {
-                    throw new ModelException("Le format du lien Google Maps est invalide");
-                }
-
-                this.googleMapsLink = googleMapsLink.strip();
-            }
+            this.googleMapsLink = verifyGoogleMapsLink(googleMapsLink);
         }
 
         // ─── Overrides & inheritance ─── //

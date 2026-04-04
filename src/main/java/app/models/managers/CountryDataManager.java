@@ -1,8 +1,9 @@
 package app.models.managers;
 
-import app.models.Model;
 import app.models.ModelException;
-import app.models.NotResultForPrimaryKeyException;
+import app.models.NoResultForPrimaryKeyException;
+import utils.helpers.validation.BlankOrNullValueValidatorException;
+import utils.helpers.validation.Validators;
 import utils.data_management.FileType;
 import app.models.Country;
 import utils.data_management.converters.CustomSerializable;
@@ -56,12 +57,13 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
         }
     }
 
-    public Country getCountryWithExceptions(String iso3) throws NotResultForPrimaryKeyException {
-        Country country;
-        country = this.getCountry(iso3);
+    public Country getCountryWithExceptions(String iso3) throws DataManagerException, ModelException {
+        iso3 = Country.verifyIso3(iso3);
+
+        Country country = this.getCountry(iso3);
 
         if (country == null) {
-            throw new NotResultForPrimaryKeyException("Aucun des pays enregistrés ne porte l'ISO3 '%s'".formatted(iso3));
+            throw new NoResultForPrimaryKeyException("Aucun des pays enregistrés ne porte l'ISO3 '%s'".formatted(iso3));
         }
 
         return country;

@@ -3,7 +3,7 @@ package app.models.managers;
 import app.models.Model;
 import app.models.ModelException;
 import app.models.ModelReference;
-import utils.io.helpers.Functions;
+import utils.helpers.Functions;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -49,12 +49,14 @@ public class DataManagers {
 
     public static void initAll() {
         initAndResolveReferencesOf(
-                CountryDataManager.class,
-                PersonDataManager.class,
-                AddressDataManager.class,
-                ClubDataManager.class,
-                CampDataManager.class,
-                AffiliationDataManager.class
+            CountryDataManager.class,
+            PersonDataManager.class,
+            AddressDataManager.class,
+            ClubDataManager.class,
+            CampDataManager.class,
+            DinnerDataManager.class,
+            AffiliationDataManager.class,
+            CampDiscountDataManager.class
         );
     }
 

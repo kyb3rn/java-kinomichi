@@ -11,8 +11,8 @@ import app.models.managers.DataManagers;
 import app.routing.Request;
 import app.views.data_managers.ReInitDataManagersView;
 import app.views.data_managers.SaveDataManagersView;
-import utils.io.helpers.Functions;
-import utils.io.helpers.texts.formatting.TextFormatter;
+import utils.helpers.Functions;
+import utils.io.text_formatting.TextFormatter;
 
 import java.util.List;
 

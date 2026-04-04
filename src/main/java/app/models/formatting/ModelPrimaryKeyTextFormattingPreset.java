@@ -1,9 +1,9 @@
 package app.models.formatting;
 
-import utils.io.helpers.texts.formatting.TextAlignment;
-import utils.io.helpers.texts.formatting.TextColor;
-import utils.io.helpers.texts.formatting.TextFormattingOptions;
-import utils.io.helpers.texts.formatting.TextStyle;
+import utils.io.text_formatting.TextAlignment;
+import utils.io.text_formatting.TextColor;
+import utils.io.text_formatting.TextFormattingOptions;
+import utils.io.text_formatting.TextStyle;
 
 public class ModelPrimaryKeyTextFormattingPreset extends ModelKeyTextFormattingPreset {
 

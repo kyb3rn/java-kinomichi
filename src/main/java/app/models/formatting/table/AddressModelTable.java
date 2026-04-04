@@ -1,12 +1,11 @@
 package app.models.formatting.table;
 
 import app.models.Address;
-import app.models.Country;
 import app.models.ModelException;
 import app.models.formatting.ModelKeyTextFormattingPreset;
-import utils.io.helpers.tables.ModelTableDisplay;
-import utils.io.helpers.tables.TableDisplayFormattingOptions;
-import utils.io.helpers.texts.formatting.TextAlignment;
+import utils.io.tables.ModelTableDisplay;
+import utils.io.tables.TableDisplayFormattingOptions;
+import utils.io.text_formatting.TextAlignment;
 
 public class AddressModelTable extends IdentifiedModelTable<Address> {
 

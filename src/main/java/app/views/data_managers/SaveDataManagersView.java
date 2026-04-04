@@ -5,7 +5,7 @@ import app.events.Event;
 import app.events.SaveDataManagerEvent;
 import app.models.managers.DataManager;
 import app.views.View;
-import utils.io.helpers.Functions;
+import utils.helpers.Functions;
 import utils.io.menus.MenuResponse;
 import app.utils.menus.KinomichiStandardMenu;
 import utils.io.menus.UnhandledMenuResponseType;

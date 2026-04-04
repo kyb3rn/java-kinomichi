@@ -17,9 +17,9 @@ import app.views.persons.AddPersonFormData;
 import app.views.persons.AddPersonView;
 import app.views.persons.PersonsDashboardView;
 import utils.io.commands.list.SortColumnCommand;
-import utils.io.helpers.Functions;
-import utils.io.helpers.tables.SimpleBox;
-import utils.io.helpers.texts.formatting.TextFormatter;
+import utils.helpers.Functions;
+import utils.io.tables.SimpleBox;
+import utils.io.text_formatting.TextFormatter;
 
 import java.util.List;
 import java.util.LinkedHashMap;

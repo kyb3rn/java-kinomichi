@@ -1,14 +1,12 @@
 package app.models.formatting.table;
 
-import app.models.Address;
 import app.models.Club;
-import app.models.Country;
 import app.models.ModelException;
 import app.models.formatting.ModelKeyTextFormattingPreset;
-import utils.io.helpers.tables.ModelTableDisplay;
-import utils.io.helpers.tables.TableDisplayFormattingOptions;
-import utils.io.helpers.texts.formatting.TextAlignment;
-import utils.io.helpers.texts.formatting.TextStyle;
+import utils.io.tables.ModelTableDisplay;
+import utils.io.tables.TableDisplayFormattingOptions;
+import utils.io.text_formatting.TextAlignment;
+import utils.io.text_formatting.TextStyle;
 
 public class ClubModelTable extends IdentifiedModelTable<Club> {
 

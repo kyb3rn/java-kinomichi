@@ -4,7 +4,7 @@ import app.events.CallUrlEvent;
 import app.events.Event;
 import app.models.managers.*;
 import app.views.View;
-import utils.io.helpers.texts.formatting.TextFormatter;
+import utils.io.text_formatting.TextFormatter;
 import utils.io.menus.MenuResponse;
 import app.utils.menus.KinomichiStandardMenu;
 import utils.io.menus.UnhandledMenuResponseType;
