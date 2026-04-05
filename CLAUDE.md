@@ -1,4 +1,4 @@
-> Dernière mise à jour : 2026-04-05 16:30
+> Dernière mise à jour : 2026-04-05 20:45
 
 # Projet
 
@@ -59,7 +59,7 @@ Les events sont le mecanisme de retour entre les views/controllers et la boucle 
   3. Trier les modeles
   4. Creer et rendre une `View`, retourner l'`Event` resultat
 
-Controllers existants : `MainController`, `ExploreController`, `PersonController`, `CampController`, `ClubController`, `AffiliationController`, `AddressController`, `CountryController`, `DataManagerController`.
+Controllers existants : `MainController`, `ExploreController`, `PersonController`, `CampController`, `ClubController`, `AffiliationController`, `DinnerController`, `LodgingController`, `SessionController`, `DataManagerController`.
 
 ## Views (package `app.views`)
 
@@ -74,12 +74,18 @@ Views existantes :
 - `MainView` — menu principal avec options dynamiques selon l'etat des DataManagers
 - `ExploreDataView` — menu d'exploration de toutes les donnees
 - `persons/` — `PersonsDashboardView`, `AddPersonView` + `AddPersonFormData`, `ModifyPersonView` + `ModifyPersonFormData`, `SelectPersonView`, `DeletePersonView`
-- `camps/` — `SelectCampView`, `ManageCampView`, `AddCampView` + `AddCampFormData`
+- `camps/` — `SelectCampView`, `ManageCampView`, `AddCampView` + `AddCampFormData`, `ModifyCampView` + `ModifyCampFormData`, `DeleteCampView`
 - `clubs/` — `ClubsDashboardView`, `AddClubView` + `AddClubFormData`, `ModifyClubView` + `ModifyClubFormData`, `SelectClubView`, `DeleteClubView`
 - `affiliations/` — `AffiliationsDashboardView`, `AddAffiliationView`, `ModifyAffiliationView`, `SelectAffiliationView`, `DeleteAffiliationView`
+- `dinners/` — `ManageDinnersView`, `AddDinnerView`, `ModifyDinnerView` + `ModifyDinnerFormData`, `SelectDinnerView`, `DeleteDinnerView`, `ManageDinnerReservationsView`, `AddDinnerReservationView`, `DeleteDinnerReservationView`
+- `lodgings/` — `ManageLodgingsView`, `AddLodgingView`, `ModifyLodgingView` + `ModifyLodgingFormData`, `SelectLodgingView`, `DeleteLodgingView`, `ManageLodgingReservationsView`, `AddLodgingReservationView`, `DeleteLodgingReservationView`
+- `invitations/` — `ManageInvitationsView`, `AddInvitationView`, `DeleteInvitationView`
+- `sessions/` — `ManageSessionsView`, `AddSessionView`, `ModifySessionView` + `ModifySessionFormData`, `SelectSessionView`, `DeleteSessionView`, `ManageSessionTrainersView`, `AddSessionTrainerView`, `DeleteSessionTrainerView`, `ManageSessionRegistrationsView`, `AddSessionRegistrationView`, `DeleteSessionRegistrationView`
 - `data_managers/` — `ReInitDataManagersView`, `SaveDataManagersView`
 
 Pattern CRUD complet des vues par domaine : `Dashboard` (menu), `Add` (formulaire), `Modify` (select → formulaire), `Delete` (select → confirmation), `Select` (liste avec selection par ID). Les `SelectView` retournent un `FormResultEvent<Integer>` avec l'ID selectionne.
+
+Les domaines camp-scoped (dinners, lodgings, sessions) suivent un pattern supplementaire : un `ManageXxxView` (menu) accessible depuis `ManageCampView`, un `SelectXxxView` pour naviguer vers le sous-domaine (reservations, trainers, registrations), et des vues `ManageXxxYyyView` pour le CRUD du sous-domaine.
 
 ## Middleware (package `app.middlewares`)
 
@@ -205,6 +211,8 @@ Modeles avec references (pattern complet hydrate/dehydrate) :
 - `hydrate(Data)` : peuple le Model depuis le DTO (les FK sont stockees dans des champs `pending*Pk`, pas encore resolues)
 - `dehydrate()` : convertit le Model en DTO (extrait les IDs des objets references)
 
+`CampScheduledItem` (interface) : implemente par les modeles dont le `timeSlot` doit etre contenu dans celui du camp parent (`Dinner`, `Lodging`, `Session`). Fournit `validateTimeSlotWithinCampBounds()` et `validateInstantWithinCampBounds()`.
+
 Modeles existants :
 - `Camp` — Hydratable, references : `@ModelReference → Address`
 - `Club` — Hydratable, references : `@ModelReference → Address`
@@ -214,6 +222,12 @@ Modeles existants :
 - `Country` — extends `Model` directement (pas IdentifiedModel), utilise `iso3` comme cle, implemente `CsvConvertible`
 - `Dinner` — extends `IdentifiedModel`, Hydratable
 - `DinnerReservation` — extends `IdentifiedModel`, Hydratable, references : `@ModelReference → Person`, `@ModelReference → Dinner`. Propriete `cancellationDatetime` (Instant, nullable)
+- `Invitation` — extends `IdentifiedModel`, Hydratable, references : `@ModelReference → Person`, `@ModelReference → Camp`
+- `Lodging` — extends `IdentifiedModel`, Hydratable, implements `CampScheduledItem`, references : `@ModelReference → Camp`. Proprietes `label`, `timeSlot`, `price`
+- `LodgingReservation` — extends `IdentifiedModel`, Hydratable, references : `@ModelReference → Person`, `@ModelReference → Lodging`
+- `Session` — extends `IdentifiedModel`, Hydratable, implements `CampScheduledItem`, references : `@ModelReference → Camp`. Proprietes `label`, `timeSlot`. Creneau horaire valide dans les bornes du camp
+- `SessionTrainer` — extends `IdentifiedModel`, Hydratable, references : `@ModelReference → Session`, `@ModelReference → Person`. Represente l'assignation d'un formateur a une session
+- `SessionRegistration` — extends `IdentifiedModel`, Hydratable, references : `@ModelReference → Session`, `@ModelReference → Person`. Represente l'inscription d'un participant a une session
 - `CampDiscount` — extends `IdentifiedModel`, Hydratable
 
 ### Exception `NoResultForPrimaryKeyException`
@@ -238,7 +252,7 @@ Chaque DataManager :
 - Doit avoir un constructeur sans argument (peut etre `private`)
 - Doit overrider : `init()`, `export()`, `export(FileType)`, `count()`, `hydrate(Data)`, `dehydrate()`, `addResolvedModel(Model)`
 
-DataManagers existants : `PersonDataManager`, `CountryDataManager`, `AddressDataManager`, `ClubDataManager`, `CampDataManager`, `DinnerDataManager`, `DinnerReservationDataManager`, `AffiliationDataManager`, `CampDiscountDataManager`.
+DataManagers existants : `PersonDataManager`, `CountryDataManager`, `AddressDataManager`, `ClubDataManager`, `CampDataManager`, `SessionDataManager`, `LodgingDataManager`, `LodgingReservationDataManager`, `DinnerDataManager`, `DinnerReservationDataManager`, `InvitationDataManager`, `AffiliationDataManager`, `SessionTrainerDataManager`, `SessionRegistrationDataManager`, `CampDiscountDataManager`.
 
 Convention `get*WithExceptions()` : certains DataManagers exposent un getter qui lance `NoResultForPrimaryKeyException` si la PK n'existe pas (ex : `getClubWithExceptions(int)`, `getPersonWithExceptions(int)`, `getCountryWithExceptions(String)`). Utilise pour la validation dans les formulaires et les `set*FromPk()`.
 
@@ -257,6 +271,17 @@ Initialisation en deux passes (dans `DataManagers.initAndResolveReferencesOf()`)
 Exceptions : `PersonDataManager` et `CountryDataManager` n'utilisent pas `pendingModels` — ils ajoutent les modeles directement dans `hydrate()` et font `this.initialized = true` immediatement (car pas de FK a resoudre).
 
 Donnees stockees dans `/data/` avec le nom de fichier derive automatiquement (voir section reflection).
+
+### Regles metier du systeme de sessions
+
+Le systeme de sessions (Session / SessionTrainer / SessionRegistration) implique des validations croisees entre DataManagers :
+
+- **Ajout d'un formateur** (`SessionTrainerDataManager.addSessionTrainer`) : la personne doit etre affiliee durant le camp (`AffiliationDataManager.getPersonAffiliationsDuringTimeSlot`), ne pas etre deja formateur de cette session, ne pas etre formateur ou inscrit dans une session avec timeSlot qui overlap
+- **Retrait d'un formateur** (`SessionTrainerDataManager.deleteSessionTrainer`) : bloque si la session a des inscrits (`SessionRegistrationDataManager.isSessionUsed`)
+- **Ajout d'une inscription** (`SessionRegistrationDataManager.addSessionRegistration`) : la session doit avoir au moins un formateur, la personne ne doit pas etre inscrite ou formateur dans une session avec timeSlot qui overlap
+- **Suppression d'une session** (`SessionDataManager.deleteSession`) : les formateurs ET les inscriptions doivent etre vides
+- **Modification du timeSlot d'une session** (`SessionDataManager.updateSession`) : les formateurs ET les inscriptions doivent etre vides
+- **Suppression/modification d'une affiliation** (`AffiliationDataManager`) : verifie que la personne n'est pas formateur dans une session dont le camp tombe durant la periode de validite de l'affiliation (sauf si une autre affiliation couvre cette periode)
 
 ## Conventions de nommage implicites (reflection)
 
@@ -297,7 +322,7 @@ Le systeme d'affichage tabulaire est base sur des classes `ModelTable` decouplee
 Hierarchie :
 - `ModelTable<T extends Model>` (abstract) — base, fournit la resolution par reflection (`fromModelType(M)`, `fromModelClass(Class)`)
 - `IdentifiedModelTable<T extends IdentifiedModel>` (extends ModelTable) — ajoute automatiquement la colonne ID
-- Implementations concretes : `PersonModelTable`, `ClubModelTable`, `AffiliationModelTable`, `CampModelTable`, `CountryModelTable`, `AddressModelTable`
+- Implementations concretes : `PersonModelTable`, `ClubModelTable`, `AffiliationModelTable`, `CampModelTable`, `CountryModelTable`, `AddressModelTable`, `DinnerModelTable`, `DinnerReservationModelTable`, `InvitationModelTable`, `LodgingModelTable`, `LodgingReservationModelTable`, `SessionModelTable`, `SessionTrainerModelTable`, `SessionRegistrationModelTable`
 
 Convention de nommage : `{Model}ModelTable` dans le package `app.models.formatting.table`. Resolu par reflection a partir du nom du Model.
 
