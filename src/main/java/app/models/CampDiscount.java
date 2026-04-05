@@ -109,14 +109,18 @@ public class CampDiscount extends IdentifiedModel implements Hydratable<CampDisc
 
     // ─── Special setters ─── //
 
-    public void setCampFromPk(int campId) throws ModelException {
+    public void setCampFromPk(int campId) throws DataManagerException {
         try {
             this.camp = DataManagers.get(CampDataManager.class).getCampWithExceptions(campId);
         } catch (NoResultForPrimaryKeyException e) {
             throw e;
         } catch (DataManagerException | ModelException e) {
-            throw new ModelException("Impossible de vérifier l'identifiant du stage '%d' (les stages n'ont pas pu être chargés dans l'application)".formatted(campId), e);
+            throw new DataManagerException("Impossible de vérifier l'identifiant du stage '%d' (les stages n'ont pas pu être chargés dans l'application)".formatted(campId), e);
         }
+    }
+
+    public void setCampFromPk(String campIdAsString) throws DataManagerException, ModelException {
+        this.setCampFromPk(Camp.verifyId(campIdAsString));
     }
 
     public void setChargeableElementTypeFromName(String chargeableElementTypeName) throws ModelException {

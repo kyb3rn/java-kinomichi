@@ -54,8 +54,15 @@ public class DataManagers {
             AddressDataManager.class,
             ClubDataManager.class,
             CampDataManager.class,
+            SessionDataManager.class,
+            LodgingDataManager.class,
+            LodgingReservationDataManager.class,
             DinnerDataManager.class,
+            DinnerReservationDataManager.class,
+            InvitationDataManager.class,
             AffiliationDataManager.class,
+            SessionTrainerDataManager.class,
+            SessionRegistrationDataManager.class,
             CampDiscountDataManager.class
         );
     }

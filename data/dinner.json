@@ -1,3 +1,13 @@
 {
-  "dinners": []
+  "dinners": [
+    {
+      "name": "Souper",
+      "campId": 1,
+      "timeSlotStart": "2026-05-12T18:00:00Z",
+      "timeSlotEnd": "2026-05-12T21:00:00Z",
+      "priceCurrency": "EURO",
+      "priceAmount": 28.0,
+      "id": 1
+    }
+  ]
 }

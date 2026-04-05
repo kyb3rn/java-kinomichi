@@ -15,22 +15,23 @@ import utils.io.menus.UnhandledMenuResponseType;
 import java.util.Collection;
 import java.util.Map;
 
-public class ModelListView<M extends Model> extends View {
+public class ModelListView<M extends Model> extends ModelView {
 
     // ─── Properties ─── //
 
     private final Class<M> modelClass;
     private final Collection<M> sortedModels;
     private final boolean hasUnsavedChanges;
-    private final String sortBasePath;
+    private final String sortBaseUrl;
 
     // ─── Constructors ─── //
 
-    public ModelListView(Class<M> modelClass, Collection<M> sortedModels, boolean hasUnsavedChanges, String sortBasePath) {
+    public ModelListView(Class<M> modelClass, Collection<M> sortedModels, boolean hasUnsavedChanges, String sortBaseUrl, String errorBackUrl) {
+        super(errorBackUrl);
         this.modelClass = modelClass;
         this.sortedModels = sortedModels;
         this.hasUnsavedChanges = hasUnsavedChanges;
-        this.sortBasePath = sortBasePath;
+        this.sortBaseUrl = sortBaseUrl;
     }
 
     // ─── Overrides & inheritance ─── //
@@ -42,11 +43,11 @@ public class ModelListView<M extends Model> extends View {
             modelListMenu = new ModelListMenu<>(this.sortedModels);
         } catch (UnimplementedModelTableException | EmptyContentModelTableFormatterException e) {
             System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
-            return new CallUrlEvent("/");
+            return new CallUrlEvent(this.getErrorBackUrl());
         }
 
         if (!modelListMenu.generateTable()) {
-            return new CallUrlEvent("/");
+            return new CallUrlEvent(this.getErrorBackUrl());
         }
 
         if (this.hasUnsavedChanges) {
@@ -59,7 +60,7 @@ public class ModelListView<M extends Model> extends View {
         if (response instanceof Event event) {
             return event;
         } else if (response instanceof SortColumnCommand sortColumnCommand) {
-            return new CallUrlEvent(this.sortBasePath + "/sort/" + this.buildSortPathSegment(sortColumnCommand));
+            return new CallUrlEvent(this.sortBaseUrl + "/sort/" + this.buildSortPathSegment(sortColumnCommand));
         } else {
             throw new UnhandledMenuResponseType();
         }

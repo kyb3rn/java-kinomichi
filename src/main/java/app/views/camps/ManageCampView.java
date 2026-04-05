@@ -25,7 +25,13 @@ public class ManageCampView extends View {
     @Override
     public Event render() {
         KinomichiStandardMenu manageCampMenu = new KinomichiStandardMenu("Kinomichi - Gestion du stage " + TextFormatter.bold("#%s".formatted(this.campId)), new CallUrlEvent("/"));
-        manageCampMenu.addUnoptionedRow("À venir !");
+        manageCampMenu.addOption("Modifier ce stage", new CallUrlEvent("/camps/modify/%d".formatted(this.campId)));
+        manageCampMenu.addOption("Supprimer ce stage", new CallUrlEvent("/camps/delete/%d".formatted(this.campId)));
+        manageCampMenu.addSectionSeparationIndex();
+        manageCampMenu.addOption("Gestion des repas", new CallUrlEvent("/camps/manage/%d/dinners".formatted(this.campId)));
+        manageCampMenu.addOption("Gestion des hébergements", new CallUrlEvent("/camps/manage/%d/lodgings".formatted(this.campId)));
+        manageCampMenu.addOption("Gestion des sessions", new CallUrlEvent("/camps/manage/%d/sessions".formatted(this.campId)));
+        manageCampMenu.addOption("Gestion des invitations", new CallUrlEvent("/camps/manage/%d/invitations".formatted(this.campId)));
 
         MenuResponse menuResponse = manageCampMenu.use();
 

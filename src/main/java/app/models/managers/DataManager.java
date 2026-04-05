@@ -195,7 +195,7 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
         }
 
         if (identifiedModel.getId() == -1) {
-            int maxId = ((List<IdentifiedModel>) this.getModels()).stream().mapToInt(IdentifiedModel::getId).max().orElse(0);
+            int maxId = ((Collection<IdentifiedModel>) this.getModels()).stream().mapToInt(IdentifiedModel::getId).max().orElse(0);
             identifiedModel.setId(maxId + 1);
         }
     }

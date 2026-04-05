@@ -121,7 +121,7 @@ public class ClubController extends Controller {
         Club club;
         try {
             club = clubDataManager.getClubWithExceptions(clubId);
-        } catch (ModelException e) {
+        } catch (DataManagerException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
             return new CallUrlEvent("/clubs/dashboard");
         }
@@ -214,7 +214,7 @@ public class ClubController extends Controller {
             return new CallUrlEvent("/explore");
         }
 
-        ModelListView<Club> clubListView = new ModelListView<>(Club.class, sortedClubs, clubDataManager.hasUnsavedChanges(), "/clubs/list");
+        ModelListView<Club> clubListView = new ModelListView<>(Club.class, sortedClubs, clubDataManager.hasUnsavedChanges(), "/clubs/list", "/clubs/dashboard");
         return clubListView.render();
     }
 

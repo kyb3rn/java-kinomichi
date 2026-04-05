@@ -2,6 +2,7 @@ package app.models.managers;
 
 import app.models.*;
 import com.google.gson.*;
+import java.time.Instant;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
 
@@ -30,18 +31,14 @@ public class CampDataManager extends DataManager<CampDataManager.Data> {
 
     // ─── Utility methods ─── //
 
-    public Camp getCamp(Integer id) throws ModelException {
+    public Camp getCampWithExceptions(Integer id) throws DataManagerException, ModelException {
         if (id == null) {
-            throw new NoResultForPrimaryKeyException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
+            throw new DataManagerException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
         }
 
         id = IdentifiedModel.verifyId(id);
 
-        return this.camps.get(id);
-    }
-
-    public Camp getCampWithExceptions(int id) throws ModelException {
-        Camp camp = this.getCamp(id);
+        Camp camp = this.camps.get(id);
 
         if (camp == null) {
             throw new NoResultForPrimaryKeyException("Aucun des stages enregistrés ne porte l'identifiant '%d'".formatted(id));
@@ -52,14 +49,14 @@ public class CampDataManager extends DataManager<CampDataManager.Data> {
 
     public void addCamp(Camp camp) throws ModelException, DataManagerException {
         if (camp == null) {
-            throw new ModelException("Le stage à ajouter ne peut pas être nul");
+            throw new DataManagerException("Le stage à ajouter ne peut pas être nul");
         }
+
+        this.applyAutoIncrementIfPossible(camp);
 
         if (!camp.isValid()) {
             throw new ModelException("Le stage à ajouter n'est pas valide");
         }
-
-        this.applyAutoIncrementIfPossible(camp);
 
         if (this.camps.containsKey(camp.getId())) {
             throw new DataManagerException("Un stage portant l'identifiant '%d' existe déjà".formatted(camp.getId()));
@@ -75,7 +72,7 @@ public class CampDataManager extends DataManager<CampDataManager.Data> {
 
     public Camp addCamp(Camp.Data campData) throws ModelException, DataManagerException {
         if (campData == null) {
-            throw new ModelException("Le stage à ajouter ne peut pas être nul");
+            throw new DataManagerException("Le stage à ajouter ne peut pas être nul");
         }
 
         Camp camp = new Camp();
@@ -85,6 +82,127 @@ public class CampDataManager extends DataManager<CampDataManager.Data> {
         this.addCamp(camp);
 
         return camp;
+    }
+
+    public void updateCamp(int campId, Camp modifiedCamp) throws ModelException, DataManagerException {
+        campId = IdentifiedModel.verifyId(campId);
+
+        if (modifiedCamp == null) {
+            throw new ModelException("Le stage modifié ne peut pas être nul");
+        }
+
+        if (!modifiedCamp.isValid()) {
+            throw new ModelException("Le stage modifié reçu n'est pas valide");
+        }
+
+        Camp campToModify = this.getCampWithExceptions(campId);
+
+        if (campToModify.getId() != modifiedCamp.getId()) {
+            throw new ModelException("Modifier l'identifiant d'un modèle n'est pas autorisé");
+        }
+
+        if (campToModify.getAddressId() != modifiedCamp.getAddressId()) {
+            throw new ModelException("Modifier l'identifiant de référence de l'adresse d'un stage n'est pas autorisé");
+        }
+
+        if (campToModify.getTimeSlot().getEnd().isBefore(Instant.now())) {
+            throw new DataManagerException("Impossible de modifier un stage déjà terminé");
+        }
+
+        // Validate that all scheduled sub-elements fit within the new TimeSlot
+        this.validateScheduledItemsWithinTimeSlot(campToModify, modifiedCamp.getTimeSlot());
+
+        campToModify.hydrate(modifiedCamp.dehydrate());
+        DataManagers.resolveModelReferences(campToModify);
+
+        if (this.isInitialized()) {
+            this.unsavedChanges = true;
+            this.export();
+        }
+    }
+
+    private void validateScheduledItemsWithinTimeSlot(Camp camp, app.utils.elements.time.TimeSlot newTimeSlot) throws ModelException, DataManagerException {
+        DinnerDataManager dinnerDataManager = DataManagers.get(DinnerDataManager.class);
+        List<Dinner> campDinners = dinnerDataManager.getCampDinners(camp);
+
+        for (Dinner dinner : campDinners) {
+            if (!newTimeSlot.contains(dinner.getTimeSlot())) {
+                throw new ModelVerificationException("Impossible de modifier la période du stage : le repas %s n'est plus contenu dans la nouvelle période".formatted(dinner.toString()));
+            }
+        }
+
+        LodgingDataManager lodgingDataManager = DataManagers.get(LodgingDataManager.class);
+        List<Lodging> campLodgings = lodgingDataManager.getCampLodgings(camp);
+
+        for (Lodging lodging : campLodgings) {
+            if (!newTimeSlot.contains(lodging.getTimeSlot())) {
+                throw new ModelVerificationException("Impossible de modifier la période du stage : l'hébergement %s n'est plus contenu dans la nouvelle période".formatted(lodging.toString()));
+            }
+        }
+
+        SessionDataManager sessionDataManager = DataManagers.get(SessionDataManager.class);
+        List<Session> campSessions = sessionDataManager.getCampSessions(camp);
+
+        for (Session session : campSessions) {
+            if (!newTimeSlot.contains(session.getTimeSlot())) {
+                throw new ModelVerificationException("Impossible de modifier la période du stage : la session %s n'est plus contenue dans la nouvelle période".formatted(session.toString()));
+            }
+        }
+    }
+
+    public void deleteCamp(int campId) throws ModelException, DataManagerException {
+        Camp campToDelete = this.getCampWithExceptions(campId);
+
+        if (campToDelete.getTimeSlot().getEnd().isBefore(Instant.now())) {
+            throw new DataManagerException("Impossible de supprimer un stage déjà terminé");
+        }
+
+        if (DataManagers.get(InvitationDataManager.class).isCampUsed(campToDelete)) {
+            throw new DeletingReferencedDataManagerDataException("Ce stage est référencé par au moins une invitation et est donc impossible à supprimer.");
+        }
+
+        if (DataManagers.get(DinnerDataManager.class).getCampDinners(campToDelete).size() > 0) {
+            throw new DeletingReferencedDataManagerDataException("Ce stage est référencé par au moins un repas et est donc impossible à supprimer.");
+        }
+
+        if (DataManagers.get(LodgingDataManager.class).getCampLodgings(campToDelete).size() > 0) {
+            throw new DeletingReferencedDataManagerDataException("Ce stage est référencé par au moins un hébergement et est donc impossible à supprimer.");
+        }
+
+        if (DataManagers.get(SessionDataManager.class).getCampSessions(campToDelete).size() > 0) {
+            throw new DeletingReferencedDataManagerDataException("Ce stage est référencé par au moins une session et est donc impossible à supprimer.");
+        }
+
+        this.camps.remove(campToDelete.getId());
+
+        if (this.isInitialized()) {
+            this.unsavedChanges = true;
+            this.export();
+        }
+    }
+
+    public boolean isPersonUsed(Person personToDelete) throws ModelException, DataManagerException {
+        if (personToDelete == null) {
+            throw new DataManagerException("La personne sur laquelle effectuer la recherche ne peut pas être nulle");
+        }
+
+        // Check invitations
+        if (DataManagers.get(InvitationDataManager.class).isPersonUsed(personToDelete)) {
+            return true;
+        }
+
+        // Check sessions
+        if (DataManagers.get(SessionDataManager.class).isPersonUsed(personToDelete)) {
+            return true;
+        }
+
+        // Check lodgings
+        if (DataManagers.get(LodgingDataManager.class).isPersonUsed(personToDelete)) {
+            return true;
+        }
+
+        // Check dinners
+        return DataManagers.get(DinnerDataManager.class).isPersonUsed(personToDelete);
     }
 
     // ─── Overrides & inheritance ─── //
@@ -192,7 +310,11 @@ public class CampDataManager extends DataManager<CampDataManager.Data> {
 
         @Override
         public String toJson() {
-            return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+            return new GsonBuilder()
+                    .setPrettyPrinting()
+                    .registerTypeAdapter(Instant.class, (JsonSerializer<Instant>) (src, typeOfSrc, context) -> new JsonPrimitive(src.toString()))
+                    .create()
+                    .toJson(this);
         }
 
     }

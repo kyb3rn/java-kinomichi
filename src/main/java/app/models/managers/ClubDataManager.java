@@ -29,36 +29,32 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
 
     // ─── Utility methods ─── //
 
-    public Club getClub(Integer id) throws ModelException {
+    public Club getClubWithExceptions(Integer id) throws DataManagerException, ModelException {
         if (id == null) {
-            throw new NoResultForPrimaryKeyException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
+            throw new DataManagerException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
         }
 
         id = IdentifiedModel.verifyId(id);
 
-        return this.clubs.get(id);
-    }
+        Club camp = this.clubs.get(id);
 
-    public Club getClubWithExceptions(int id) throws ModelException {
-        Club club = this.getClub(id);
-
-        if (club == null) {
+        if (camp == null) {
             throw new NoResultForPrimaryKeyException("Aucun des clubs enregistrés ne porte l'identifiant '%d'".formatted(id));
         }
 
-        return club;
+        return camp;
     }
 
     public void addClub(Club club) throws ModelException, DataManagerException {
         if (club == null) {
-            throw new ModelException("Le club à ajouter ne peut pas être nul");
+            throw new DataManagerException("Le club à ajouter ne peut pas être nul");
         }
+
+        this.applyAutoIncrementIfPossible(club);
 
         if (!club.isValid()) {
             throw new ModelException("Le club à ajouter n'est pas valide");
         }
-
-        this.applyAutoIncrementIfPossible(club);
 
         if (this.clubs.containsKey(club.getId())) {
             throw new DataManagerException("Un club portant l'identifiant '%d' existe déjà".formatted(club.getId()));
@@ -74,7 +70,7 @@ public class ClubDataManager extends DataManager<ClubDataManager.Data> {
 
     public Club addClub(Club.Data clubData) throws ModelException, DataManagerException {
         if (clubData == null) {
-            throw new ModelException("Le club à ajouter ne peut pas être nul");
+            throw new DataManagerException("Le club à ajouter ne peut pas être nul");
         }
 
         Club club = new Club();

@@ -1,0 +1,11 @@
+{
+  "sessions": [
+    {
+      "campId": 1,
+      "label": "Première session pratique",
+      "timeSlotStart": "2026-05-12T14:00:00Z",
+      "timeSlotEnd": "2026-05-12T15:30:00Z",
+      "id": 1
+    }
+  ]
+}

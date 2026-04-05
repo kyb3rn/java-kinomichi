@@ -1,0 +1,15 @@
+{
+  "lodgings": [
+    {
+      "name": "Première nuit",
+      "campId": 1,
+      "timeSlotStart": "2026-05-12T19:30:00Z",
+      "timeSlotEnd": "2026-05-13T06:30:00Z",
+      "sharedRoomPriceCurrency": "EURO",
+      "sharedRoomPriceAmount": 30.0,
+      "singleRoomPriceCurrency": "EURO",
+      "singleRoomPriceAmount": 40.0,
+      "id": 1
+    }
+  ]
+}

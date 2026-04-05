@@ -1,9 +1,8 @@
 package app.models;
 
-import app.models.managers.AffiliationDataManager;
-import app.models.managers.DataManagerException;
-import app.models.managers.DataManagers;
+import app.models.managers.*;
 import app.utils.elements.time.TimeSlot;
+import app.utils.tarification.ChargingElement;
 import app.utils.tarification.EChargeableCategory;
 import app.utils.tarification.ChargeableElement;
 import com.google.gson.GsonBuilder;
@@ -19,7 +18,8 @@ import utils.helpers.validation.BlankOrNullValueValidatorException;
 import utils.helpers.validation.PatternMatchingValidatorException;
 import utils.helpers.validation.Validators;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Person extends IdentifiedModel implements Hydratable<Person>, CustomSerializable, JsonConvertible, ChargeableElement {
 
@@ -67,6 +67,10 @@ public class Person extends IdentifiedModel implements Hydratable<Person>, Custo
     }
 
     // ─── Utility methods ─── //
+
+    public String getFullName() {
+        return this.getFirstName() + " " + this.getLastName();
+    }
 
     public static String verifyFirstName(String firstName) throws ModelException {
         return verifyNotNullOrEmpty(firstName, "Le prénom d'une personne ne peut pas être vide ou nul");
@@ -176,17 +180,40 @@ public class Person extends IdentifiedModel implements Hydratable<Person>, Custo
     }
 
     @Override
-    public ChargeableCategory getChargeableCategory(TimeSlot timeSlot) {
+    public Set<EChargeableCategory> getChargeableCategory(ChargingElement chargingElement) throws ModelException, DataManagerException {
+        HashSet<EChargeableCategory> chargeableCategory = new HashSet<>();
+
+        TimeSlot timeSlot;
+        Camp camp;
+
+        if (chargingElement instanceof DinnerReservation dinnerReservation) {
+            camp = DataManagers.get(DinnerReservationDataManager.class).getCampLinkedTo(dinnerReservation);
+            timeSlot = camp.getTimeSlot();
+        } else {
+            timeSlot = null;
+            camp = null;
+        }
+
+        if (camp != null) {
+            if (DataManagers.get(InvitationDataManager.class).isPersonInvited(this, camp)) {
+                chargeableCategory.add(ChargeableCategory.INVITED);
+            }
+
+            // TODO: Verify if the person is teacher in one of the camp session
+        }
+
         if (timeSlot != null) {
             try {
                 if (!DataManagers.get(AffiliationDataManager.class).getPersonAffiliationsDuringTimeSlot(this, timeSlot).isEmpty()) {
-                    return ChargeableCategory.AFFILIATED;
+                    chargeableCategory.add(ChargeableCategory.AFFILIATED);
                 }
             } catch (DataManagerException | ModelException _) {
             }
         }
 
-        return ChargeableCategory.NORMAL;
+        chargeableCategory.add(ChargeableCategory.NORMAL);
+
+        return chargeableCategory;
     }
 
     public enum ChargeableCategory implements EChargeableCategory {

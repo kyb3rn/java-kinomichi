@@ -95,6 +95,15 @@
       "street": "1",
       "number": "1",
       "id": 12
+    },
+    {
+      "countryIso3": "BEL",
+      "zipCode": 4000,
+      "city": "Liège",
+      "street": "Rue Saint-Paul",
+      "number": "56",
+      "boxNumber": 2,
+      "id": 13
     }
   ]
 }

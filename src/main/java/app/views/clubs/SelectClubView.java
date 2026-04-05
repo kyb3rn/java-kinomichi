@@ -28,6 +28,7 @@ import utils.io.text_formatting.TextFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SelectClubView extends View {
 
@@ -64,7 +65,7 @@ public class SelectClubView extends View {
         System.out.println(TextFormatter.italic("Entrez l'identifiant (#) d'un club pour le sélectionner."));
 
         try {
-            final int[] selectedClubId = new int[1];
+            AtomicInteger selectedClubId = new AtomicInteger();
 
             KinomichiFunctions.promptInputWithCommandHandling(scanner, (_, command) -> {
                 switch (command) {
@@ -104,17 +105,17 @@ public class SelectClubView extends View {
                     throw new InvalidMenuInputException("L'entrée '%s' est invalide. Veuillez entrer un nombre entier strictement positif.".formatted(input), e);
                 }
 
-                Club selectedClub = this.clubDataManager.getClub(clubId);
+                Club selectedClub = this.clubDataManager.getClubWithExceptions(clubId);
 
                 if (selectedClub == null) {
                     throw new InvalidMenuInputException("Aucun club ne porte l'identifiant '%d'.".formatted(clubId));
                 }
 
-                selectedClubId[0] = clubId;
+                selectedClubId.set(clubId);
                 System.out.printf("%s%n", TextFormatter.green(TextFormatter.italic("Club sélectionné : ", TextFormatter.bold(selectedClub.toString()))));
             });
 
-            return new FormResultEvent<>(selectedClubId[0]);
+            return new FormResultEvent<>(selectedClubId.get());
         } catch (CommandResponseException commandResponseException) {
             Object response = commandResponseException.getResponse();
 

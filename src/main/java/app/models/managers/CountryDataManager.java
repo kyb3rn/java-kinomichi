@@ -40,7 +40,7 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
         return this.countries.get(iso3);
     }
 
-    public Country getCountryWithExceptions(String iso3) throws ModelException {
+    public Country getCountryWithExceptions(String iso3) throws DataManagerException, ModelException {
         Country country = this.getCountry(iso3);
 
         if (country == null) {
@@ -52,7 +52,7 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
 
     public void addCountry(Country country) throws ModelException, DataManagerException {
         if (country == null) {
-            throw new ModelException("Le pays à ajouter ne peut pas être nul");
+            throw new DataManagerException("Le pays à ajouter ne peut pas être nul");
         }
 
         if (!country.isValid()) {

@@ -1,9 +1,6 @@
 package app.models.managers;
 
-import app.models.IdentifiedModel;
-import app.models.ModelException;
-import app.models.NoResultForPrimaryKeyException;
-import app.models.Person;
+import app.models.*;
 import com.google.gson.*;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
@@ -11,12 +8,7 @@ import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 public class PersonDataManager extends DataManager<PersonDataManager.Data> {
 
@@ -32,42 +24,57 @@ public class PersonDataManager extends DataManager<PersonDataManager.Data> {
 
     // ─── Utility methods ─── //
 
-    public Person getPerson(Integer id) throws ModelException {
+    public Person getPersonWithExceptions(Integer id) throws DataManagerException, ModelException {
         if (id == null) {
-            throw new NoResultForPrimaryKeyException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
+            throw new DataManagerException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
         }
 
         id = IdentifiedModel.verifyId(id);
 
-        return this.persons.get(id);
-    }
+        Person camp = this.persons.get(id);
 
-    public Person getPersonWithExceptions(int id) throws ModelException {
-        Person person = this.getPerson(id);
-
-        if (person == null) {
+        if (camp == null) {
             throw new NoResultForPrimaryKeyException("Aucune des personnes enregistrées ne porte l'identifiant '%d'".formatted(id));
         }
 
-        return person;
+        return camp;
     }
 
     public void addPerson(Person person) throws ModelException, DataManagerException {
         if (person == null) {
-            throw new ModelException("La personne à ajouter ne peut pas être nulle");
+            throw new DataManagerException("La personne à ajouter ne peut pas être nulle");
         }
+
+        this.applyAutoIncrementIfPossible(person);
 
         if (!person.isValid()) {
             throw new ModelException("La personne à ajouter n'est pas valide");
         }
-
-        this.applyAutoIncrementIfPossible(person);
 
         if (this.persons.containsKey(person.getId())) {
             throw new DataManagerException("Une personne portant l'identifiant '%d' existe déjà".formatted(person.getId()));
         }
 
         this.persons.put(person.getId(), person);
+
+        if (this.isInitialized()) {
+            this.unsavedChanges = true;
+            this.export();
+        }
+    }
+
+    public void deletePerson(int personId) throws ModelException, DataManagerException {
+        Person personToDelete = this.getPersonWithExceptions(personId);
+
+        if (DataManagers.get(AffiliationDataManager.class).isPersonUsed(personToDelete)) {
+            throw new DeletingReferencedDataManagerDataException("Cette personne est référencée par au moins une affiliation et est donc impossible à supprimer.");
+        }
+
+        if (DataManagers.get(CampDataManager.class).isPersonUsed(personToDelete)) {
+            throw new DeletingReferencedDataManagerDataException("Cette personne est référencée par au moins un des composants d'un des stages et est donc impossible à supprimer.");
+        }
+
+        this.persons.remove(personToDelete.getId());
 
         if (this.isInitialized()) {
             this.unsavedChanges = true;

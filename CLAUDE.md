@@ -1,4 +1,4 @@
-> Dernière mise à jour : 2026-04-02 22:44
+> Dernière mise à jour : 2026-04-05 16:30
 
 # Projet
 
@@ -14,7 +14,7 @@ Packages principaux :
 
 `Main.java` contient la boucle centrale de l'application :
 
-1. Initialise les `DataManagers` via `DataManagers.initAndResolveReferencesOf(...)` (pass 1 + pass 2)
+1. Initialise les `DataManagers` via `DataManagers.initAll()` qui appelle `initAndResolveReferencesOf(...)` (pass 1 + pass 2)
 2. Charge les commandes via `CommandManager.loadCommands()`
 3. Instancie un `Router` et enregistre toutes les `Route` (nom + regex de path + action de controller)
 4. Boucle : `push path dans NavigationHistory` → `router.dispatch(path)` → recoit un `Event` → determine le prochain path (ou `null` pour quitter)
@@ -23,6 +23,7 @@ Packages principaux :
 Le switch sur les events :
 - `CallUrlEvent` → navigue vers l'URL contenue
 - `GoBackEvent` → `AppState.navigationHistory.goBack()`
+- `GoBackBackEvent` → `AppState.navigationHistory.goBackUntilDifferentRoute(router)` (remonte jusqu'a une route differente)
 - `ExitProgramEvent` → `null` (sort de la boucle)
 
 ## Routing (package `app.routing`)
@@ -44,6 +45,7 @@ Les events sont le mecanisme de retour entre les views/controllers et la boucle 
 - `Event` (abstract) — classe de base
 - `CallUrlEvent(String url)` — navigue vers une URL
 - `GoBackEvent` — revient en arriere dans l'historique
+- `GoBackBackEvent` — remonte dans l'historique jusqu'a une route differente de la courante (declenche par `!bb`)
 - `ExitProgramEvent` — quitte l'application
 - `FormResultEvent<T>(T result)` — transporte le resultat d'un formulaire (ex : `AddCampFormData`, un `Integer` pour un ID selectionne)
 
@@ -57,22 +59,27 @@ Les events sont le mecanisme de retour entre les views/controllers et la boucle 
   3. Trier les modeles
   4. Creer et rendre une `View`, retourner l'`Event` resultat
 
-Controllers existants : `MainController`, `ExploreController`, `PersonController`, `CampController`, `ClubController`, `AffiliatedController`, `AddressController`, `CountryController`, `DataManagerController`.
+Controllers existants : `MainController`, `ExploreController`, `PersonController`, `CampController`, `ClubController`, `AffiliationController`, `AddressController`, `CountryController`, `DataManagerController`.
 
 ## Views (package `app.views`)
 
 - `View` (abstract) — classe de base, methode abstraite `Event render()`
-- Les views construisent des menus (`KinomichiStandardMenu`, `ModelListMenu`) ou gerent des formulaires manuels (scanner + boucle d'input)
+- `FormView` (abstract, extends View) — base pour les formulaires, fournit `promptField(Scanner, HashMap<FormViewField, FieldHandler>, FormViewField)` et `getModelTable(Model)`. Inner record `FieldHandler(String label, ThrowingConsumer<String> inputConsumer)`, inner interface `FormViewField` (marqueur pour les enums de champs)
+- `ModelView<M>` (extends View) — vue generique de detail d'un modele, utilise `ModelDetailMenu`
+- `ModelListView<M>` — vue generique de liste tabulaire pour n'importe quel Model
+- Les views construisent des menus (`KinomichiStandardMenu`, `ModelListMenu`, `ModelDetailMenu`) ou gerent des formulaires via `FormView`
 - `render()` retourne un `Event` qui remonte au controller puis a la boucle principale
 
 Views existantes :
 - `MainView` — menu principal avec options dynamiques selon l'etat des DataManagers
 - `ExploreDataView` — menu d'exploration de toutes les donnees
-- `ModelListView<M>` — vue generique de liste tabulaire pour n'importe quel Model
-- `persons/` — `PersonsDashboardView`, `AddPersonView` + `AddPersonFormData` (record : `Person` + `Affiliated.Data` nullable)
-- `camps/` — `SelectCampView`, `ManageCampView`, `AddCampView` + `AddCampFormData` (record : `Camp.Data` + `Address.Data`)
-- `clubs/` — `ClubsDashboardView`, `AddClubView` + `AddClubFormData` (record : `Club.Data` + `Address.Data`)
+- `persons/` — `PersonsDashboardView`, `AddPersonView` + `AddPersonFormData`, `ModifyPersonView` + `ModifyPersonFormData`, `SelectPersonView`, `DeletePersonView`
+- `camps/` — `SelectCampView`, `ManageCampView`, `AddCampView` + `AddCampFormData`
+- `clubs/` — `ClubsDashboardView`, `AddClubView` + `AddClubFormData`, `ModifyClubView` + `ModifyClubFormData`, `SelectClubView`, `DeleteClubView`
+- `affiliations/` — `AffiliationsDashboardView`, `AddAffiliationView`, `ModifyAffiliationView`, `SelectAffiliationView`, `DeleteAffiliationView`
 - `data_managers/` — `ReInitDataManagersView`, `SaveDataManagersView`
+
+Pattern CRUD complet des vues par domaine : `Dashboard` (menu), `Add` (formulaire), `Modify` (select → formulaire), `Delete` (select → confirmation), `Select` (liste avec selection par ID). Les `SelectView` retournent un `FormResultEvent<Integer>` avec l'ID selectionne.
 
 ## Middleware (package `app.middlewares`)
 
@@ -89,7 +96,9 @@ Hierarchie des menus (dans `utils/`) :
 
 Surcouches applicatives (dans `app/utils/menus/`) :
 - `KinomichiStandardMenu` (extends StandardMenu) — preconfigure le `CommandHandler` pour mapper `BackCommand` → `GoBackEvent`, `ExitCommand` → `ExitProgramEvent`
-- `ModelListMenu<M>` (extends OrderedMenu) — affiche une table de modeles via `ModelTableFormatter`, gere la commande `!sort`
+- `ModelMenu<M>` (abstract, extends OrderedMenu) — base pour les menus qui affichent des modeles en table, gere la generation de table via `ModelTableFormatter` et le rendu dans `display()`
+- `ModelListMenu<M>` (extends ModelMenu) — affiche une liste de modeles, gere la commande `!sort`
+- `ModelDetailMenu<M>` (extends ModelMenu) — affiche le detail d'un seul modele, gere `BackCommand` → `GoBackEvent`, `BackBackCommand` → `GoBackBackEvent`, `ExitCommand` → `ExitProgramEvent`
 
 `MenuResponse` encapsule la reponse (un `Event`, une `Command`, ou autre objet) qui remonte au code appelant.
 
@@ -100,6 +109,7 @@ Les commandes utilisateur sont prefixees par `!` (ex : `!e`, `!b`, `!sort 2`).
 Commandes disponibles (enum `ECommand`) :
 - `EXIT` (`!exit`, `!e`) → `ExitCommand`
 - `BACK` (`!back`, `!b`) → `BackCommand`
+- `BACK_BACK` (`!backback`, `!bb`) → `BackBackCommand` (remonte jusqu'a une route differente)
 - `SORT_COLUMN` (`!sort`, `!s`) → `SortColumnCommand` (accepte des arguments : `!sort 2:DESC 3`)
 
 Parsing via `CommandManager.convertInput(String)`. Les menus/vues qui ne gerent pas une commande lancent `UnhandledCommandException`.
@@ -113,12 +123,43 @@ Parsing via `CommandManager.convertInput(String)`. Les menus/vues qui ne gerent 
 
 `ThrowingConsumer<T>` : interface fonctionnelle dont `accept(T)` peut lancer une `Exception` (utilisee pour les setters qui lancent `ModelException`).
 
+`ThrowingVerificator<T>` : interface fonctionnelle `boolean accept(T)` pouvant lancer une `Exception` (utilisee pour les predicats de validation dans les formulaires).
+
 ## Navigation (app.utils.NavigationHistory)
 
 `AppState.navigationHistory` (instance statique) maintient une pile de paths.
 
 - `push(path)` — ajoute le path (ignore si identique au dernier)
 - `goBack(steps)` — retourne le path cible et nettoie la pile (note : supprime la cible elle-meme de la pile, le `push` dans la boucle principale la re-ajoute)
+- `goBackUntilDifferentRoute(Router)` — remonte dans la pile jusqu'a trouver un path qui correspond a une route differente de la route courante (utilise par `GoBackBackEvent`)
+
+## Validation (package `utils.helpers.validation`)
+
+`Validators` — classe utilitaire statique avec methodes de validation :
+- `validateNotNullOrBlank(String, boolean strip)`, `validateNotNullOrStrictlyEmpty(String)`
+- `validateInt(String)`, `validatePositiveInt(String)`, `validateStrictlyPositiveInt(String)`, `validateInteger(String)` (nullable)
+- `validateDouble(String, boolean lax)` (mode lax : convertit les virgules en points)
+- `validateEmail(String)`, `validateInstant(String)` (ISO 8601)
+
+Hierarchie d'exceptions :
+- `ValidatorException` → `BlankOrNullValueValidatorException`, `StrictlyEmptyOrNullValueValidatorException`, `ParsingValidatorException`, `PatternMatchingValidatorException`
+- `BoundaryValidatorException` (extends ValidatorException) → `BelowBoundaryValidatorException`, `AboveBoundaryValidatorException`
+
+## Elements utilitaires applicatifs (package `app.utils.elements`)
+
+### Money (`app.utils.elements.money`)
+
+- `Currency` (enum) — devises supportees (EURO), avec symbole et placement (BEFORE/AFTER)
+- `MoneyAmount` — montant avec devise, proprietes `currency` et `amount`
+- `Price` (extends MoneyAmount) — montant non-negatif (validation dans `setAmount`)
+
+### Time (`app.utils.elements.time`)
+
+- `TimeSlot` — intervalle temporel immutable avec `start` (Instant) et `end` (Instant). Validation : end > start. Methodes utilitaires : `overlaps()`, `contains()`, `isBefore()`, `isAfter()`, `getDuration()`. Affichage localise en francais via `toPrettyStringFormat()`
+
+## Tarification (package `app.utils.tarification`)
+
+Systeme de tarification avec `ChargeableElement`, `ChargeableElementType`, `ChargingElementType`, `EChargeableCategory`. Exceptions : `ChargeableElementException`, `ChargeableException`, `TarificationException`.
 
 # Conventions
 
@@ -167,12 +208,15 @@ Modeles avec references (pattern complet hydrate/dehydrate) :
 Modeles existants :
 - `Camp` — Hydratable, references : `@ModelReference → Address`
 - `Club` — Hydratable, references : `@ModelReference → Address`
-- `Affiliated` — extends `Person`, Hydratable, references : `@ModelReference → Person`, `@ModelReference → Club`
+- `Affiliation` — extends `IdentifiedModel`, Hydratable, references : `@ModelReference → Person`, `@ModelReference → Club`. Propriete `validityPeriod` (TimeSlot) pour la periode de validite. Possede un `affiliationNumber` (format XXXX-YYYYY)
 - `Address` — Hydratable, references : `@ModelReference → Country`
 - `Person` — pas de inner class Data, implemente directement `CustomSerializable` + `JsonConvertible` (cas particulier historique, pas de FK). Les formulaires d'ajout manipulent l'objet `Person` directement (pas un DTO)
 - `Country` — extends `Model` directement (pas IdentifiedModel), utilise `iso3` comme cle, implemente `CsvConvertible`
+- `Dinner` — extends `IdentifiedModel`, Hydratable
+- `DinnerReservation` — extends `IdentifiedModel`, Hydratable, references : `@ModelReference → Person`, `@ModelReference → Dinner`. Propriete `cancellationDatetime` (Instant, nullable)
+- `CampDiscount` — extends `IdentifiedModel`, Hydratable
 
-### Exception `NotResultForPrimaryKeyException`
+### Exception `NoResultForPrimaryKeyException`
 
 Exception specialisee (extends `ModelException`) lancee par les methodes `get*WithExceptions()` des DataManagers quand aucun modele ne correspond a la cle primaire fournie. Utilisee pour valider les FK saisies dans les formulaires.
 
@@ -194,9 +238,15 @@ Chaque DataManager :
 - Doit avoir un constructeur sans argument (peut etre `private`)
 - Doit overrider : `init()`, `export()`, `export(FileType)`, `count()`, `hydrate(Data)`, `dehydrate()`, `addResolvedModel(Model)`
 
-DataManagers existants : `CampDataManager`, `ClubDataManager`, `AffiliatedDataManager`, `AddressDataManager`, `PersonDataManager`, `CountryDataManager`.
+DataManagers existants : `PersonDataManager`, `CountryDataManager`, `AddressDataManager`, `ClubDataManager`, `CampDataManager`, `DinnerDataManager`, `DinnerReservationDataManager`, `AffiliationDataManager`, `CampDiscountDataManager`.
 
-Convention `get*WithExceptions()` : certains DataManagers exposent un getter qui lance `NotResultForPrimaryKeyException` si la PK n'existe pas (ex : `getClubWithExceptions(int)`, `getPersonWithExceptions(int)`, `getCountryWithExceptions(String)`). Utilise pour la validation dans les formulaires et les `set*FromPk()`.
+Convention `get*WithExceptions()` : certains DataManagers exposent un getter qui lance `NoResultForPrimaryKeyException` si la PK n'existe pas (ex : `getClubWithExceptions(int)`, `getPersonWithExceptions(int)`, `getCountryWithExceptions(String)`). Utilise pour la validation dans les formulaires et les `set*FromPk()`.
+
+Exceptions DataManager :
+- `DeletingReferencedDataManagerDataException` — lancee lors de la suppression d'un modele encore reference par d'autres
+- `OverridingUninitializedDataManagerDataException` — lancee lors d'une tentative d'export/modification sur un DataManager non initialise
+
+Auto-increment centralise : `DataManager.applyAutoIncrementIfPossible(IdentifiedModel)` attribue automatiquement un ID aux nouveaux modeles. Les getters de collections retournent des maps non modifiables via `Collections.unmodifiableSortedMap()`.
 
 `DataManagers.exportAll()` : sauvegarde tous les DataManagers ayant `hasUnsavedChanges() == true`. Appelee a la sortie de l'application.
 
@@ -240,15 +290,24 @@ Le projet utilise de la reflection et des conventions de nommage pour eviter du 
   - Champ pending attendu : `private String pendingCountryPk;`
   - Methode setter attendue : `public void setCountryFromPk(String iso3)`
 
-### 4. `@TableDisplay` sur les getters → colonnes d'affichage en table
+### 4. `ModelTable` et `@ModelTableDisplay` → colonnes d'affichage en table
 
-- `ModelTableFormatter` decouvre par reflection toutes les methodes publiques annotees `@TableDisplay` sur une classe Model.
-- Les methodes sont triees par `order()` et invoquees par reflection pour extraire les valeurs.
-- Le `name()` de l'annotation sert de titre de colonne.
-- Convention pour les FK : `name = "#& (entite)"` avec `ModelKeyTextFormattingPreset` et `TextAlignment.CENTER`.
-- L'annotation imbriquee `@TableDisplayFormattingOptions` dans `format()` permet de specifier : `preset` (classe `TextFormattingPreset`), `alignment`, `color`, `backgroundColor`, `styles`.
-- Si un `TextFormattingPreset` custom est specifie, il est instancie par reflection via `getDeclaredConstructor().newInstance()`.
-- Presets existants : `ModelPrimaryKeyTextFormattingPreset` (bold, underline, blue), `ModelKeyTextFormattingPreset` (underline).
+Le systeme d'affichage tabulaire est base sur des classes `ModelTable` decouplees des modeles (package `app.models.formatting.table`).
+
+Hierarchie :
+- `ModelTable<T extends Model>` (abstract) — base, fournit la resolution par reflection (`fromModelType(M)`, `fromModelClass(Class)`)
+- `IdentifiedModelTable<T extends IdentifiedModel>` (extends ModelTable) — ajoute automatiquement la colonne ID
+- Implementations concretes : `PersonModelTable`, `ClubModelTable`, `AffiliationModelTable`, `CampModelTable`, `CountryModelTable`, `AddressModelTable`
+
+Convention de nommage : `{Model}ModelTable` dans le package `app.models.formatting.table`. Resolu par reflection a partir du nom du Model.
+
+`ModelTableFormatter` (dans `app.models.formatting`) decouvre par reflection les methodes annotees `@ModelTableDisplay` sur la classe `ModelTable` correspondante :
+- Les methodes sont triees par `order()` et invoquees pour extraire les valeurs
+- Le `name()` de l'annotation sert de titre de colonne
+- Methodes statiques : `forList(List<T>)`, `forDetail(T item)`, `getColumnCount(Class)`, `comparatorForColumn(Class, int)`
+- Convention pour les FK : `name = "#& (entite)"` avec `ModelKeyTextFormattingPreset` et `TextAlignment.CENTER`
+
+Presets de formatage (dans `app.models.formatting`) : `ModelPrimaryKeyTextFormattingPreset` (bold, underline, blue), `ModelKeyTextFormattingPreset` (underline).
 
 ### 5. Instanciation des `DataManager` par reflection
 

@@ -116,24 +116,32 @@ public class Affiliation extends IdentifiedModel implements Hydratable<Affiliati
 
     // ─── Special setters ─── //
 
-    public void setPersonFromPk(int personId) throws ModelException {
+    public void setPersonFromPk(int personId) throws DataManagerException {
         try {
             this.person = DataManagers.get(PersonDataManager.class).getPersonWithExceptions(personId);
         } catch (NoResultForPrimaryKeyException e) {
             throw e;
         } catch (DataManagerException | ModelException e) {
-            throw new ModelException("Impossible de vérifier l'identifiant de personne '%d' (les personnes n'ont pas pu être chargées dans l'application)".formatted(personId), e);
+            throw new DataManagerException("Impossible de vérifier l'identifiant de personne '%d' (les personnes n'ont pas pu être chargées dans l'application)".formatted(personId), e);
         }
     }
 
-    public void setClubFromPk(int clubId) throws ModelException {
+    public void setClubFromPk(int clubId) throws DataManagerException {
         try {
             this.club = DataManagers.get(ClubDataManager.class).getClubWithExceptions(clubId);
         } catch (NoResultForPrimaryKeyException e) {
             throw e;
         } catch (DataManagerException | ModelException e) {
-            throw new ModelException("Impossible de vérifier l'identifiant de club '%d' (les clubs n'ont pas pu être chargés dans l'application)".formatted(clubId), e);
+            throw new DataManagerException("Impossible de vérifier l'identifiant de club '%d' (les clubs n'ont pas pu être chargés dans l'application)".formatted(clubId), e);
         }
+    }
+
+    public void setPersonFromPk(String personIdAsString) throws DataManagerException, ModelException {
+        this.setPersonFromPk(Person.verifyId(personIdAsString));
+    }
+
+    public void setClubFromPk(String clubIdAsString) throws DataManagerException, ModelException {
+        this.setClubFromPk(Club.verifyId(clubIdAsString));
     }
 
     // ─── Utility methods ─── //

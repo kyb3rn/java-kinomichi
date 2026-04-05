@@ -1,9 +1,9 @@
 package app.utils.tarification;
 
-import app.utils.elements.time.TimeSlot;
+import java.util.Set;
 
 public interface ChargeableElement {
 
-    EChargeableCategory getChargeableCategory(TimeSlot timeSlot);
+    Set<EChargeableCategory> getChargeableCategory(ChargingElement chargingElement) throws Exception;
 
 }

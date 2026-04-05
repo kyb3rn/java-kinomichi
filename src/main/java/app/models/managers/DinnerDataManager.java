@@ -2,6 +2,7 @@ package app.models.managers;
 
 import app.models.*;
 import com.google.gson.*;
+import java.time.Instant;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
 import utils.data_management.converters.convertibles.JsonConvertible;
@@ -29,36 +30,42 @@ public class DinnerDataManager extends DataManager<DinnerDataManager.Data> {
 
     // ─── Utility methods ─── //
 
-    public Dinner getDinner(Integer id) throws ModelException {
+    public Dinner getDinnerWithExceptions(Integer id) throws DataManagerException, ModelException {
         if (id == null) {
-            throw new NoResultForPrimaryKeyException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
+            throw new DataManagerException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
         }
 
         id = IdentifiedModel.verifyId(id);
 
-        return this.dinners.get(id);
-    }
+        Dinner camp = this.dinners.get(id);
 
-    public Dinner getDinnerWithExceptions(int id) throws ModelException {
-        Dinner dinner = this.getDinner(id);
-
-        if (dinner == null) {
+        if (camp == null) {
             throw new NoResultForPrimaryKeyException("Aucun des repas enregistrés ne porte l'identifiant '%d'".formatted(id));
         }
 
-        return dinner;
+        return camp;
+    }
+
+    public Camp getCampLinkedTo(Dinner dinner) throws DataManagerException, ModelException {
+        if (dinner == null) {
+            throw new DataManagerException("Le repas sur lequel effectuer la recherche ne peut pas être nul");
+        }
+
+        return DataManagers.get(CampDataManager.class).getCampWithExceptions(dinner.getCampId());
     }
 
     public void addDinner(Dinner dinner) throws ModelException, DataManagerException {
         if (dinner == null) {
-            throw new ModelException("Le repas à ajouter ne peut pas être nul");
+            throw new DataManagerException("Le repas à ajouter ne peut pas être nul");
         }
+
+        this.applyAutoIncrementIfPossible(dinner);
 
         if (!dinner.isValid()) {
             throw new ModelException("Le repas à ajouter n'est pas valide");
         }
 
-        this.applyAutoIncrementIfPossible(dinner);
+        dinner.validateTimeSlotWithinCampBounds();
 
         if (this.dinners.containsKey(dinner.getId())) {
             throw new DataManagerException("Un repas portant l'identifiant '%d' existe déjà".formatted(dinner.getId()));
@@ -74,7 +81,7 @@ public class DinnerDataManager extends DataManager<DinnerDataManager.Data> {
 
     public Dinner addDinner(Dinner.Data dinnerData) throws ModelException, DataManagerException {
         if (dinnerData == null) {
-            throw new ModelException("Le repas à ajouter ne peut pas être nul");
+            throw new DataManagerException("Le repas à ajouter ne peut pas être nul");
         }
 
         Dinner dinner = new Dinner();
@@ -84,6 +91,98 @@ public class DinnerDataManager extends DataManager<DinnerDataManager.Data> {
         this.addDinner(dinner);
 
         return dinner;
+    }
+
+    public void updateDinner(int dinnerId, Dinner modifiedDinner) throws ModelException, DataManagerException {
+        dinnerId = IdentifiedModel.verifyId(dinnerId);
+
+        if (modifiedDinner == null) {
+            throw new ModelException("Le repas modifié ne peut pas être nul");
+        }
+
+        if (!modifiedDinner.isValid()) {
+            throw new ModelException("Le repas modifié reçu n'est pas valide");
+        }
+
+        Dinner dinnerToModify = this.getDinnerWithExceptions(dinnerId);
+
+        if (dinnerToModify.getId() != modifiedDinner.getId()) {
+            throw new ModelException("Modifier l'identifiant d'un modèle n'est pas autorisé");
+        }
+
+        if (dinnerToModify.getCampId() != modifiedDinner.getCampId()) {
+            throw new ModelException("Modifier le stage de référence d'un repas n'est pas autorisé");
+        }
+
+        if (dinnerToModify.getTimeSlot().getEnd().isBefore(Instant.now())) {
+            throw new DataManagerException("Impossible de modifier un repas dont la date de fin est déjà passée");
+        }
+
+        if (!dinnerToModify.getTimeSlot().getStart().equals(modifiedDinner.getTimeSlot().getStart()) || !dinnerToModify.getTimeSlot().getEnd().equals(modifiedDinner.getTimeSlot().getEnd())) {
+            DinnerReservationDataManager dinnerReservationDataManager = DataManagers.get(DinnerReservationDataManager.class);
+            if (dinnerReservationDataManager.isDinnerUsed(dinnerToModify)) {
+                throw new DataManagerException("Impossible de modifier l'horaire d'un repas ayant des réservations");
+            }
+        }
+
+        modifiedDinner.validateTimeSlotWithinCampBounds();
+
+        dinnerToModify.hydrate(modifiedDinner.dehydrate());
+        DataManagers.resolveModelReferences(dinnerToModify);
+
+        if (this.isInitialized()) {
+            this.unsavedChanges = true;
+            this.export();
+        }
+    }
+
+    public void deleteDinner(int dinnerId) throws ModelException, DataManagerException {
+        Dinner dinnerToDelete = this.getDinnerWithExceptions(dinnerId);
+
+        if (dinnerToDelete.getTimeSlot().getEnd().isBefore(Instant.now())) {
+            throw new DataManagerException("Impossible de supprimer un repas dont la date de fin est déjà passée");
+        }
+
+        DinnerReservationDataManager dinnerReservationDataManager = DataManagers.get(DinnerReservationDataManager.class);
+        if (dinnerReservationDataManager.isDinnerUsed(dinnerToDelete)) {
+            throw new DeletingReferencedDataManagerDataException("Ce repas est référencé par au moins une réservation et est donc impossible à supprimer.");
+        }
+
+        this.dinners.remove(dinnerToDelete.getId());
+
+        if (this.isInitialized()) {
+            this.unsavedChanges = true;
+            this.export();
+        }
+    }
+
+    public List<Dinner> getCampDinners(Camp camp) throws DataManagerException {
+        if (camp == null) {
+            throw new DataManagerException("Le stage sur lequel effectuer la recherche ne peut pas être nul");
+        }
+
+        return this.dinners.values().stream().filter(dinner -> {
+            try {
+                return dinner.getCampId() == camp.getId();
+            } catch (ModelException e) {
+                return false;
+            }
+        }).toList();
+    }
+
+    public boolean isPersonUsed(Person personToDelete) throws ModelException, DataManagerException {
+        if (personToDelete == null) {
+            throw new DataManagerException("La personne sur laquelle effectuer la recherche ne peut pas être nulle");
+        }
+
+        DinnerReservationDataManager dinnerReservationDataManager = DataManagers.get(DinnerReservationDataManager.class);
+        return this.getModels().stream().anyMatch(dinner -> {
+            try {
+                return dinnerReservationDataManager.isPersonRegisteredForDinner(dinner.getId(), personToDelete);
+            } catch (DataManagerException | ModelException e) {
+                return false;
+            }
+        });
     }
 
     // ─── Overrides & inheritance ─── //
@@ -191,7 +290,11 @@ public class DinnerDataManager extends DataManager<DinnerDataManager.Data> {
 
         @Override
         public String toJson() {
-            return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+            return new GsonBuilder()
+                    .setPrettyPrinting()
+                    .registerTypeAdapter(Instant.class, (JsonSerializer<Instant>) (src, typeOfSrc, context) -> new JsonPrimitive(src.toString()))
+                    .create()
+                    .toJson(this);
         }
 
     }

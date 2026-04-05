@@ -29,36 +29,32 @@ public class CampDiscountDataManager extends DataManager<CampDiscountDataManager
 
     // ─── Utility methods ─── //
 
-    public CampDiscount getCampDiscount(Integer id) throws ModelException {
+    public CampDiscount getCampDiscountWithExceptions(Integer id) throws DataManagerException, ModelException {
         if (id == null) {
-            throw new NoResultForPrimaryKeyException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
+            throw new DataManagerException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
         }
 
         id = IdentifiedModel.verifyId(id);
 
-        return this.campsDiscounts.get(id);
-    }
+        CampDiscount camp = this.campsDiscounts.get(id);
 
-    public CampDiscount getCampDiscountWithExceptions(int id) throws ModelException {
-        CampDiscount campDiscount = this.getCampDiscount(id);
-
-        if (campDiscount == null) {
+        if (camp == null) {
             throw new NoResultForPrimaryKeyException("Aucune des réductions enregistrées ne porte l'identifiant '%d'".formatted(id));
         }
 
-        return campDiscount;
+        return camp;
     }
 
     public void addCampDiscount(CampDiscount campDiscount) throws ModelException, DataManagerException {
         if (campDiscount == null) {
-            throw new ModelException("La réduction à ajouter ne peut pas être nulle");
+            throw new DataManagerException("La réduction à ajouter ne peut pas être nulle");
         }
+
+        this.applyAutoIncrementIfPossible(campDiscount);
 
         if (!campDiscount.isValid()) {
             throw new ModelException("La réduction à ajouter n'est pas valide");
         }
-
-        this.applyAutoIncrementIfPossible(campDiscount);
 
         if (this.campsDiscounts.containsKey(campDiscount.getId())) {
             throw new DataManagerException("Une réduction portant l'identifiant '%d' existe déjà".formatted(campDiscount.getId()));
@@ -74,7 +70,7 @@ public class CampDiscountDataManager extends DataManager<CampDiscountDataManager
 
     public CampDiscount addCampDiscount(CampDiscount.Data campDiscountData) throws ModelException, DataManagerException {
         if (campDiscountData == null) {
-            throw new ModelException("Le réduction à ajouter ne peut pas être nulle");
+            throw new DataManagerException("Le réduction à ajouter ne peut pas être nulle");
         }
 
         CampDiscount campDiscount = new CampDiscount();

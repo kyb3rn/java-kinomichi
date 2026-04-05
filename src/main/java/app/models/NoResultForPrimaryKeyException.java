@@ -1,6 +1,8 @@
 package app.models;
 
-public class NoResultForPrimaryKeyException extends ModelException {
+import app.models.managers.DataManagerException;
+
+public class NoResultForPrimaryKeyException extends DataManagerException {
 
     // ─── Constructors ─── //
 

@@ -1,10 +1,12 @@
 package app.utils.tarification;
 
-import app.models.Dinner;
+import app.models.DinnerReservation;
+import app.models.LodgingReservation;
 
 public enum ChargingElementType {
 
-    DINNER(Dinner.class);
+    DINNER(DinnerReservation.class),
+    LODGING(LodgingReservation .class);
 
     // ─── Properties ─── //
 

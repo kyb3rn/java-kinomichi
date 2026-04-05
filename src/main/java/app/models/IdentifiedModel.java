@@ -31,7 +31,7 @@ public abstract class IdentifiedModel extends Model {
         } catch (BlankOrNullValueValidatorException e) {
             throw new ModelVerificationException("L'identifiant de ce modèle ne peut pas être vide ou nul");
         } catch (ParsingValidatorException e) {
-            throw new ModelVerificationException("L'identifiant doit de ce modèle être un entier strictement positif (ou -1)");
+            throw new ModelVerificationException("L'identifiant de ce modèle doit être un entier strictement positif (ou -1)");
         } catch (BelowBoundaryValidatorException e) {
             Object valueWhenCrated = e.getValueWhenCrated();
             if (valueWhenCrated instanceof Integer parsedId) {
@@ -40,7 +40,7 @@ public abstract class IdentifiedModel extends Model {
                 }
             }
 
-            throw new ModelVerificationException("L'identifiant doit de ce modèle être un entier strictement positif (ou -1)");
+            throw new ModelVerificationException("L'identifiant de ce modèle doit être un entier strictement positif (ou -1)");
         }
     }
 

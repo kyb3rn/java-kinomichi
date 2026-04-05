@@ -17,12 +17,20 @@ public class ExploreDataView extends View {
     public Event render() {
         KinomichiStandardMenu exploreMenu = new KinomichiStandardMenu("Explorer les données", new CallUrlEvent("/"));
 
-        this.addDataManagerOption(exploreMenu, "Stages", CampDataManager.class, "/camps/list", "stages non chargés");
-        this.addDataManagerOption(exploreMenu, "Personnes", PersonDataManager.class, "/persons/list", "personnes non chargées");
-        this.addDataManagerOption(exploreMenu, "Affiliations", AffiliationDataManager.class, "/affiliations/list", "affiliés non chargés");
-        this.addDataManagerOption(exploreMenu, "Clubs", ClubDataManager.class, "/clubs/list", "clubs non chargés");
-        this.addDataManagerOption(exploreMenu, "Adresses", AddressDataManager.class, "/addresses/list", "adresses non chargées");
-        this.addDataManagerOption(exploreMenu, "Pays", CountryDataManager.class, "/countries/list", "pays non chargés");
+        this.addDataManagerOption(exploreMenu, "Stages", CampDataManager.class, "/explore/camps", "stages non chargés");
+        this.addDataManagerOption(exploreMenu, "Personnes", PersonDataManager.class, "/explore/persons", "personnes non chargées");
+        this.addDataManagerOption(exploreMenu, "Affiliations", AffiliationDataManager.class, "/explore/affiliations", "affiliés non chargés");
+        this.addDataManagerOption(exploreMenu, "Repas", DinnerDataManager.class, "/explore/dinners", "repas non chargés");
+        this.addDataManagerOption(exploreMenu, "Hébergements", LodgingDataManager.class, "/explore/lodgings", "hébergements non chargés");
+        this.addDataManagerOption(exploreMenu, "Sessions", SessionDataManager.class, "/explore/sessions", "sessions non chargées");
+        this.addDataManagerOption(exploreMenu, "Formateurs de session", SessionTrainerDataManager.class, "/explore/session-trainers", "formateurs de session non chargés");
+        this.addDataManagerOption(exploreMenu, "Inscriptions aux sessions", SessionRegistrationDataManager.class, "/explore/session-registrations", "inscriptions aux sessions non chargées");
+        this.addDataManagerOption(exploreMenu, "Invitations", InvitationDataManager.class, "/explore/invitations", "invitations non chargées");
+        this.addDataManagerOption(exploreMenu, "Réservations de repas", DinnerReservationDataManager.class, "/explore/dinner-reservations", "réservations de repas non chargées");
+        this.addDataManagerOption(exploreMenu, "Réservations d'hébergement", LodgingReservationDataManager.class, "/explore/lodging-reservations", "réservations d'hébergement non chargées");
+        this.addDataManagerOption(exploreMenu, "Clubs", ClubDataManager.class, "/explore/clubs", "clubs non chargés");
+        this.addDataManagerOption(exploreMenu, "Adresses", AddressDataManager.class, "/explore/addresses", "adresses non chargées");
+        this.addDataManagerOption(exploreMenu, "Pays", CountryDataManager.class, "/explore/countries", "pays non chargés");
 
         MenuResponse menuResponse = exploreMenu.use();
 

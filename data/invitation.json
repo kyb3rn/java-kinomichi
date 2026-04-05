@@ -1,0 +1,14 @@
+{
+  "invitations": [
+    {
+      "campId": 1,
+      "personId": 21,
+      "id": 1
+    },
+    {
+      "campId": 2,
+      "personId": 22,
+      "id": 2
+    }
+  ]
+}

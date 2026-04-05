@@ -102,15 +102,13 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
 
     // ─── Special setters ─── //
 
-    public void setCountryFromPk(String iso3) throws ModelException {
-        iso3 = Country.verifyIso3(iso3);
-
+    public void setCountryFromPk(String iso3) throws DataManagerException {
         try {
             this.country = DataManagers.get(CountryDataManager.class).getCountryWithExceptions(iso3);
         } catch (NoResultForPrimaryKeyException e) {
             throw e;
         } catch (DataManagerException | ModelException e) {
-            throw new ModelException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3), e);
+            throw new DataManagerException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3), e);
         }
     }
 

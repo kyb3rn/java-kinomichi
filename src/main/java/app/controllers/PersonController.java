@@ -13,6 +13,7 @@ import app.models.managers.PersonDataManager;
 import app.routing.Request;
 import app.views.ModelListView;
 import app.views.persons.AddPersonView;
+import app.views.persons.DeletePersonView;
 import app.views.persons.ModifyPersonView;
 import app.views.persons.PersonsDashboardView;
 import app.views.persons.SelectPersonView;
@@ -109,7 +110,7 @@ public class PersonController extends Controller {
         Person person;
         try {
             person = personDataManager.getPersonWithExceptions(personId);
-        } catch (ModelException e) {
+        } catch (DataManagerException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
             return new CallUrlEvent("/persons/dashboard");
         }
@@ -128,6 +129,49 @@ public class PersonController extends Controller {
                 System.out.println();
                 personModifiedSimpleBox.display();
             } catch (DataManagerException | ModelException e) {
+                System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
+            }
+
+            return new CallUrlEvent("/persons/dashboard");
+        }
+
+        return event;
+    }
+
+    public Event delete(Request request) {
+        PersonDataManager personDataManager;
+        try {
+            personDataManager = DataManagers.get(PersonDataManager.class);
+        } catch (DataManagerException | ModelException e) {
+            System.out.println(Functions.styleAsErrorMessage("Les données des personnes n'ont pas pu être chargées."));
+            return new CallUrlEvent("/persons/dashboard");
+        }
+
+        LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders = this.parseSortParameter(request);
+        List<Person> sortedPersons;
+
+        try {
+            sortedPersons = this.sortModels(personDataManager.getModels(), Person.class, sortOrders);
+        } catch (UnimplementedModelTableException e) {
+            System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
+            return new CallUrlEvent("/persons/dashboard");
+        }
+
+        DeletePersonView deletePersonView = new DeletePersonView(sortedPersons, personDataManager);
+        Event event = deletePersonView.render();
+
+        if (event instanceof FormResultEvent<?> formResultEvent && formResultEvent.getResult() instanceof Integer personId) {
+            try {
+                Person personToDelete = personDataManager.getPersonWithExceptions(personId);
+                personDataManager.deletePerson(personId);
+
+                SimpleBox personDeletedSimpleBox = new SimpleBox();
+                personDeletedSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Personne supprimée")));
+                personDeletedSimpleBox.addLine(TextFormatter.italic("La personne " + TextFormatter.bold(personToDelete.toString()) + " a bien été supprimée."));
+
+                System.out.println();
+                personDeletedSimpleBox.display();
+            } catch (ModelException | DataManagerException e) {
                 System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
             }
 
@@ -156,7 +200,7 @@ public class PersonController extends Controller {
             return new CallUrlEvent("/explore");
         }
 
-        ModelListView<Person> personListView = new ModelListView<>(Person.class, sortedPersons, personDataManager.hasUnsavedChanges(), "/persons/list");
+        ModelListView<Person> personListView = new ModelListView<>(Person.class, sortedPersons, personDataManager.hasUnsavedChanges(), "/persons/list", "/persons/dashboard");
         return personListView.render();
     }
 

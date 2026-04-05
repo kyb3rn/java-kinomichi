@@ -28,6 +28,7 @@ import utils.io.text_formatting.TextFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SelectPersonView extends View {
 
@@ -64,7 +65,7 @@ public class SelectPersonView extends View {
         System.out.println(TextFormatter.italic("Entrez l'identifiant (#) d'une personne pour la sélectionner."));
 
         try {
-            final int[] selectedPersonId = new int[1];
+            AtomicInteger selectedPersonId = new AtomicInteger();
 
             KinomichiFunctions.promptInputWithCommandHandling(scanner, (_, command) -> {
                 switch (command) {
@@ -104,17 +105,17 @@ public class SelectPersonView extends View {
                     throw new InvalidMenuInputException("L'entrée '%s' est invalide. Veuillez entrer un nombre entier strictement positif.".formatted(input), e);
                 }
 
-                Person selectedPerson = this.personDataManager.getPerson(personId);
+                Person selectedPerson = this.personDataManager.getPersonWithExceptions(personId);
 
                 if (selectedPerson == null) {
                     throw new InvalidMenuInputException("Aucune personne ne porte l'identifiant '%d'.".formatted(personId));
                 }
 
-                selectedPersonId[0] = personId;
+                selectedPersonId.set(personId);
                 System.out.printf("%s%n", TextFormatter.green(TextFormatter.italic("Personne sélectionnée : ", TextFormatter.bold(selectedPerson.toString()))));
             });
 
-            return new FormResultEvent<>(selectedPersonId[0]);
+            return new FormResultEvent<>(selectedPersonId.get());
         } catch (CommandResponseException commandResponseException) {
             Object response = commandResponseException.getResponse();
 

@@ -3,10 +3,7 @@ package app.models;
 import app.models.managers.AddressDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import utils.data_management.converters.CustomSerializable;
 import utils.data_management.converters.Hydratable;
 import utils.data_management.converters.convertibles.JsonConvertible;
@@ -82,14 +79,18 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
 
     // ─── Special setters ─── //
 
-    public void setAddressFromPk(int addressId) throws ModelException {
+    public void setAddressFromPk(int addressId) throws DataManagerException {
         try {
             this.address = DataManagers.get(AddressDataManager.class).getAddressWithExceptions(addressId);
         } catch (NoResultForPrimaryKeyException e) {
             throw e;
         } catch (DataManagerException | ModelException e) {
-            throw new ModelException("Impossible de vérifier l'identifiant d'adresse '%d' (les adresses n'ont pas pu être chargées dans l'application)".formatted(addressId), e);
+            throw new DataManagerException("Impossible de vérifier l'identifiant d'adresse '%d' (les adresses n'ont pas pu être chargées dans l'application)".formatted(addressId), e);
         }
+    }
+
+    public void setAddressFromPk(String addressIdAsString) throws DataManagerException, ModelException {
+        this.setAddressFromPk(Address.verifyId(addressIdAsString));
     }
 
     // ─── Utility methods ─── //
@@ -119,6 +120,24 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
     }
 
     // ─── Overrides & inheritance ─── //
+
+    @Override
+    public Camp clone() {
+        Camp clone = new Camp();
+
+        try {
+            clone.setId(this.getId());
+        } catch (ModelException _) {
+            // Impossible case scenario (for IdentifiedModel at least)
+        }
+
+        clone.name = this.name;
+        clone.address = this.address;
+        clone.pendingAddressPk = this.pendingAddressPk;
+        clone.timeSlot = this.timeSlot;
+
+        return clone;
+    }
 
     @Override
     public String toString() {
@@ -265,7 +284,11 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
 
         @Override
         public String toJson() {
-            return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+            return new GsonBuilder()
+                    .setPrettyPrinting()
+                    .registerTypeAdapter(Instant.class, (JsonSerializer<Instant>) (src, typeOfSrc, context) -> new JsonPrimitive(src.toString()))
+                    .create()
+                    .toJson(this);
         }
 
     }

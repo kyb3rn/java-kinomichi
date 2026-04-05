@@ -29,6 +29,7 @@ import utils.io.text_formatting.TextFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DeleteClubView extends View {
 
@@ -65,7 +66,7 @@ public class DeleteClubView extends View {
         System.out.println(TextFormatter.italic("Entrez l'identifiant (#) d'un club pour le supprimer."));
 
         try {
-            final int[] selectedClubId = new int[1];
+            AtomicInteger selectedClubId = new AtomicInteger();
 
             KinomichiFunctions.promptInputWithCommandHandling(scanner, (_, command) -> {
                 switch (command) {
@@ -105,13 +106,13 @@ public class DeleteClubView extends View {
                     throw new InvalidMenuInputException("L'entrée '%s' est invalide. Veuillez entrer un nombre entier strictement positif.".formatted(input), e);
                 }
 
-                Club selectedClub = this.clubDataManager.getClub(clubId);
+                Club selectedClub = this.clubDataManager.getClubWithExceptions(clubId);
 
                 if (selectedClub == null) {
                     throw new InvalidMenuInputException("Aucun club ne porte l'identifiant '%d'.".formatted(clubId));
                 }
 
-                selectedClubId[0] = clubId;
+                selectedClubId.set(clubId);
 
                 SimpleBox confirmationSimpleBox = new SimpleBox();
                 confirmationSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Confirmation de suppression")));
@@ -144,16 +145,16 @@ public class DeleteClubView extends View {
                 }
 
                 if (normalizedInput.equals("N")) {
-                    selectedClubId[0] = -1;
+                    selectedClubId.set(-1);
                 }
             });
 
-            if (selectedClubId[0] == -1) {
+            if (selectedClubId.get() == -1) {
                 System.out.println(TextFormatter.italic("Suppression annulée."));
                 return new GoBackEvent();
             }
 
-            return new FormResultEvent<>(selectedClubId[0]);
+            return new FormResultEvent<>(selectedClubId.get());
         } catch (CommandResponseException commandResponseException) {
             Object response = commandResponseException.getResponse();
 

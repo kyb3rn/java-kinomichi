@@ -77,4 +77,8 @@ public abstract class ModelTable<T extends Model> {
         return TextFormatter.italic(TextFormatter.yellow("null"));
     }
 
+    protected static FormattedText getQuestionMarkFormattedText() {
+        return TextFormatter.italic(TextFormatter.yellow("?"));
+    }
+
 }

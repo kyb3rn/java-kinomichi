@@ -70,8 +70,8 @@ public class ModifyAffiliationView extends FormView {
         }
 
         HashMap<FormViewField, FieldHandler> fieldHandlers = new HashMap<>();
-        fieldHandlers.put(Field.PERSON_ID, new FieldHandler(TextFormatter.bold(TextFormatter.green("1.")) + " Identifiant de la personne (#) " + TextFormatter.italic("(actuel : %s)".formatted(currentPersonIdLabel)), input -> clonedAffiliation.setPersonFromPk(Integer.parseInt(input))));
-        fieldHandlers.put(Field.CLUB_ID, new FieldHandler(TextFormatter.bold(TextFormatter.green("2.")) + " Identifiant du club (#) " + TextFormatter.italic("(actuel : %s)".formatted(currentClubIdLabel)), input -> clonedAffiliation.setClubFromPk(Integer.parseInt(input))));
+        fieldHandlers.put(Field.PERSON_ID, new FieldHandler(TextFormatter.bold(TextFormatter.green("1.")) + " Identifiant de la personne (#) " + TextFormatter.italic("(actuel : %s)".formatted(currentPersonIdLabel)), input -> clonedAffiliation.setPersonFromPk(input)));
+        fieldHandlers.put(Field.CLUB_ID, new FieldHandler(TextFormatter.bold(TextFormatter.green("2.")) + " Identifiant du club (#) " + TextFormatter.italic("(actuel : %s)".formatted(currentClubIdLabel)), input -> clonedAffiliation.setClubFromPk(input)));
         fieldHandlers.put(Field.AFFILIATION_NUMBER, new FieldHandler(TextFormatter.bold(TextFormatter.green("3.")) + " Numéro d'affiliation " + TextFormatter.italic("(actuel : %s)".formatted(clonedAffiliation.getAffiliationNumber())), clonedAffiliation::setAffiliationNumber));
         fieldHandlers.put(Field.VALIDITY_PERIOD_START, new FieldHandler(TextFormatter.bold(TextFormatter.green("4.")) + " Début de validité " + TextFormatter.italic("(actuel : %s)".formatted(clonedAffiliation.getValidityPeriod().getFormattedStart())), input -> {
             clonedAffiliation.setValidityPeriod(new app.utils.elements.time.TimeSlot(

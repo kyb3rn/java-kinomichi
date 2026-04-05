@@ -28,6 +28,7 @@ import utils.io.text_formatting.TextFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SelectAffiliationView extends View {
 
@@ -64,7 +65,7 @@ public class SelectAffiliationView extends View {
         System.out.println(TextFormatter.italic("Entrez l'identifiant (#) d'une affiliation pour la sélectionner."));
 
         try {
-            final int[] selectedAffiliationId = new int[1];
+            AtomicInteger selectedAffiliationId = new AtomicInteger();
 
             KinomichiFunctions.promptInputWithCommandHandling(scanner, (_, command) -> {
                 switch (command) {
@@ -104,17 +105,17 @@ public class SelectAffiliationView extends View {
                     throw new InvalidMenuInputException("L'entrée '%s' est invalide. Veuillez entrer un nombre entier strictement positif.".formatted(input), e);
                 }
 
-                Affiliation selectedAffiliation = this.affiliationDataManager.getAffiliation(affiliationId);
+                Affiliation selectedAffiliation = this.affiliationDataManager.getAffiliationWithExceptions(affiliationId);
 
                 if (selectedAffiliation == null) {
                     throw new InvalidMenuInputException("Aucune affiliation ne porte l'identifiant '%d'.".formatted(affiliationId));
                 }
 
-                selectedAffiliationId[0] = affiliationId;
+                selectedAffiliationId.set(affiliationId);
                 System.out.printf("%s%n", TextFormatter.green(TextFormatter.italic("Affiliation sélectionnée : ", TextFormatter.bold(selectedAffiliation.toString()))));
             });
 
-            return new FormResultEvent<>(selectedAffiliationId[0]);
+            return new FormResultEvent<>(selectedAffiliationId.get());
         } catch (CommandResponseException commandResponseException) {
             Object response = commandResponseException.getResponse();
 

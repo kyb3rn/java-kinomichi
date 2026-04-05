@@ -77,14 +77,18 @@ public class Club extends IdentifiedModel implements Hydratable<Club.Data> {
 
     // ─── Special setters ─── //
 
-    public void setAddressFromPk(int addressId) throws ModelException {
+    public void setAddressFromPk(int addressId) throws DataManagerException {
         try {
             this.address = DataManagers.get(AddressDataManager.class).getAddressWithExceptions(addressId);
         } catch (NoResultForPrimaryKeyException e) {
             throw e;
         } catch (DataManagerException | ModelException e) {
-            throw new ModelException("Impossible de vérifier l'identifiant d'adresse '%d' (les adresses n'ont pas pu être chargées dans l'application)".formatted(addressId), e);
+            throw new DataManagerException("Impossible de vérifier l'identifiant d'adresse '%d' (les adresses n'ont pas pu être chargées dans l'application)".formatted(addressId), e);
         }
+    }
+
+    public void setAddressFromPk(String addressIdAsString) throws DataManagerException, ModelException {
+        this.setAddressFromPk(Address.verifyId(addressIdAsString));
     }
 
     // ─── Utility methods ─── //

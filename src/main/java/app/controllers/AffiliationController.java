@@ -110,7 +110,7 @@ public class AffiliationController extends Controller {
         Affiliation affiliation;
         try {
             affiliation = affiliationDataManager.getAffiliationWithExceptions(affiliationId);
-        } catch (ModelException e) {
+        } catch (DataManagerException | ModelException e) {
             System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
             return new CallUrlEvent("/affiliations/dashboard");
         }
@@ -200,7 +200,7 @@ public class AffiliationController extends Controller {
             return new CallUrlEvent("/explore");
         }
 
-        ModelListView<Affiliation> affiliationListView = new ModelListView<>(Affiliation.class, sortedAffiliations, affiliationDataManager.hasUnsavedChanges(), "/affiliations/list");
+        ModelListView<Affiliation> affiliationListView = new ModelListView<>(Affiliation.class, sortedAffiliations, affiliationDataManager.hasUnsavedChanges(), "/affiliations/list", "/affiliations/dashboard");
         return affiliationListView.render();
     }
 

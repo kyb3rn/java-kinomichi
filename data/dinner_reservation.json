@@ -1,0 +1,16 @@
+{
+  "dinnerReservations": [
+    {
+      "personId": 21,
+      "dinnerId": 1,
+      "cancellationDatetime": null,
+      "id": 1
+    },
+    {
+      "personId": 25,
+      "dinnerId": 1,
+      "cancellationDatetime": null,
+      "id": 2
+    }
+  ]
+}

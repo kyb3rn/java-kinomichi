@@ -34,36 +34,32 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
 
     // ─── Utility methods ─── //
 
-    public Address getAddress(Integer id) throws ModelException {
+    public Address getAddressWithExceptions(Integer id) throws DataManagerException, ModelException {
         if (id == null) {
-            throw new NoResultForPrimaryKeyException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
+            throw new DataManagerException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
         }
 
         id = IdentifiedModel.verifyId(id);
 
-        return this.addresses.get(id);
-    }
+        Address camp = this.addresses.get(id);
 
-    public Address getAddressWithExceptions(int id) throws ModelException {
-        Address address = this.getAddress(id);
-
-        if (address == null) {
+        if (camp == null) {
             throw new NoResultForPrimaryKeyException("Aucune des adresses enregistrées ne porte l'identifiant '%d'".formatted(id));
         }
 
-        return address;
+        return camp;
     }
 
     public void addAddress(Address address) throws ModelException, DataManagerException {
         if (address == null) {
-            throw new ModelException("L'adresse à ajouter ne peut pas être nulle");
+            throw new DataManagerException("L'adresse à ajouter ne peut pas être nulle");
         }
+
+        this.applyAutoIncrementIfPossible(address);
 
         if (!address.isValid()) {
             throw new ModelException("L'adresse qui a voulue être ajoutée n'est pas valide");
         }
-
-        this.applyAutoIncrementIfPossible(address);
 
         if (this.addresses.containsKey(address.getId())) {
             throw new DataManagerException("Une adresse portant l'identifiant '%d' existe déjà".formatted(address.getId()));
@@ -79,7 +75,7 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
 
     public Address addAddress(Address.Data addressData) throws ModelException, DataManagerException {
         if (addressData == null) {
-            throw new ModelException("L'adresse à ajouter ne peut pas être nulle");
+            throw new DataManagerException("L'adresse à ajouter ne peut pas être nulle");
         }
 
         Address address = new Address();

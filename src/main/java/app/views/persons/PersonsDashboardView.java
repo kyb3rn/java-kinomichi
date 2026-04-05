@@ -32,6 +32,7 @@ public class PersonsDashboardView extends View {
         managePersonsMenu.addOption("Liste des personnes", new CallUrlEvent("/persons/list"));
         managePersonsMenu.addOption("Ajouter une personne", new CallUrlEvent("/persons/add"));
         managePersonsMenu.addOption("Modifier une personne", new CallUrlEvent("/persons/modify/select"));
+        managePersonsMenu.addOption("Supprimer une personne", new CallUrlEvent("/persons/delete/select"));
 
         MenuResponse menuResponse = managePersonsMenu.use();
 

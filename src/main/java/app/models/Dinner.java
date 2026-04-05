@@ -8,10 +8,7 @@ import app.utils.elements.money.Price;
 import app.utils.elements.money.exceptions.NotACurrencyException;
 import app.utils.elements.money.exceptions.UnknownCurrencyException;
 import app.utils.tarification.ChargingElement;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import utils.data_management.converters.CustomSerializable;
 import utils.data_management.converters.Hydratable;
 import utils.data_management.converters.convertibles.JsonConvertible;
@@ -24,7 +21,7 @@ import app.utils.elements.time.TimeSlot;
 
 import java.time.Instant;
 
-public class Dinner extends IdentifiedModel implements Hydratable<Dinner.Data>, ChargingElement {
+public class Dinner extends IdentifiedModel implements Hydratable<Dinner.Data>, CampScheduledItem {
 
     // ─── Properties ─── //
 
@@ -87,6 +84,8 @@ public class Dinner extends IdentifiedModel implements Hydratable<Dinner.Data>, 
             throw new ModelVerificationException("La période de temps d'un repas ne peut pas être nulle");
         }
 
+        CampScheduledItem.validateTimeSlotWithinCampBounds(this.camp, timeSlot);
+
         this.timeSlot = timeSlot;
     }
 
@@ -100,14 +99,18 @@ public class Dinner extends IdentifiedModel implements Hydratable<Dinner.Data>, 
 
     // ─── Special setters ─── //
 
-    public void setCampFromPk(int campId) throws ModelException {
+    public void setCampFromPk(int campId) throws DataManagerException {
         try {
             this.camp = DataManagers.get(CampDataManager.class).getCampWithExceptions(campId);
         } catch (NoResultForPrimaryKeyException e) {
             throw e;
         } catch (DataManagerException | ModelException e) {
-            throw new ModelException("Impossible de vérifier l'identifiant du stage '%d' (les stages n'ont pas pu être chargées dans l'application)".formatted(campId), e);
+            throw new DataManagerException("Impossible de vérifier l'identifiant du stage '%d' (les stages n'ont pas pu être chargées dans l'application)".formatted(campId), e);
         }
+    }
+
+    public void setCampFromPk(String campIdAsString) throws DataManagerException, ModelException {
+        this.setCampFromPk(Camp.verifyId(campIdAsString));
     }
 
     // ─── Utility methods ─── //
@@ -176,6 +179,25 @@ public class Dinner extends IdentifiedModel implements Hydratable<Dinner.Data>, 
     // ─── Overrides & inheritance ─── //
 
     @Override
+    public Dinner clone() {
+        Dinner clone = new Dinner();
+
+        try {
+            clone.setId(this.getId());
+        } catch (ModelException _) {
+            // Impossible case scenario (for IdentifiedModel at least)
+        }
+
+        clone.camp = this.camp;
+        clone.pendingCampPk = this.pendingCampPk;
+        clone.label = this.label;
+        clone.timeSlot = this.timeSlot;
+        clone.price = this.price;
+
+        return clone;
+    }
+
+    @Override
     public void hydrate(Data dataObject) throws ModelException {
         this.setId(dataObject.getId());
         this.pendingCampPk = dataObject.getCampId();
@@ -202,11 +224,6 @@ public class Dinner extends IdentifiedModel implements Hydratable<Dinner.Data>, 
     @Override
     public boolean isValid() {
         return this.getId() > 0 && this.camp != null && this.label != null && this.timeSlot != null && this.price != null;
-    }
-
-    @Override
-    public double getBasePrice() {
-        return this.getPrice().getAmount();
     }
 
     // ─── Sub classes ─── //
@@ -382,7 +399,11 @@ public class Dinner extends IdentifiedModel implements Hydratable<Dinner.Data>, 
 
         @Override
         public String toJson() {
-            return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+            return new GsonBuilder()
+                    .setPrettyPrinting()
+                    .registerTypeAdapter(Instant.class, (JsonSerializer<Instant>) (src, typeOfSrc, context) -> new JsonPrimitive(src.toString()))
+                    .create()
+                    .toJson(this);
         }
 
     }

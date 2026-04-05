@@ -28,6 +28,7 @@ import utils.io.text_formatting.TextFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SelectCampView extends View {
 
@@ -64,7 +65,7 @@ public class SelectCampView extends View {
         System.out.println(TextFormatter.italic("Entrez l'identifiant (#) d'un stage pour le sélectionner."));
 
         try {
-            final int[] selectedCampId = new int[1];
+            AtomicInteger selectedCampId = new AtomicInteger();
 
             KinomichiFunctions.promptInputWithCommandHandling(scanner, (_, command) -> {
                 switch (command) {
@@ -104,17 +105,17 @@ public class SelectCampView extends View {
                     throw new InvalidMenuInputException("L'entrée '%s' est invalide. Veuillez entrer un nombre entier strictement positif.".formatted(input), e);
                 }
 
-                Camp selectedCamp = this.campDataManager.getCamp(campId);
+                Camp selectedCamp = this.campDataManager.getCampWithExceptions(campId);
 
                 if (selectedCamp == null) {
                     throw new InvalidMenuInputException("Aucun stage ne porte l'identifiant '%d'.".formatted(campId));
                 }
 
-                selectedCampId[0] = campId;
+                selectedCampId.set(campId);
                 System.out.printf("%s%n", TextFormatter.green(TextFormatter.italic("Stage sélectionné : ", TextFormatter.bold(selectedCamp.toString()))));
             });
 
-            return new FormResultEvent<>(selectedCampId[0]);
+            return new FormResultEvent<>(selectedCampId.get());
         } catch (CommandResponseException commandResponseException) {
             Object response = commandResponseException.getResponse();
 
