@@ -4,12 +4,13 @@ import app.models.Affiliation;
 import app.models.ModelException;
 import app.models.formatting.ModelKeyTextFormattingPreset;
 import app.models.formatting.ModelPrimaryKeyTextFormattingPreset;
+import app.utils.elements.time.TimeSlot;
 import utils.io.tables.ModelTableDisplay;
 import utils.io.tables.TableDisplayFormattingOptions;
 import utils.io.text_formatting.TextAlignment;
 import utils.io.text_formatting.TextStyle;
 
-public class AffiliationModelTable extends ModelTable<Affiliation> {
+public class AffiliationModelTable extends IdentifiedModelTable<Affiliation> {
 
     // ─── Constructors ─── //
 
@@ -19,7 +20,7 @@ public class AffiliationModelTable extends ModelTable<Affiliation> {
 
     // ─── Utility methods ─── //
 
-    @ModelTableDisplay(name = "#& (personne)", format = @TableDisplayFormattingOptions(preset = ModelPrimaryKeyTextFormattingPreset.class), order = 1)
+    @ModelTableDisplay(name = "#& (personne)", format = @TableDisplayFormattingOptions(preset = ModelKeyTextFormattingPreset.class, alignment = TextAlignment.CENTER), order = 2)
     public String getPersonId() {
         try {
             return String.valueOf(this.getModel().getPersonId());
@@ -28,7 +29,7 @@ public class AffiliationModelTable extends ModelTable<Affiliation> {
         }
     }
 
-    @ModelTableDisplay(name = "#& (club)", format = @TableDisplayFormattingOptions(preset = ModelKeyTextFormattingPreset.class, alignment = TextAlignment.CENTER), order = 2)
+    @ModelTableDisplay(name = "#& (club)", format = @TableDisplayFormattingOptions(preset = ModelKeyTextFormattingPreset.class, alignment = TextAlignment.CENTER), order = 3)
     public String getClubId() {
         try {
             return String.valueOf(this.getModel().getClubId());
@@ -37,9 +38,15 @@ public class AffiliationModelTable extends ModelTable<Affiliation> {
         }
     }
 
-    @ModelTableDisplay(name = "N° affiliation", format = @TableDisplayFormattingOptions(styles = {TextStyle.ITALIC}), order = 2)
+    @ModelTableDisplay(name = "N° affiliation", format = @TableDisplayFormattingOptions(styles = {TextStyle.ITALIC}), order = 4)
     public String getAffiliationNumber() {
         return this.getModel().getAffiliationNumber();
+    }
+
+    @ModelTableDisplay(name = "Période de validité", order = 5)
+    public String getValidityPeriod() {
+        TimeSlot validityPeriod = this.getModel().getValidityPeriod();
+        return validityPeriod != null ? validityPeriod.toString() : ModelTable.getNullFormattedText().toString();
     }
 
 }

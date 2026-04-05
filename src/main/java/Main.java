@@ -52,10 +52,17 @@ public class Main {
         router.register(new Route("clubs.list", "/clubs/list(?:/sort/(?<sort>.+))?", clubController::list));
         router.register(new Route("clubs.add", "/clubs/add", clubController::add));
         router.register(new Route("clubs.dashboard", "/clubs/dashboard", clubController::dashboard));
+        router.register(new Route("clubs.modify.select", "/clubs/modify/select(?:/sort/(?<sort>.+))?", clubController::modifySelect));
+        router.register(new Route("clubs.modify", "/clubs/modify/(?<id>\\d+)", clubController::modify));
         router.register(new Route("clubs.delete.select", "/clubs/delete/select(?:/sort/(?<sort>.+))?", clubController::delete));
 
         // Affiliations
+        router.register(new Route("affiliations.dashboard", "/affiliations/dashboard", affiliationController::dashboard));
         router.register(new Route("affiliations.list", "/affiliations/list(?:/sort/(?<sort>.+))?", affiliationController::list));
+        router.register(new Route("affiliations.add", "/affiliations/add", affiliationController::add));
+        router.register(new Route("affiliations.modify.select", "/affiliations/modify/select(?:/sort/(?<sort>.+))?", affiliationController::modifySelect));
+        router.register(new Route("affiliations.modify", "/affiliations/modify/(?<id>\\d+)", affiliationController::modify));
+        router.register(new Route("affiliations.delete.select", "/affiliations/delete/select(?:/sort/(?<sort>.+))?", affiliationController::delete));
 
         // Addresses
         router.register(new Route("addresses.list", "/addresses/list(?:/sort/(?<sort>.+))?", addressController::list));

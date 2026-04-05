@@ -1,9 +1,6 @@
 package app.models.managers;
 
-import app.models.Address;
-import app.models.Model;
-import app.models.ModelException;
-import app.models.NoResultForPrimaryKeyException;
+import app.models.*;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -18,8 +15,10 @@ import utils.data_management.parsing.StringParserException;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.TreeMap;
+import java.util.Collections;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class AddressDataManager extends DataManager<AddressDataManager.Data> {
 
@@ -29,17 +28,23 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
 
     // ─── Getters ─── //
 
-    public TreeMap<Integer, Address> getAddresses() {
-        return this.addresses;
+    public SortedMap<Integer, Address> getAddresses() {
+        return Collections.unmodifiableSortedMap(this.addresses);
     }
 
     // ─── Utility methods ─── //
 
-    public Address getAddress(Integer id) {
+    public Address getAddress(Integer id) throws ModelException {
+        if (id == null) {
+            throw new NoResultForPrimaryKeyException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
+        }
+
+        id = IdentifiedModel.verifyId(id);
+
         return this.addresses.get(id);
     }
 
-    public Address getAddressWithExceptions(int id) throws NoResultForPrimaryKeyException {
+    public Address getAddressWithExceptions(int id) throws ModelException {
         Address address = this.getAddress(id);
 
         if (address == null) {
@@ -50,9 +55,15 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
     }
 
     public void addAddress(Address address) throws ModelException, DataManagerException {
+        if (address == null) {
+            throw new ModelException("L'adresse à ajouter ne peut pas être nulle");
+        }
+
         if (!address.isValid()) {
             throw new ModelException("L'adresse qui a voulue être ajoutée n'est pas valide");
         }
+
+        this.applyAutoIncrementIfPossible(address);
 
         if (this.addresses.containsKey(address.getId())) {
             throw new DataManagerException("Une adresse portant l'identifiant '%d' existe déjà".formatted(address.getId()));
@@ -67,16 +78,43 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
     }
 
     public Address addAddress(Address.Data addressData) throws ModelException, DataManagerException {
+        if (addressData == null) {
+            throw new ModelException("L'adresse à ajouter ne peut pas être nulle");
+        }
+
         Address address = new Address();
         address.hydrate(addressData);
         DataManagers.resolveModelReferences(address);
 
-        int maxId = this.addresses.values().stream().mapToInt(Address::getId).max().orElse(0);
-        address.setId(maxId + 1);
-
         this.addAddress(address);
 
         return address;
+    }
+
+    public void updateAddress(int addressId, Address modifiedAddress) throws ModelException, DataManagerException {
+        addressId = IdentifiedModel.verifyId(addressId);
+
+        if (modifiedAddress == null) {
+            throw new ModelException("L'adresse modifiée ne peut pas être nulle");
+        }
+
+        if (!modifiedAddress.isValid()) {
+            throw new ModelException("L'adresse modifiée reçue n'est pas valide");
+        }
+
+        Address addressToModify = this.getAddressWithExceptions(addressId);
+
+        if (addressToModify.getId() != modifiedAddress.getId()) {
+            throw new ModelException("Modifier l'identifiant d'un modèle n'est pas autorisé");
+        }
+
+        addressToModify.hydrate(modifiedAddress.dehydrate());
+        DataManagers.resolveModelReferences(addressToModify);
+
+        if (this.isInitialized()) {
+            this.unsavedChanges = true;
+            this.export();
+        }
     }
 
     // ─── Overrides & inheritance ─── //
@@ -144,7 +182,7 @@ public class AddressDataManager extends DataManager<AddressDataManager.Data> {
         // ─── Constructors ─── //
 
         public Data(AddressDataManager addressManager) throws ModelException {
-            for (Address address : addressManager.getAddresses().values()) {
+            for (Address address : addressManager.getModels()) {
                 this.addresses.add(address.dehydrate());
             }
         }

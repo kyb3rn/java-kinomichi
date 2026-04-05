@@ -4,23 +4,22 @@ import app.events.*;
 import app.models.Address;
 import app.models.Club;
 import app.models.ModelException;
-import app.models.managers.CountryDataManager;
-import app.models.managers.DataManagerException;
-import app.models.managers.DataManagers;
-import app.utils.ThrowingConsumer;
 import app.utils.helpers.KinomichiFunctions;
 import app.utils.menus.KinomichiStandardMenu;
 import app.views.FormView;
-import app.views.View;
 import utils.io.commands.exceptions.CommandResponseException;
 import utils.io.commands.list.BackBackCommand;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
 import utils.helpers.Functions;
 import utils.io.tables.SimpleBox;
+import utils.io.tables.Table;
 import utils.io.text_formatting.TextFormatter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AddClubView extends FormView {
@@ -31,8 +30,8 @@ public class AddClubView extends FormView {
     public Event render() {
         Scanner scanner = new Scanner(System.in);
 
-        Club.Data clubData = new Club.Data();
-        Address.Data clubAddressData = new Address.Data();
+        Club club = new Club();
+        Address address = new Address();
 
         SimpleBox sectionHeaderSimpleBox = new SimpleBox();
         sectionHeaderSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Ajout d'un club")));
@@ -42,26 +41,14 @@ public class AddClubView extends FormView {
         sectionHeaderSimpleBox.display();
 
         HashMap<FormViewField, FieldHandler> fieldHandlers = new HashMap<>();
-        fieldHandlers.put(Field.NAME, new FieldHandler(TextFormatter.bold(TextFormatter.green("1.")) + " Nom", clubData::setName));
-        fieldHandlers.put(Field.ADDRESS_COUNTRY_ISO3, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.1.")) + " Adresse - Pays (ISO 3)", input -> {
-            clubAddressData.setCountryIso3(input);
-            String iso3 = clubAddressData.getCountryIso3();
-
-            CountryDataManager countryDataManager;
-            try {
-                countryDataManager = DataManagers.get(CountryDataManager.class);
-            } catch (DataManagerException | ModelException e) {
-                throw new DataManagerException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3), e);
-            }
-
-            countryDataManager.getCountryWithExceptions(iso3);
-        }));
-        fieldHandlers.put(Field.ADDRESS_ZIP_CODE, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.2.")) + " Adresse - Code postal", clubAddressData::setZipCode));
-        fieldHandlers.put(Field.ADDRESS_CITY, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.3.")) + " Adresse - Ville", clubAddressData::setCity));
-        fieldHandlers.put(Field.ADDRESS_STREET, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.4.")) + " Adresse - Rue", clubAddressData::setStreet));
-        fieldHandlers.put(Field.ADDRESS_NUMBER, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.5.")) + " Adresse - Numéro", clubAddressData::setNumber));
-        fieldHandlers.put(Field.ADDRESS_BOX_NUMBER, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.6.")) + " Adresse - Numéro de boîte " + TextFormatter.italic("(optionnel)"), clubAddressData::setBoxNumber));
-        fieldHandlers.put(Field.GOOGLE_MAPS_LINK, new FieldHandler(TextFormatter.bold(TextFormatter.green("3.")) + " Lien Google Maps " + TextFormatter.italic("(optionnel)"), clubData::setGoogleMapsLink));
+        fieldHandlers.put(Field.NAME, new FieldHandler(TextFormatter.bold(TextFormatter.green("1.")) + " Nom", club::setName));
+        fieldHandlers.put(Field.ADDRESS_COUNTRY_ISO3, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.1.")) + " Adresse - Pays (ISO 3)", address::setCountryFromPk));
+        fieldHandlers.put(Field.ADDRESS_ZIP_CODE, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.2.")) + " Adresse - Code postal", input -> address.setZipCode(Address.verifyZipCode(input))));
+        fieldHandlers.put(Field.ADDRESS_CITY, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.3.")) + " Adresse - Ville", address::setCity));
+        fieldHandlers.put(Field.ADDRESS_STREET, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.4.")) + " Adresse - Rue", address::setStreet));
+        fieldHandlers.put(Field.ADDRESS_NUMBER, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.5.")) + " Adresse - Numéro", address::setNumber));
+        fieldHandlers.put(Field.ADDRESS_BOX_NUMBER, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.6.")) + " Adresse - Numéro de boîte " + TextFormatter.italic("(optionnel)"), input -> address.setBoxNumber(Address.verifyBoxNumber(input))));
+        fieldHandlers.put(Field.GOOGLE_MAPS_LINK, new FieldHandler(TextFormatter.bold(TextFormatter.green("3.")) + " Lien Google Maps " + TextFormatter.italic("(optionnel)"), club::setGoogleMapsLink));
 
         try {
             promptField(scanner, fieldHandlers, Field.NAME);
@@ -86,16 +73,15 @@ public class AddClubView extends FormView {
 
             // Treat M
             do {
-                SimpleBox summarySimpleBox = new SimpleBox();
-                summarySimpleBox.addLine(TextFormatter.bold("Nom") + " : " + clubData.getName());
-                summarySimpleBox.addLine(TextFormatter.bold("Pays (ISO 3)") + " : " + clubAddressData.getCountryIso3());
-                summarySimpleBox.addLine(TextFormatter.bold("Code postal") + " : " + clubAddressData.getZipCode());
-                summarySimpleBox.addLine(TextFormatter.bold("Ville") + " : " + clubAddressData.getCity());
-                summarySimpleBox.addLine(TextFormatter.bold("Rue") + " : " + clubAddressData.getStreet());
-                summarySimpleBox.addLine(TextFormatter.bold("Numéro") + " : " + clubAddressData.getNumber());
-                summarySimpleBox.addLine(TextFormatter.bold("N° boîte") + " : " + (clubAddressData.getBoxNumber() != null ? clubAddressData.getBoxNumber() : "-"));
-                summarySimpleBox.addLine(TextFormatter.bold("Google Maps") + " : " + (clubData.getGoogleMapsLink() != null ? clubData.getGoogleMapsLink() : "-"));
-                summarySimpleBox.display();
+                System.out.println();
+                Table clubTable = getModelTable(club);
+                if (clubTable != null) {
+                    clubTable.display();
+                }
+                Table addressTable = getModelTable(address);
+                if (addressTable != null) {
+                    addressTable.display();
+                }
                 confirmationSimpleBox.display();
 
                 AtomicReference<String> formattedInput = new AtomicReference<>();
@@ -142,7 +128,7 @@ public class AddClubView extends FormView {
             }
 
             // Only O left
-            return new FormResultEvent<>(new AddClubFormData(clubData, clubAddressData));
+            return new FormResultEvent<>(new AddClubFormData(club, address));
         } catch (CommandResponseException commandResponseException) {
             Object response = commandResponseException.getResponse();
 

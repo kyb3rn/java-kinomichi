@@ -6,9 +6,9 @@ import app.events.FormResultEvent;
 import app.models.Address;
 import app.models.Club;
 import app.models.ModelException;
+import app.models.NoResultForPrimaryKeyException;
 import app.models.managers.AddressDataManager;
 import app.models.managers.ClubDataManager;
-import app.models.NoResultForPrimaryKeyException;
 import app.models.managers.DataManagerException;
 import app.models.formatting.table.UnimplementedModelTableException;
 import app.models.managers.DataManagers;
@@ -18,6 +18,9 @@ import app.views.clubs.AddClubFormData;
 import app.views.clubs.AddClubView;
 import app.views.clubs.ClubsDashboardView;
 import app.views.clubs.DeleteClubView;
+import app.views.clubs.ModifyClubFormData;
+import app.views.clubs.ModifyClubView;
+import app.views.clubs.SelectClubView;
 import utils.io.commands.list.SortColumnCommand;
 import utils.helpers.Functions;
 import utils.io.tables.SimpleBox;
@@ -49,9 +52,15 @@ public class ClubController extends Controller {
 
         if (event instanceof FormResultEvent<?> formResultEvent && formResultEvent.getResult() instanceof AddClubFormData addClubFormData) {
             try {
-                Address address = DataManagers.get(AddressDataManager.class).addAddress(addClubFormData.addressData());
-                addClubFormData.clubData().setAddressId(address.getId());
-                Club club = DataManagers.get(ClubDataManager.class).addClub(addClubFormData.clubData());
+                AddressDataManager addressDataManager = DataManagers.get(AddressDataManager.class);
+                ClubDataManager clubDataManager = DataManagers.get(ClubDataManager.class);
+
+                Address address = addClubFormData.address();
+                addressDataManager.addAddress(address);
+
+                Club club = addClubFormData.club();
+                club.setAddress(address);
+                clubDataManager.addClub(club);
 
                 SimpleBox clubAddedSimpleBox = new SimpleBox();
                 clubAddedSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Club ajouté")));
@@ -59,6 +68,80 @@ public class ClubController extends Controller {
 
                 System.out.println();
                 clubAddedSimpleBox.display();
+            } catch (DataManagerException | ModelException e) {
+                System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
+            }
+
+            return new CallUrlEvent("/clubs/dashboard");
+        }
+
+        return event;
+    }
+
+    public Event modifySelect(Request request) {
+        ClubDataManager clubDataManager;
+        try {
+            clubDataManager = DataManagers.get(ClubDataManager.class);
+        } catch (DataManagerException | ModelException e) {
+            System.out.println(Functions.styleAsErrorMessage("Les données des clubs n'ont pas pu être chargées."));
+            return new CallUrlEvent("/clubs/dashboard");
+        }
+
+        LinkedHashMap<Integer, SortColumnCommand.SortOrder> sortOrders = this.parseSortParameter(request);
+        List<Club> sortedClubs;
+
+        try {
+            sortedClubs = this.sortModels(clubDataManager.getModels(), Club.class, sortOrders);
+        } catch (UnimplementedModelTableException e) {
+            System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
+            return new CallUrlEvent("/clubs/dashboard");
+        }
+
+        SelectClubView selectClubView = new SelectClubView(sortedClubs, clubDataManager);
+        Event event = selectClubView.render();
+
+        if (event instanceof FormResultEvent<?> formResultEvent && formResultEvent.getResult() instanceof Integer clubId) {
+            return new CallUrlEvent("/clubs/modify/" + clubId);
+        }
+
+        return event;
+    }
+
+    public Event modify(Request request) {
+        int clubId = Integer.parseInt(request.getParameter("id"));
+
+        ClubDataManager clubDataManager;
+        try {
+            clubDataManager = DataManagers.get(ClubDataManager.class);
+        } catch (DataManagerException | ModelException e) {
+            System.out.println(Functions.styleAsErrorMessage("Les données des clubs n'ont pas pu être chargées."));
+            return new CallUrlEvent("/clubs/dashboard");
+        }
+
+        Club club;
+        try {
+            club = clubDataManager.getClubWithExceptions(clubId);
+        } catch (ModelException e) {
+            System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
+            return new CallUrlEvent("/clubs/dashboard");
+        }
+
+        ModifyClubView modifyClubView = new ModifyClubView(club);
+        Event event = modifyClubView.render();
+
+        if (event instanceof FormResultEvent<?> formResultEvent && formResultEvent.getResult() instanceof ModifyClubFormData modifyClubFormData) {
+            try {
+                Address modifiedAddress = modifyClubFormData.modifiedAddress();
+                DataManagers.get(AddressDataManager.class).updateAddress(modifiedAddress.getId(), modifiedAddress);
+
+                clubDataManager.updateClub(clubId, modifyClubFormData.modifiedClub());
+
+                SimpleBox clubModifiedSimpleBox = new SimpleBox();
+                clubModifiedSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Club modifié")));
+                clubModifiedSimpleBox.addLine(TextFormatter.italic("Le club " + TextFormatter.bold("#" + clubId) + " a bien été modifié"));
+
+                System.out.println();
+                clubModifiedSimpleBox.display();
             } catch (DataManagerException | ModelException e) {
                 System.out.println(Functions.styleAsErrorMessage(e.getMessage()));
             }

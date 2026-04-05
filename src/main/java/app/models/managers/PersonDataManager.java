@@ -1,5 +1,6 @@
 package app.models.managers;
 
+import app.models.IdentifiedModel;
 import app.models.ModelException;
 import app.models.NoResultForPrimaryKeyException;
 import app.models.Person;
@@ -12,7 +13,9 @@ import utils.data_management.parsing.StringParserException;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class PersonDataManager extends DataManager<PersonDataManager.Data> {
@@ -23,17 +26,23 @@ public class PersonDataManager extends DataManager<PersonDataManager.Data> {
 
     // ─── Getters ─── //
 
-    public TreeMap<Integer, Person> getPersons() {
-        return this.persons;
+    public SortedMap<Integer, Person> getPersons() {
+        return Collections.unmodifiableSortedMap(this.persons);
     }
 
     // ─── Utility methods ─── //
 
-    public Person getPerson(Integer id) {
+    public Person getPerson(Integer id) throws ModelException {
+        if (id == null) {
+            throw new NoResultForPrimaryKeyException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
+        }
+
+        id = IdentifiedModel.verifyId(id);
+
         return this.persons.get(id);
     }
 
-    public Person getPersonWithExceptions(int id) throws NoResultForPrimaryKeyException {
+    public Person getPersonWithExceptions(int id) throws ModelException {
         Person person = this.getPerson(id);
 
         if (person == null) {
@@ -44,9 +53,15 @@ public class PersonDataManager extends DataManager<PersonDataManager.Data> {
     }
 
     public void addPerson(Person person) throws ModelException, DataManagerException {
-        if (!person.isValid()) {
-            throw new ModelException("La personne qui a voulu être ajouté n'est pas valide");
+        if (person == null) {
+            throw new ModelException("La personne à ajouter ne peut pas être nulle");
         }
+
+        if (!person.isValid()) {
+            throw new ModelException("La personne à ajouter n'est pas valide");
+        }
+
+        this.applyAutoIncrementIfPossible(person);
 
         if (this.persons.containsKey(person.getId())) {
             throw new DataManagerException("Une personne portant l'identifiant '%d' existe déjà".formatted(person.getId()));
@@ -60,27 +75,22 @@ public class PersonDataManager extends DataManager<PersonDataManager.Data> {
         }
     }
 
-    public Person addPerson(Person person, boolean autoAssignId) throws ModelException, DataManagerException {
-        if (autoAssignId) {
-            int maxId = this.persons.values().stream().mapToInt(Person::getId).max().orElse(0);
-            person.setId(maxId + 1);
-        }
+    public void updatePerson(int personId, Person modifiedPerson) throws ModelException, DataManagerException {
+        personId = IdentifiedModel.verifyId(personId);
 
-        this.addPerson(person);
-
-        return person;
-    }
-
-    public void updatePerson(Person modifiedPerson) throws ModelException, DataManagerException {
         if (modifiedPerson == null) {
-            throw new ModelException("La personne modifiée ne peut pas être nul");
+            throw new ModelException("La personne modifiée ne peut pas être nulle");
         }
 
         if (!modifiedPerson.isValid()) {
             throw new ModelException("La personne modifiée reçue n'est pas valide");
         }
 
-        Person personToModify = this.getPersonWithExceptions(modifiedPerson.getId());
+        Person personToModify = this.getPersonWithExceptions(personId);
+
+        if (personToModify.getId() != modifiedPerson.getId()) {
+            throw new ModelException("Modifier l'identifiant d'un modèle n'est pas autorisé");
+        }
 
         personToModify.hydrate(modifiedPerson);
 
@@ -144,7 +154,7 @@ public class PersonDataManager extends DataManager<PersonDataManager.Data> {
         // ─── Constructors ─── //
 
         public Data(PersonDataManager personDataManager) {
-            this.persons.addAll(personDataManager.getPersons().values());
+            this.persons.addAll(personDataManager.getModels());
         }
 
         public Data() {}

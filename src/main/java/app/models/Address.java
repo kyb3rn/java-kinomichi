@@ -168,6 +168,27 @@ public class Address extends IdentifiedModel implements Hydratable<Address.Data>
     // ─── Overrides & inheritance ─── //
 
     @Override
+    public Address clone() {
+        Address clone = new Address();
+
+        try {
+            clone.setId(this.getId());
+        } catch (ModelException _) {
+            // Impossible case scenario (for IdentifiedModel at least)
+        }
+
+        clone.country = this.country;
+        clone.pendingCountryPk = this.pendingCountryPk;
+        clone.zipCode = this.zipCode;
+        clone.city = this.city;
+        clone.street = this.street;
+        clone.number = this.number;
+        clone.boxNumber = this.boxNumber;
+
+        return clone;
+    }
+
+    @Override
     public String toString() {
         String result = this.street + " " + this.number;
         if (this.boxNumber != null) {

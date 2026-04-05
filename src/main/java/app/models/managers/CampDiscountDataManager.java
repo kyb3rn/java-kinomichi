@@ -1,9 +1,6 @@
 package app.models.managers;
 
-import app.models.CampDiscount;
-import app.models.Model;
-import app.models.ModelException;
-import app.models.NoResultForPrimaryKeyException;
+import app.models.*;
 import com.google.gson.*;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
@@ -13,7 +10,9 @@ import utils.data_management.parsing.StringParserException;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class CampDiscountDataManager extends DataManager<CampDiscountDataManager.Data> {
@@ -24,17 +23,23 @@ public class CampDiscountDataManager extends DataManager<CampDiscountDataManager
 
     // ─── Getters ─── //
 
-    public TreeMap<Integer, CampDiscount> getCampsDiscounts() {
-        return this.campsDiscounts;
+    public SortedMap<Integer, CampDiscount> getCampsDiscounts() {
+        return Collections.unmodifiableSortedMap(this.campsDiscounts);
     }
 
     // ─── Utility methods ─── //
 
-    public CampDiscount getCampDiscount(Integer id) {
+    public CampDiscount getCampDiscount(Integer id) throws ModelException {
+        if (id == null) {
+            throw new NoResultForPrimaryKeyException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
+        }
+
+        id = IdentifiedModel.verifyId(id);
+
         return this.campsDiscounts.get(id);
     }
 
-    public CampDiscount getCampDiscountWithExceptions(int id) throws NoResultForPrimaryKeyException {
+    public CampDiscount getCampDiscountWithExceptions(int id) throws ModelException {
         CampDiscount campDiscount = this.getCampDiscount(id);
 
         if (campDiscount == null) {
@@ -45,9 +50,15 @@ public class CampDiscountDataManager extends DataManager<CampDiscountDataManager
     }
 
     public void addCampDiscount(CampDiscount campDiscount) throws ModelException, DataManagerException {
-        if (!campDiscount.isValid()) {
-            throw new ModelException("La réduction qui a voulu être ajoutée n'est pas valide");
+        if (campDiscount == null) {
+            throw new ModelException("La réduction à ajouter ne peut pas être nulle");
         }
+
+        if (!campDiscount.isValid()) {
+            throw new ModelException("La réduction à ajouter n'est pas valide");
+        }
+
+        this.applyAutoIncrementIfPossible(campDiscount);
 
         if (this.campsDiscounts.containsKey(campDiscount.getId())) {
             throw new DataManagerException("Une réduction portant l'identifiant '%d' existe déjà".formatted(campDiscount.getId()));
@@ -62,12 +73,13 @@ public class CampDiscountDataManager extends DataManager<CampDiscountDataManager
     }
 
     public CampDiscount addCampDiscount(CampDiscount.Data campDiscountData) throws ModelException, DataManagerException {
+        if (campDiscountData == null) {
+            throw new ModelException("Le réduction à ajouter ne peut pas être nulle");
+        }
+
         CampDiscount campDiscount = new CampDiscount();
         campDiscount.hydrate(campDiscountData);
         DataManagers.resolveModelReferences(campDiscount);
-
-        int maxId = this.campsDiscounts.values().stream().mapToInt(CampDiscount::getId).max().orElse(0);
-        campDiscount.setId(maxId + 1);
 
         this.addCampDiscount(campDiscount);
 
@@ -139,7 +151,7 @@ public class CampDiscountDataManager extends DataManager<CampDiscountDataManager
         // ─── Constructors ─── //
 
         public Data(CampDiscountDataManager campDiscountDataManager) throws ModelException {
-            for (CampDiscount campDiscount : campDiscountDataManager.getCampsDiscounts().values()) {
+            for (CampDiscount campDiscount : campDiscountDataManager.getModels()) {
                 this.campsDiscounts.add(campDiscount.dehydrate());
             }
         }

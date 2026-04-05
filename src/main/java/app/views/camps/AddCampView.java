@@ -4,20 +4,20 @@ import app.events.*;
 import app.models.Address;
 import app.models.Camp;
 import app.models.ModelException;
-import app.models.managers.CountryDataManager;
-import app.models.managers.DataManagerException;
-import app.models.managers.DataManagers;
+import app.utils.elements.time.TimeSlot;
 import app.utils.helpers.KinomichiFunctions;
 import app.utils.menus.KinomichiStandardMenu;
 import app.views.FormView;
-import utils.helpers.Functions;
 import utils.io.commands.exceptions.CommandResponseException;
 import utils.io.commands.list.BackBackCommand;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
+import utils.helpers.Functions;
 import utils.io.tables.SimpleBox;
+import utils.io.tables.Table;
 import utils.io.text_formatting.TextFormatter;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,8 +32,10 @@ public class AddCampView extends FormView {
     public Event render() {
         Scanner scanner = new Scanner(System.in);
 
-        Camp.Data campData = new Camp.Data();
-        Address.Data campAddressData = new Address.Data();
+        Camp camp = new Camp();
+        Address address = new Address();
+        AtomicReference<Instant> timeSlotStart = new AtomicReference<>();
+        AtomicReference<Instant> timeSlotEnd = new AtomicReference<>();
 
         SimpleBox sectionHeaderSimpleBox = new SimpleBox();
         sectionHeaderSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Ajout d'un stage")));
@@ -43,27 +45,33 @@ public class AddCampView extends FormView {
         sectionHeaderSimpleBox.display();
 
         HashMap<FormViewField, FieldHandler> fieldHandlers = new HashMap<>();
-        fieldHandlers.put(Field.NAME, new FieldHandler(TextFormatter.bold(TextFormatter.green("1.")) + " Nom", campData::setName));
-        fieldHandlers.put(Field.ADDRESS_COUNTRY_ISO3, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.1.")) + " Pays (ISO 3)", input -> {
-            campAddressData.setCountryIso3(input);
-            String iso3 = campAddressData.getCountryIso3();
-
-            CountryDataManager countryDataManager;
-            try {
-                countryDataManager = DataManagers.get(CountryDataManager.class);
-            } catch (DataManagerException | ModelException e) {
-                throw new DataManagerException("Impossible de vérifier l'ISO3 '%s'".formatted(iso3), e);
+        fieldHandlers.put(Field.NAME, new FieldHandler(TextFormatter.bold(TextFormatter.green("1.")) + " Nom", camp::setName));
+        fieldHandlers.put(Field.ADDRESS_COUNTRY_ISO3, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.1.")) + " Pays (ISO 3)", address::setCountryFromPk));
+        fieldHandlers.put(Field.ADDRESS_ZIP_CODE, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.2.")) + " Code postal", input -> address.setZipCode(Address.verifyZipCode(input))));
+        fieldHandlers.put(Field.ADDRESS_CITY, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.3.")) + " Ville", address::setCity));
+        fieldHandlers.put(Field.ADDRESS_STREET, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.4.")) + " Rue", address::setStreet));
+        fieldHandlers.put(Field.ADDRESS_NUMBER, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.5.")) + " Numéro", address::setNumber));
+        fieldHandlers.put(Field.ADDRESS_BOX_NUMBER, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.6.")) + " Numéro de boîte " + TextFormatter.italic("(optionnel)"), input -> address.setBoxNumber(Address.verifyBoxNumber(input))));
+        fieldHandlers.put(Field.TIME_SLOT_START, new FieldHandler(TextFormatter.bold(TextFormatter.green("3.")) + " Date de début " + TextFormatter.italic("(format: yyyy-MM-ddTHH:mm:ssZ)"), input -> {
+            Instant start = Camp.verifyTimeSlotStart(input);
+            if (timeSlotEnd.get() != null && !start.isBefore(timeSlotEnd.get())) {
+                throw new ModelException("La date de début doit être strictement antérieure à la date de fin");
             }
-
-            countryDataManager.getCountryWithExceptions(iso3);
+            timeSlotStart.set(start);
+            if (timeSlotEnd.get() != null) {
+                camp.setTimeSlot(new TimeSlot(start, timeSlotEnd.get()));
+            }
         }));
-        fieldHandlers.put(Field.ADDRESS_ZIP_CODE, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.2.")) + " Code postal", campAddressData::setZipCode));
-        fieldHandlers.put(Field.ADDRESS_CITY, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.3.")) + " Ville", campAddressData::setCity));
-        fieldHandlers.put(Field.ADDRESS_STREET, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.4.")) + " Rue", campAddressData::setStreet));
-        fieldHandlers.put(Field.ADDRESS_NUMBER, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.5.")) + " Numéro", campAddressData::setNumber));
-        fieldHandlers.put(Field.ADDRESS_BOX_NUMBER, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("2.6.")) + " Numéro de boîte " + TextFormatter.italic("(optionnel)"), campAddressData::setBoxNumber));
-        fieldHandlers.put(Field.TIME_SLOT_START, new FieldHandler(TextFormatter.bold(TextFormatter.green("3.")) + " Date de début " + TextFormatter.italic("(format: yyyy-MM-ddTHH:mm:ssZ)"), campData::setTimeSlotStart));
-        fieldHandlers.put(Field.TIME_SLOT_END, new FieldHandler(TextFormatter.bold(TextFormatter.green("4.")) + " Date de fin " + TextFormatter.italic("(format: yyyy-MM-ddTHH:mm:ssZ)"), campData::setTimeSlotEnd));
+        fieldHandlers.put(Field.TIME_SLOT_END, new FieldHandler(TextFormatter.bold(TextFormatter.green("4.")) + " Date de fin " + TextFormatter.italic("(format: yyyy-MM-ddTHH:mm:ssZ)"), input -> {
+            Instant end = Camp.verifyTimeSlotEnd(input);
+            if (timeSlotStart.get() != null && !end.isAfter(timeSlotStart.get())) {
+                throw new ModelException("La date de fin doit être strictement postérieure à la date de début");
+            }
+            timeSlotEnd.set(end);
+            if (timeSlotStart.get() != null) {
+                camp.setTimeSlot(new TimeSlot(timeSlotStart.get(), end));
+            }
+        }));
 
         try {
             promptField(scanner, fieldHandlers, Field.NAME);
@@ -89,17 +97,15 @@ public class AddCampView extends FormView {
 
             // Treat M
             do {
-                SimpleBox summarySimpleBox = new SimpleBox();
-                summarySimpleBox.addLine(TextFormatter.bold("Nom") + " : " + campData.getName());
-                summarySimpleBox.addLine(TextFormatter.bold("Pays (ISO 3)") + " : " + campAddressData.getCountryIso3());
-                summarySimpleBox.addLine(TextFormatter.bold("Code postal") + " : " + campAddressData.getZipCode());
-                summarySimpleBox.addLine(TextFormatter.bold("Ville") + " : " + campAddressData.getCity());
-                summarySimpleBox.addLine(TextFormatter.bold("Rue") + " : " + campAddressData.getStreet());
-                summarySimpleBox.addLine(TextFormatter.bold("Numéro") + " : " + campAddressData.getNumber());
-                summarySimpleBox.addLine(TextFormatter.bold("N° boîte") + " : " + (campAddressData.getBoxNumber() != null ? campAddressData.getBoxNumber() : "-"));
-                summarySimpleBox.addLine(TextFormatter.bold("Date de début") + " : " + campData.getTimeSlotStart());
-                summarySimpleBox.addLine(TextFormatter.bold("Date de fin") + " : " + campData.getTimeSlotEnd());
-                summarySimpleBox.display();
+                System.out.println();
+                Table campTable = getModelTable(camp);
+                if (campTable != null) {
+                    campTable.display();
+                }
+                Table addressTable = getModelTable(address);
+                if (addressTable != null) {
+                    addressTable.display();
+                }
                 confirmationSimpleBox.display();
 
                 AtomicReference<String> formattedInput = new AtomicReference<>();
@@ -147,7 +153,7 @@ public class AddCampView extends FormView {
             }
 
             // Only O left
-            return new FormResultEvent<>(new AddCampFormData(campData, campAddressData));
+            return new FormResultEvent<>(new AddCampFormData(camp, address));
         } catch (CommandResponseException commandResponseException) {
             Object response = commandResponseException.getResponse();
 

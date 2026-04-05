@@ -1,8 +1,6 @@
 package app.models.managers;
 
-import app.models.Model;
-import app.models.ModelException;
-import app.models.ModelReference;
+import app.models.*;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
 import utils.data_management.converters.Hydratable;
@@ -185,5 +183,21 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
     }
 
     protected void addResolvedModel(Model model) throws ModelException, DataManagerException {}
+
+    @SuppressWarnings("unchecked")
+    protected void applyAutoIncrementIfPossible(IdentifiedModel identifiedModel) throws ModelException {
+        if (identifiedModel == null) {
+            throw new ModelException("Le modèle identifié à auto-incrémenter ne peut pas être nulle");
+        }
+
+        if (!(IdentifiedModel.class.isAssignableFrom(this.getModelClass()))) {
+            throw new ModelException("La classe du modèle lié à ce gestionnaire de donnée doit étendre de IdentifiedModel");
+        }
+
+        if (identifiedModel.getId() == -1) {
+            int maxId = ((List<IdentifiedModel>) this.getModels()).stream().mapToInt(IdentifiedModel::getId).max().orElse(0);
+            identifiedModel.setId(maxId + 1);
+        }
+    }
 
 }

@@ -41,9 +41,15 @@ public class CampController extends Controller {
 
         if (event instanceof FormResultEvent<?> formResultEvent && formResultEvent.getResult() instanceof AddCampFormData addCampFormData) {
             try {
-                Address address = DataManagers.get(AddressDataManager.class).addAddress(addCampFormData.addressData());
-                addCampFormData.campData().setAddressId(address.getId());
-                Camp camp = DataManagers.get(CampDataManager.class).addCamp(addCampFormData.campData());
+                AddressDataManager addressDataManager = DataManagers.get(AddressDataManager.class);
+                CampDataManager campDataManager = DataManagers.get(CampDataManager.class);
+
+                Address address = addCampFormData.address();
+                addressDataManager.addAddress(address);
+
+                Camp camp = addCampFormData.camp();
+                camp.setAddress(address);
+                campDataManager.addCamp(camp);
 
                 SimpleBox campAddedSimpleBox = new SimpleBox();
                 campAddedSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Stage ajouté")));

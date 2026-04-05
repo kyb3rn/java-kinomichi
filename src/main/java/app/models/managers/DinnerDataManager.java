@@ -1,9 +1,6 @@
 package app.models.managers;
 
-import app.models.Dinner;
-import app.models.Model;
-import app.models.ModelException;
-import app.models.NoResultForPrimaryKeyException;
+import app.models.*;
 import com.google.gson.*;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
@@ -13,7 +10,9 @@ import utils.data_management.parsing.StringParserException;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class DinnerDataManager extends DataManager<DinnerDataManager.Data> {
@@ -24,17 +23,23 @@ public class DinnerDataManager extends DataManager<DinnerDataManager.Data> {
 
     // ─── Getters ─── //
 
-    public TreeMap<Integer, Dinner> getDinners() {
-        return this.dinners;
+    public SortedMap<Integer, Dinner> getDinners() {
+        return Collections.unmodifiableSortedMap(this.dinners);
     }
 
     // ─── Utility methods ─── //
 
-    public Dinner getDinner(Integer id) {
+    public Dinner getDinner(Integer id) throws ModelException {
+        if (id == null) {
+            throw new NoResultForPrimaryKeyException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
+        }
+
+        id = IdentifiedModel.verifyId(id);
+
         return this.dinners.get(id);
     }
 
-    public Dinner getDinnerWithExceptions(int id) throws NoResultForPrimaryKeyException {
+    public Dinner getDinnerWithExceptions(int id) throws ModelException {
         Dinner dinner = this.getDinner(id);
 
         if (dinner == null) {
@@ -45,9 +50,15 @@ public class DinnerDataManager extends DataManager<DinnerDataManager.Data> {
     }
 
     public void addDinner(Dinner dinner) throws ModelException, DataManagerException {
-        if (!dinner.isValid()) {
-            throw new ModelException("Le repas qui a voulu être ajouté n'est pas valide");
+        if (dinner == null) {
+            throw new ModelException("Le repas à ajouter ne peut pas être nul");
         }
+
+        if (!dinner.isValid()) {
+            throw new ModelException("Le repas à ajouter n'est pas valide");
+        }
+
+        this.applyAutoIncrementIfPossible(dinner);
 
         if (this.dinners.containsKey(dinner.getId())) {
             throw new DataManagerException("Un repas portant l'identifiant '%d' existe déjà".formatted(dinner.getId()));
@@ -62,12 +73,13 @@ public class DinnerDataManager extends DataManager<DinnerDataManager.Data> {
     }
 
     public Dinner addDinner(Dinner.Data dinnerData) throws ModelException, DataManagerException {
+        if (dinnerData == null) {
+            throw new ModelException("Le repas à ajouter ne peut pas être nul");
+        }
+
         Dinner dinner = new Dinner();
         dinner.hydrate(dinnerData);
         DataManagers.resolveModelReferences(dinner);
-
-        int maxId = this.dinners.values().stream().mapToInt(Dinner::getId).max().orElse(0);
-        dinner.setId(maxId + 1);
 
         this.addDinner(dinner);
 
@@ -139,7 +151,7 @@ public class DinnerDataManager extends DataManager<DinnerDataManager.Data> {
         // ─── Constructors ─── //
 
         public Data(DinnerDataManager dinnerDataManager) throws ModelException {
-            for (Dinner dinner : dinnerDataManager.getDinners().values()) {
+            for (Dinner dinner : dinnerDataManager.getModels()) {
                 this.dinners.add(dinner.dehydrate());
             }
         }

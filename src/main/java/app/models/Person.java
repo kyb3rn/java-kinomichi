@@ -3,6 +3,7 @@ package app.models;
 import app.models.managers.AffiliationDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
+import app.utils.elements.time.TimeSlot;
 import app.utils.tarification.EChargeableCategory;
 import app.utils.tarification.ChargeableElement;
 import com.google.gson.GsonBuilder;
@@ -17,6 +18,8 @@ import utils.data_management.parsing.StringParserException;
 import utils.helpers.validation.BlankOrNullValueValidatorException;
 import utils.helpers.validation.PatternMatchingValidatorException;
 import utils.helpers.validation.Validators;
+
+import java.util.List;
 
 public class Person extends IdentifiedModel implements Hydratable<Person>, CustomSerializable, JsonConvertible, ChargeableElement {
 
@@ -100,7 +103,7 @@ public class Person extends IdentifiedModel implements Hydratable<Person>, Custo
 
         try {
             clone.setId(this.getId());
-        } catch (ModelException e) {
+        } catch (ModelException _) {
             // Impossible case scenario (for IdentifiedModel at least)
         }
 
@@ -173,15 +176,14 @@ public class Person extends IdentifiedModel implements Hydratable<Person>, Custo
     }
 
     @Override
-    public ChargeableCategory getChargeableCategory() {
-        Affiliation affiliation = null;
-        try {
-            affiliation = DataManagers.get(AffiliationDataManager.class).getAffiliation(this.getId());
-        } catch (DataManagerException | ModelException _) {
-        }
-
-        if (affiliation != null) {
-            return ChargeableCategory.AFFILIATED;
+    public ChargeableCategory getChargeableCategory(TimeSlot timeSlot) {
+        if (timeSlot != null) {
+            try {
+                if (!DataManagers.get(AffiliationDataManager.class).getPersonAffiliationsDuringTimeSlot(this, timeSlot).isEmpty()) {
+                    return ChargeableCategory.AFFILIATED;
+                }
+            } catch (DataManagerException | ModelException _) {
+            }
         }
 
         return ChargeableCategory.NORMAL;

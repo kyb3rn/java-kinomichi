@@ -1,14 +1,7 @@
 package app.views.persons;
 
 import app.events.*;
-import app.models.Affiliation;
-import app.models.Club;
-import app.models.ModelException;
 import app.models.Person;
-import app.models.managers.AffiliationDataManager;
-import app.models.managers.DataManagerException;
-import app.models.managers.DataManagers;
-import app.utils.ThrowingConsumerException;
 import app.utils.helpers.KinomichiFunctions;
 import app.utils.menus.KinomichiStandardMenu;
 import app.views.FormView;
@@ -25,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -48,17 +40,6 @@ public class ModifyPersonView extends FormView {
         Scanner scanner = new Scanner(System.in);
 
         Person clonedPerson = this.person.clone();
-        final AtomicReference<Affiliation> resultAffiliation = new AtomicReference<>();
-        boolean wasAffiliated;
-
-        try {
-            AffiliationDataManager affiliationDataManager = DataManagers.get(AffiliationDataManager.class);
-            resultAffiliation.set(affiliationDataManager.getAffiliationWithExceptions(clonedPerson.getId()).clone());
-            wasAffiliated = true;
-        } catch (DataManagerException | ModelException _) {
-            resultAffiliation.set(new Affiliation());
-            wasAffiliated = false;
-        }
 
         SimpleBox sectionHeaderSimpleBox = new SimpleBox();
         sectionHeaderSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Modification d'une personne")));
@@ -74,30 +55,6 @@ public class ModifyPersonView extends FormView {
         fieldHandlers.put(Field.PHONE, new FieldHandler(TextFormatter.bold(TextFormatter.green("3.")) + " Téléphone " + TextFormatter.italic("(actuel : %s)".formatted(clonedPerson.getPhone())), clonedPerson::setPhone));
         fieldHandlers.put(Field.EMAIL, new FieldHandler(TextFormatter.bold(TextFormatter.green("4.")) + " Email " + TextFormatter.italic("(actuel : %s)".formatted(clonedPerson.getEmail())), clonedPerson::setEmail));
 
-        AtomicBoolean isAffiliated = new AtomicBoolean(wasAffiliated);
-        fieldHandlers.put(Field.AFFILIATED_QUESTION, new FieldHandler(TextFormatter.bold(TextFormatter.green("5.")) + " Cette personne est-elle affiliée ? " + TextFormatter.italic("(" + TextFormatter.bold("O") + " = Oui, " + TextFormatter.bold("N") + " = Non)") + TextFormatter.italic(" (actuel : %s)".formatted(wasAffiliated ? "Oui" : "Non")), input -> {
-            String normalizedInput = input.strip().toUpperCase();
-            if (normalizedInput.equals("O")) {
-                isAffiliated.set(true);
-            } else if (normalizedInput.equals("N")) {
-                isAffiliated.set(false);
-                resultAffiliation.set(new Affiliation());
-            } else {
-                throw new ThrowingConsumerException("L'entrée '%s' est invalide. Veuillez entrer 'O' ou 'N'");
-            }
-        }));
-
-        fieldHandlers.put(Field.CLUB_ID, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("5.1.")) + " Identifiant du club", input -> {
-            Club.Data tempClubData = new Club.Data();
-            tempClubData.setId(input);
-
-            Club temp = new Club();
-            temp.setId(tempClubData.getId());
-
-            resultAffiliation.get().setClubFromPk(temp.getId());
-        }));
-        fieldHandlers.put(Field.AFFILIATION_NUMBER, new FieldHandler(TextFormatter.bold(TextFormatter.yellow("5.2.")) + " Numéro d'affiliation", resultAffiliation.get()::setAffiliationNumber));
-
         try {
             Table personModelTable = getModelTable(clonedPerson);
 
@@ -105,22 +62,9 @@ public class ModifyPersonView extends FormView {
                 return new CallUrlEvent("/");
             }
 
-            Table affiliationModelTable = getModelTable(resultAffiliation.get());
-
-            if (affiliationModelTable == null) {
-                return new CallUrlEvent("/");
-            }
-
             // Show selected person details
             System.out.println();
             personModelTable.display();
-
-            if (isAffiliated.get()) {
-                affiliationModelTable = getModelTable(resultAffiliation.get());
-                if (affiliationModelTable != null) {
-                    affiliationModelTable.display();
-                }
-            }
 
             String input;
 
@@ -161,35 +105,19 @@ public class ModifyPersonView extends FormView {
                 editFieldMenu.addOption("Nom", Field.LASTNAME);
                 editFieldMenu.addOption("Téléphone", Field.PHONE);
                 editFieldMenu.addOption("Email", Field.EMAIL);
-                editFieldMenu.addOption("Affiliée ou non", Field.AFFILIATED_QUESTION);
-                if (isAffiliated.get()) {
-                    editFieldMenu.addOption("Identifiant du club", Field.CLUB_ID);
-                    editFieldMenu.addOption("Numéro d'affiliation", Field.AFFILIATION_NUMBER);
-                }
                 editFieldMenu.addSectionSeparationIndex();
                 editFieldMenu.addOption("Annuler la modification", "CANCEL_UPDATE");
 
                 Object editFieldMenuResponse = editFieldMenu.use().getResponse();
                 if (editFieldMenuResponse instanceof Field field) {
-                    boolean wasAffiliatedBeforeEdit = isAffiliated.get();
-
                     promptField(scanner, fieldHandlers, field);
-
-                    if (field == Field.AFFILIATED_QUESTION && !wasAffiliatedBeforeEdit && isAffiliated.get()) {
-                        promptField(scanner, fieldHandlers, Field.CLUB_ID);
-                        promptField(scanner, fieldHandlers, Field.AFFILIATION_NUMBER);
-                    }
                 }
 
-                // Show selected person details
+                // Show updated person details
                 System.out.println();
-                personModelTable.display();
-
-                if (isAffiliated.get()) {
-                    affiliationModelTable = getModelTable(resultAffiliation.get());
-                    if (affiliationModelTable != null) {
-                        affiliationModelTable.display();
-                    }
+                personModelTable = getModelTable(clonedPerson);
+                if (personModelTable != null) {
+                    personModelTable.display();
                 }
 
                 confirmationSimpleBox.display();
@@ -211,7 +139,7 @@ public class ModifyPersonView extends FormView {
             }
 
             // Only O left
-            return new FormResultEvent<>(new ModifyPersonFormData(clonedPerson, resultAffiliation.get(), wasAffiliated, isAffiliated.get()));
+            return new FormResultEvent<>(clonedPerson);
         } catch (CommandResponseException commandResponseException) {
             Object response = commandResponseException.getResponse();
 
@@ -232,7 +160,7 @@ public class ModifyPersonView extends FormView {
     }
 
     private enum Field implements FormViewField {
-        FIRSTNAME, LASTNAME, PHONE, EMAIL, AFFILIATED_QUESTION, CLUB_ID, AFFILIATION_NUMBER
+        FIRSTNAME, LASTNAME, PHONE, EMAIL
     }
 
 }

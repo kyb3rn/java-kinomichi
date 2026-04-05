@@ -117,16 +117,21 @@ public class Club extends IdentifiedModel implements Hydratable<Club.Data> {
     // ─── Overrides & inheritance ─── //
 
     @Override
-    public void hydrate(Data dataObject) throws ModelException {
-        this.setId(dataObject.getId());
-        this.setName(dataObject.getName());
-        this.pendingAddressPk = dataObject.getAddressId();
-        this.setGoogleMapsLink(dataObject.getGoogleMapsLink());
-    }
+    public Club clone() {
+        Club clone = new Club();
 
-    @Override
-    public Data dehydrate() throws ModelException {
-        return new Data(this);
+        try {
+            clone.setId(this.getId());
+        } catch (ModelException _) {
+            // Impossible case scenario (for IdentifiedModel at least)
+        }
+
+        clone.name = this.name;
+        clone.address = this.address;
+        clone.pendingAddressPk = this.pendingAddressPk;
+        clone.googleMapsLink = this.googleMapsLink;
+
+        return clone;
     }
 
     @Override
@@ -137,6 +142,19 @@ public class Club extends IdentifiedModel implements Hydratable<Club.Data> {
     @Override
     public boolean isValid() {
         return this.getId() > 0 && this.address != null && this.name != null;
+    }
+
+    @Override
+    public void hydrate(Data dataObject) throws ModelException {
+        this.setId(dataObject.getId());
+        this.setName(dataObject.getName());
+        this.pendingAddressPk = dataObject.getAddressId();
+        this.setGoogleMapsLink(dataObject.getGoogleMapsLink());
+    }
+
+    @Override
+    public Data dehydrate() throws ModelException {
+        return new Data(this);
     }
 
     // ─── Sub classes ─── //

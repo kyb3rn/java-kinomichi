@@ -15,7 +15,9 @@ import utils.data_management.converters.writers.*;
 import utils.data_management.parsing.ParserException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class CountryDataManager extends DataManager<CountryDataManager.Data> {
@@ -26,19 +28,19 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
 
     // ─── Getters ─── //
 
-    public TreeMap<String, Country> getCountries() {
-        return this.countries;
+    public SortedMap<String, Country> getCountries() {
+        return Collections.unmodifiableSortedMap(this.countries);
     }
 
     // ─── Utility methods ─── //
 
-    public Country getCountry(String iso3) {
+    public Country getCountry(String iso3) throws ModelException {
+        iso3 = Country.verifyIso3(iso3);
+
         return this.countries.get(iso3);
     }
 
-    public Country getCountryWithExceptions(String iso3) throws DataManagerException, ModelException {
-        iso3 = Country.verifyIso3(iso3);
-
+    public Country getCountryWithExceptions(String iso3) throws ModelException {
         Country country = this.getCountry(iso3);
 
         if (country == null) {
@@ -49,8 +51,12 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
     }
 
     public void addCountry(Country country) throws ModelException, DataManagerException {
+        if (country == null) {
+            throw new ModelException("Le pays à ajouter ne peut pas être nul");
+        }
+
         if (!country.isValid()) {
-            throw new ModelException("Le pays qui a voulu être ajouté n'est pas valide");
+            throw new ModelException("Le pays à ajouter n'est pas valide");
         }
 
         if (this.countries.containsKey(country.getIso3())) {
@@ -138,7 +144,7 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
         // ─── Constructors ─── //
 
         public Data(CountryDataManager countryManager) {
-            this.countries.addAll(countryManager.getCountries().values());
+            this.countries.addAll(countryManager.getModels());
         }
 
         public Data() {}

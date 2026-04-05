@@ -2,6 +2,7 @@ package app.views.main;
 
 import app.events.CallUrlEvent;
 import app.events.Event;
+import app.models.managers.AffiliationDataManager;
 import app.models.managers.CampDataManager;
 import app.models.managers.ClubDataManager;
 import app.models.managers.DataManager;
@@ -25,6 +26,7 @@ public class MainView extends View {
         this.addCampsOptions(mainMenu);
         this.addPersonsOption(mainMenu);
         this.addClubsOption(mainMenu);
+        this.addAffiliationsOption(mainMenu);
         mainMenu.addOption("Explorer les données", new CallUrlEvent("/explore"));
 
         mainMenu.addSectionSeparationIndex();
@@ -95,6 +97,18 @@ public class MainView extends View {
         }
 
         mainMenu.addOption(personsOptionLabel, new CallUrlEvent(personsInitialized ? "/persons/dashboard" : "/"));
+    }
+
+    private void addAffiliationsOption(KinomichiStandardMenu mainMenu) {
+        String affiliationsOptionLabel = "Gestion des affiliations (%d)".formatted(DataManagers.getCountOf(AffiliationDataManager.class));
+
+        boolean affiliationsInitialized = DataManagers.isInitialized(AffiliationDataManager.class);
+
+        if (!affiliationsInitialized) {
+            affiliationsOptionLabel = TextFormatter.strikethrough(affiliationsOptionLabel) + " " + TextFormatter.red(TextFormatter.italic("(affiliations non chargées)"));
+        }
+
+        mainMenu.addOption(affiliationsOptionLabel, new CallUrlEvent(affiliationsInitialized ? "/affiliations/dashboard" : "/"));
     }
 
     private void addClubsOption(KinomichiStandardMenu mainMenu) {

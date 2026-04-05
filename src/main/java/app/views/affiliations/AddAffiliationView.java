@@ -1,27 +1,29 @@
-package app.views.persons;
+package app.views.affiliations;
 
 import app.events.*;
-import app.models.Person;
+import app.models.Affiliation;
+import app.models.ModelException;
+import app.utils.elements.time.TimeSlot;
 import app.utils.helpers.KinomichiFunctions;
 import app.utils.menus.KinomichiStandardMenu;
 import app.views.FormView;
-import utils.helpers.Functions;
 import utils.io.commands.exceptions.CommandResponseException;
 import utils.io.commands.list.BackBackCommand;
 import utils.io.commands.list.BackCommand;
 import utils.io.commands.list.ExitCommand;
+import utils.helpers.Functions;
 import utils.io.tables.SimpleBox;
 import utils.io.tables.Table;
 import utils.io.text_formatting.TextFormatter;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 
-
-public class AddPersonView extends FormView {
+public class AddAffiliationView extends FormView {
 
     // ─── Overrides & inheritance ─── //
 
@@ -29,35 +31,51 @@ public class AddPersonView extends FormView {
     public Event render() {
         Scanner scanner = new Scanner(System.in);
 
-        Person person = new Person();
+        Affiliation affiliation = new Affiliation();
+        AtomicReference<Instant> validityPeriodStart = new AtomicReference<>();
+        AtomicReference<Instant> validityPeriodEnd = new AtomicReference<>();
 
         SimpleBox sectionHeaderSimpleBox = new SimpleBox();
-        sectionHeaderSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Ajout d'une personne")));
+        sectionHeaderSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Ajout d'une affiliation")));
         sectionHeaderSimpleBox.addLine(TextFormatter.italic("Pour annuler à tout moment, entrez la commande " + TextFormatter.bold("!b")));
 
         System.out.println();
         sectionHeaderSimpleBox.display();
 
         HashMap<FormViewField, FieldHandler> fieldHandlers = new HashMap<>();
-        fieldHandlers.put(Field.FIRSTNAME, new FieldHandler(TextFormatter.bold(TextFormatter.green("1.")) + " Prénom", person::setFirstName));
-        fieldHandlers.put(Field.LASTNAME, new FieldHandler(TextFormatter.bold(TextFormatter.green("2.")) + " Nom", person::setLastName));
-        fieldHandlers.put(Field.PHONE, new FieldHandler(TextFormatter.bold(TextFormatter.green("3.")) + " Téléphone", person::setPhone));
-        fieldHandlers.put(Field.EMAIL, new FieldHandler(TextFormatter.bold(TextFormatter.green("4.")) + " Email", person::setEmail));
+        fieldHandlers.put(Field.PERSON_ID, new FieldHandler(TextFormatter.bold(TextFormatter.green("1.")) + " Identifiant de la personne (#)", input -> affiliation.setPersonFromPk(Integer.parseInt(input))));
+        fieldHandlers.put(Field.CLUB_ID, new FieldHandler(TextFormatter.bold(TextFormatter.green("2.")) + " Identifiant du club (#)", input -> affiliation.setClubFromPk(Integer.parseInt(input))));
+        fieldHandlers.put(Field.AFFILIATION_NUMBER, new FieldHandler(TextFormatter.bold(TextFormatter.green("3.")) + " Numéro d'affiliation " + TextFormatter.italic("(format: 0000-ABCDE)"), affiliation::setAffiliationNumber));
+        fieldHandlers.put(Field.VALIDITY_PERIOD_START, new FieldHandler(TextFormatter.bold(TextFormatter.green("4.")) + " Début de validité " + TextFormatter.italic("(format: yyyy-MM-ddTHH:mm:ssZ)"), input -> {
+            Instant start = Affiliation.verifyValidityPeriodStart(input);
+            if (validityPeriodEnd.get() != null && !start.isBefore(validityPeriodEnd.get())) {
+                throw new ModelException("La date de début de validité doit être strictement antérieure à la date de fin");
+            }
+            validityPeriodStart.set(start);
+            if (validityPeriodEnd.get() != null) {
+                affiliation.setValidityPeriod(new TimeSlot(start, validityPeriodEnd.get()));
+            }
+        }));
+        fieldHandlers.put(Field.VALIDITY_PERIOD_END, new FieldHandler(TextFormatter.bold(TextFormatter.green("5.")) + " Fin de validité " + TextFormatter.italic("(format: yyyy-MM-ddTHH:mm:ssZ)"), input -> {
+            Instant end = Affiliation.verifyValidityPeriodEnd(input);
+            if (validityPeriodStart.get() != null && !end.isAfter(validityPeriodStart.get())) {
+                throw new ModelException("La date de fin de validité doit être strictement postérieure à la date de début");
+            }
+            validityPeriodEnd.set(end);
+            if (validityPeriodStart.get() != null) {
+                affiliation.setValidityPeriod(new TimeSlot(validityPeriodStart.get(), end));
+            }
+        }));
 
         try {
-            promptField(scanner, fieldHandlers, Field.FIRSTNAME);
-            promptField(scanner, fieldHandlers, Field.LASTNAME);
-            promptField(scanner, fieldHandlers, Field.PHONE);
-            promptField(scanner, fieldHandlers, Field.EMAIL);
-
-            Table personModelTable = getModelTable(person);
-
-            if (personModelTable == null) {
-                return new CallUrlEvent("/");
-            }
+            promptField(scanner, fieldHandlers, Field.PERSON_ID);
+            promptField(scanner, fieldHandlers, Field.CLUB_ID);
+            promptField(scanner, fieldHandlers, Field.AFFILIATION_NUMBER);
+            promptField(scanner, fieldHandlers, Field.VALIDITY_PERIOD_START);
+            promptField(scanner, fieldHandlers, Field.VALIDITY_PERIOD_END);
 
             SimpleBox confirmationSimpleBox = new SimpleBox();
-            confirmationSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Voulez-vous ajouter cette personne ?")));
+            confirmationSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Voulez-vous ajouter cette affiliation ?")));
             confirmationSimpleBox.addLine(TextFormatter.bold("O") + " = Oui (enregistrer), " + TextFormatter.bold("N") + " = Non (annuler), " + TextFormatter.bold("M") + " = Modifier");
 
             List<String> validOptions = new ArrayList<>(List.of("O", "N", "M"));
@@ -66,11 +84,10 @@ public class AddPersonView extends FormView {
             // Treat M
             do {
                 System.out.println();
-                personModelTable = getModelTable(person);
-                if (personModelTable != null) {
-                    personModelTable.display();
+                Table affiliationTable = getModelTable(affiliation);
+                if (affiliationTable != null) {
+                    affiliationTable.display();
                 }
-
                 confirmationSimpleBox.display();
 
                 AtomicReference<String> formattedInput = new AtomicReference<>();
@@ -87,10 +104,11 @@ public class AddPersonView extends FormView {
                     KinomichiStandardMenu editFieldMenu = new KinomichiStandardMenu("Modifier un champ", null);
                     editFieldMenu.setShowGoBackOption(false);
                     editFieldMenu.setShowExitOption(false);
-                    editFieldMenu.addOption("Prénom", Field.FIRSTNAME);
-                    editFieldMenu.addOption("Nom", Field.LASTNAME);
-                    editFieldMenu.addOption("Téléphone", Field.PHONE);
-                    editFieldMenu.addOption("Email", Field.EMAIL);
+                    editFieldMenu.addOption("Identifiant de la personne (#)", Field.PERSON_ID);
+                    editFieldMenu.addOption("Identifiant du club (#)", Field.CLUB_ID);
+                    editFieldMenu.addOption("Numéro d'affiliation", Field.AFFILIATION_NUMBER);
+                    editFieldMenu.addOption("Début de validité", Field.VALIDITY_PERIOD_START);
+                    editFieldMenu.addOption("Fin de validité", Field.VALIDITY_PERIOD_END);
                     editFieldMenu.addSectionSeparationIndex();
                     editFieldMenu.addOption("Annuler la modification", "CANCEL_UPDATE");
                     editFieldMenu.addOption("Annuler l'ajout", "CANCEL_ADD");
@@ -108,12 +126,12 @@ public class AddPersonView extends FormView {
 
             // Treat N
             if (input.equals("N")) {
-                System.out.println(Functions.styleAsErrorMessage("Ajout d'une personne annulé."));
+                System.out.println(Functions.styleAsErrorMessage("Ajout d'une affiliation annulé."));
                 return new CallUrlEvent("/");
             }
 
             // Only O left
-            return new FormResultEvent<>(person);
+            return new FormResultEvent<>(affiliation);
         } catch (CommandResponseException commandResponseException) {
             Object response = commandResponseException.getResponse();
 
@@ -134,7 +152,7 @@ public class AddPersonView extends FormView {
     }
 
     private enum Field implements FormViewField {
-        FIRSTNAME, LASTNAME, PHONE, EMAIL
+        PERSON_ID, CLUB_ID, AFFILIATION_NUMBER, VALIDITY_PERIOD_START, VALIDITY_PERIOD_END
     }
 
 }

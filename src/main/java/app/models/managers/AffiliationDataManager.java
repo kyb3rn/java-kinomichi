@@ -1,7 +1,9 @@
 package app.models.managers;
 
 import app.models.*;
+import app.utils.elements.time.TimeSlot;
 import com.google.gson.*;
+import java.time.Instant;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
 import utils.data_management.converters.convertibles.JsonConvertible;
@@ -10,7 +12,9 @@ import utils.data_management.parsing.StringParserException;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class AffiliationDataManager extends DataManager<AffiliationDataManager.Data> {
@@ -21,36 +25,64 @@ public class AffiliationDataManager extends DataManager<AffiliationDataManager.D
 
     // ─── Getters ─── //
 
-    public TreeMap<Integer, Affiliation> getAffiliations() {
-        return this.affiliations;
+    public SortedMap<Integer, Affiliation> getAffiliations() {
+        return Collections.unmodifiableSortedMap(this.affiliations);
     }
 
     // ─── Utility methods ─── //
 
-    public Affiliation getAffiliation(Integer personId) {
-        return this.affiliations.get(personId);
+    public Affiliation getAffiliation(Integer id) throws ModelException {
+        if (id == null) {
+            throw new NoResultForPrimaryKeyException("L'identifiant de recherche parmi les données enregistrées ne peut pas être nul");
+        }
+
+        id = IdentifiedModel.verifyId(id);
+
+        return this.affiliations.get(id);
     }
 
-    public Affiliation getAffiliationWithExceptions(int personId) throws NoResultForPrimaryKeyException {
-        Affiliation affiliation = this.getAffiliation(personId);
+    public Affiliation getAffiliationWithExceptions(int id) throws ModelException {
+        Affiliation affiliation = this.getAffiliation(id);
 
         if (affiliation == null) {
-            throw new NoResultForPrimaryKeyException("Aucune des affiliations enregistrées ne référence une personne portant l'identifiant '%d'".formatted(personId));
+            throw new NoResultForPrimaryKeyException("Aucune des affiliations enregistrées ne porte l'identifiant '%d'".formatted(id));
         }
 
         return affiliation;
     }
 
+    public List<Affiliation> getPersonAffiliations(int idPerson) throws ModelException {
+        int finalIdPerson = IdentifiedModel.verifyId(idPerson);
+
+        return this.getModels().stream().filter(affiliation -> {
+            try {
+                return affiliation.getPersonId() == finalIdPerson;
+            } catch (ModelException e) {
+                return false;
+            }
+        }).toList();
+    }
+
     public void addAffiliation(Affiliation affiliation) throws ModelException, DataManagerException {
+        if (affiliation == null) {
+            throw new ModelException("L'affiliation à ajouter ne peut pas être nulle");
+        }
+
         if (!affiliation.isValid()) {
-            throw new ModelException("L'affiliation qui a voulu être ajoutée n'est pas valide");
+            throw new ModelException("L'affiliation à ajouter n'est pas valide");
         }
 
-        if (this.affiliations.containsKey(affiliation.getPerson().getId())) {
-            throw new DataManagerException("Une affiliation référençant une personne portant l'identifiant '%d' existe déjà".formatted(affiliation.getPersonId()));
+        this.applyAutoIncrementIfPossible(affiliation);
+
+        if (this.affiliations.containsKey(affiliation.getId())) {
+            throw new DataManagerException("Une affiliation portant l'identifiant '%d' existe déjà".formatted(affiliation.getId()));
         }
 
-        this.affiliations.put(affiliation.getPersonId(), affiliation);
+        if (!this.getPersonAffiliationsDuringTimeSlot(affiliation.getPerson(), affiliation.getValidityPeriod()).isEmpty()) {
+            throw new ModelException("La période de validité de l'affiliation à ajouter se superpose avec celle d'une autre affiliation de la personne à laquelle elle souhaite faire référence");
+        }
+
+        this.affiliations.put(affiliation.getId(), affiliation);
 
         if (this.isInitialized()) {
             this.unsavedChanges = true;
@@ -59,6 +91,10 @@ public class AffiliationDataManager extends DataManager<AffiliationDataManager.D
     }
 
     public Affiliation addAffiliation(Affiliation.Data affiliationData) throws ModelException, DataManagerException {
+        if (affiliationData == null) {
+            throw new ModelException("L'affiliation à ajouter ne peut pas être nulle");
+        }
+
         Affiliation affiliation = new Affiliation();
         affiliation.hydrate(affiliationData);
         DataManagers.resolveModelReferences(affiliation);
@@ -68,18 +104,33 @@ public class AffiliationDataManager extends DataManager<AffiliationDataManager.D
         return affiliation;
     }
 
-    public void updateAffiliation(Affiliation modifiedAffiliation) throws ModelException, DataManagerException {
+    public void updateAffiliation(int affiliationId, Affiliation modifiedAffiliation) throws ModelException, DataManagerException {
+        affiliationId = IdentifiedModel.verifyId(affiliationId);
+
         if (modifiedAffiliation == null) {
-            throw new ModelException("L'affiliation modifiée ne peut pas être nul");
+            throw new ModelException("L'affiliation modifiée ne peut pas être nulle");
         }
 
         if (!modifiedAffiliation.isValid()) {
             throw new ModelException("L'affiliation modifiée reçue n'est pas valide");
         }
 
-        Affiliation affiliationToModify = this.getAffiliationWithExceptions(modifiedAffiliation.getPersonId());
+        Affiliation affiliationToModify = this.getAffiliationWithExceptions(affiliationId);
+
+        if (affiliationToModify.getId() != modifiedAffiliation.getId()) {
+            throw new ModelException("Modifier l'identifiant d'un modèle n'est pas autorisé");
+        }
+
+        if (affiliationToModify.getPersonId() != modifiedAffiliation.getPersonId()) {
+            // TODO: Vérifier que l'affiliation n'overlap pas avec une possible inscription de la personne (affiliationToModify.getPerson()) a un stage qui tomberait durant la période de validité de cette affiliation
+        }
+
+        if (!this.getPersonAffiliationsDuringTimeSlot(modifiedAffiliation.getPerson(), modifiedAffiliation.getValidityPeriod()).isEmpty()) {
+            throw new ModelException("La période de validité de l'affiliation modifiée se superpose avec celle d'une autre affiliation de la personne à laquelle elle souhaite faire référence");
+        }
 
         affiliationToModify.hydrate(modifiedAffiliation.dehydrate());
+        DataManagers.resolveModelReferences(affiliationToModify);
 
         if (this.isInitialized()) {
             this.unsavedChanges = true;
@@ -87,10 +138,12 @@ public class AffiliationDataManager extends DataManager<AffiliationDataManager.D
         }
     }
 
-    public void deleteAffiliation(int personId) throws ModelException, DataManagerException {
-        Affiliation affiliationToDelete = this.getAffiliationWithExceptions(personId);
+    public void deleteAffiliation(int id) throws ModelException, DataManagerException {
+        Affiliation affiliationToDelete = this.getAffiliationWithExceptions(id);
 
-        this.affiliations.remove(affiliationToDelete.getPersonId());
+        // TODO: Vérifier que l'affiliation n'overlap pas avec une possible inscription de la personne (affiliationToDelete.getPerson()) a un stage qui tomberait durant la période de validité de cette affiliation
+
+        this.affiliations.remove(affiliationToDelete.getId());
 
         if (this.isInitialized()) {
             this.unsavedChanges = true;
@@ -100,16 +153,42 @@ public class AffiliationDataManager extends DataManager<AffiliationDataManager.D
 
     public boolean isClubUsed(Club clubToDelete) throws ModelException {
         if (clubToDelete == null) {
-            throw new ModelException("Le club à chercher ne peut pas être nul");
+            throw new ModelException("Le club sur lequel effectuer la recherche ne peut pas être nul");
         }
 
-        return this.affiliations.values().stream().anyMatch(affiliation -> {
+        return this.getModels().stream().anyMatch(affiliation -> {
             try {
                 return affiliation.getClubId() == clubToDelete.getId();
             } catch (ModelException _) {
                 return false;
             }
         });
+    }
+
+    public List<Affiliation> getAffiliationsDuringTimeSlot(TimeSlot timeSlot) throws DataManagerException {
+        if (timeSlot == null) {
+            throw new DataManagerException("La période de temps sur laquelle effectuer la recherche ne peut pas être nulle");
+        }
+
+        return this.getModels().stream().filter(affiliation -> affiliation.getValidityPeriod().overlaps(timeSlot)).toList();
+    }
+
+    public List<Affiliation> getPersonAffiliationsDuringTimeSlot(Person person, TimeSlot timeSlot) throws DataManagerException {
+        if (person == null) {
+            throw new DataManagerException("La personne sur laquelle effectuer la recherche ne peut pas être nulle");
+        }
+
+        if (timeSlot == null) {
+            throw new DataManagerException("La période de temps sur laquelle effectuer la recherche ne peut pas être nulle");
+        }
+
+        return this.getModels().stream().filter(affiliation -> {
+            try {
+                return affiliation.getPersonId() == person.getId() && affiliation.getValidityPeriod().overlaps(timeSlot);
+            } catch (ModelException e) {
+                return false;
+            }
+        }).toList();
     }
 
     // ─── Overrides & inheritance ─── //
@@ -177,7 +256,7 @@ public class AffiliationDataManager extends DataManager<AffiliationDataManager.D
         // ─── Constructors ─── //
 
         public Data(AffiliationDataManager affiliationDataManager) throws ModelException {
-            for (Affiliation affiliation : affiliationDataManager.getAffiliations().values()) {
+            for (Affiliation affiliation : affiliationDataManager.getModels()) {
                 this.affiliations.add(affiliation.dehydrate());
             }
         }
@@ -217,7 +296,11 @@ public class AffiliationDataManager extends DataManager<AffiliationDataManager.D
 
         @Override
         public String toJson() {
-            return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+            return new GsonBuilder()
+                    .setPrettyPrinting()
+                    .registerTypeAdapter(Instant.class, (JsonSerializer<Instant>) (src, typeOfSrc, context) -> new JsonPrimitive(src.toString()))
+                    .create()
+                    .toJson(this);
         }
 
     }
