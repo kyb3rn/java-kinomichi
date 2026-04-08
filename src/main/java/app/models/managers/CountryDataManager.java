@@ -80,7 +80,7 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
 
     @Override
     public void init() throws LoadDataManagerDataException {
-        if (!this.isInitialized()) {
+        if (!this.dataLoaded) {
             this.defaultFileType = FileType.CSV;
 
             DataWriter<Data> dataWriter = new DataWriter<>();
@@ -99,6 +99,8 @@ public class CountryDataManager extends DataManager<CountryDataManager.Data> {
             } catch (Exception e) {
                 throw new LoadDataManagerDataException("Les données lues du manager '%s' dans le fichier '%s' n'ont pas pu être enregistrées dans le manager '%s'".formatted(this.getClass().getSimpleName(), filePath, e));
             }
+
+            this.dataLoaded = true;
         }
     }
 

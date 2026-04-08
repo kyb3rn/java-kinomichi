@@ -1,6 +1,8 @@
 package app.models.managers;
 
 import app.models.*;
+import app.utils.tarification.ChargeableElementType;
+import app.utils.tarification.ChargingElementType;
 import com.google.gson.*;
 import utils.data_management.FileType;
 import utils.data_management.converters.CustomSerializable;
@@ -12,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -28,6 +31,20 @@ public class CampDiscountDataManager extends DataManager<CampDiscountDataManager
     }
 
     // ─── Utility methods ─── //
+
+    public List<CampDiscount> getCampDiscounts(int campId) {
+        return this.campsDiscounts.values().stream()
+                .filter(campDiscount -> campDiscount.getCamp().getId() == campId)
+                .toList();
+    }
+
+    public Optional<CampDiscount> getCampDiscount(int campId, ChargeableElementType chargeableElementType, ChargingElementType chargingElementType) {
+        return this.campsDiscounts.values().stream()
+                .filter(campDiscount -> campDiscount.getCamp().getId() == campId)
+                .filter(campDiscount -> campDiscount.getChargeableElementType() == chargeableElementType)
+                .filter(campDiscount -> campDiscount.getChargingElementType() == chargingElementType)
+                .findFirst();
+    }
 
     public CampDiscount getCampDiscountWithExceptions(Integer id) throws DataManagerException, ModelException {
         if (id == null) {

@@ -73,19 +73,9 @@ public class SessionTrainerDataManager extends DataManager<SessionTrainerDataMan
             throw new DataManagerException("La personne portant l'identifiant '%d' est déjà formateur dans une autre session dont le créneau horaire se superpose".formatted(sessionTrainer.getPersonId()));
         }
 
-        // Check that the person is not registered as a participant in a session that overlaps this one
-        SessionRegistrationDataManager sessionRegistrationDataManager = DataManagers.get(SessionRegistrationDataManager.class);
-        List<SessionRegistration> personOverlappingRegistrations = sessionRegistrationDataManager.getPersonSessionRegistrationsDuringTimeSlot(sessionTrainer.getPerson(), sessionTimeSlot);
-        if (!personOverlappingRegistrations.isEmpty()) {
-            throw new DataManagerException("La personne portant l'identifiant '%d' est déjà inscrite à une autre session dont le créneau horaire se superpose".formatted(sessionTrainer.getPersonId()));
-        }
-
-        // Check that the person is affiliated (affiliation overlaps the camp timeSlot)
-        AffiliationDataManager affiliationDataManager = DataManagers.get(AffiliationDataManager.class);
-        TimeSlot campTimeSlot = sessionTrainer.getSession().getCamp().getTimeSlot();
-        List<Affiliation> personAffiliationsDuringCamp = affiliationDataManager.getPersonAffiliationsDuringTimeSlot(sessionTrainer.getPerson(), campTimeSlot);
-        if (personAffiliationsDuringCamp.isEmpty()) {
-            throw new DataManagerException("La personne portant l'identifiant '%d' n'est pas affiliée durant la période du stage lié à cette session".formatted(sessionTrainer.getPersonId()));
+        // Cross-DataManager validations (skipped during init, run in validateResolvedModels)
+        if (this.isInitialized()) {
+            this.validateCrossDataManagerConstraints(sessionTrainer);
         }
 
         this.sessionTrainers.put(sessionTrainer.getId(), sessionTrainer);
@@ -216,6 +206,24 @@ public class SessionTrainerDataManager extends DataManager<SessionTrainerDataMan
         });
     }
 
+    private void validateCrossDataManagerConstraints(SessionTrainer sessionTrainer) throws ModelException, DataManagerException {
+        // Check that the person is not registered as a participant in a session that overlaps this one
+        SessionRegistrationDataManager sessionRegistrationDataManager = DataManagers.get(SessionRegistrationDataManager.class);
+        TimeSlot sessionTimeSlot = sessionTrainer.getSession().getTimeSlot();
+        List<SessionRegistration> personOverlappingRegistrations = sessionRegistrationDataManager.getPersonSessionRegistrationsDuringTimeSlot(sessionTrainer.getPerson(), sessionTimeSlot);
+        if (!personOverlappingRegistrations.isEmpty()) {
+            throw new DataManagerException("La personne portant l'identifiant '%d' est déjà inscrite à une autre session dont le créneau horaire se superpose".formatted(sessionTrainer.getPersonId()));
+        }
+
+        // Check that the person is affiliated (affiliation overlaps the camp timeSlot)
+        AffiliationDataManager affiliationDataManager = DataManagers.get(AffiliationDataManager.class);
+        TimeSlot campTimeSlot = sessionTrainer.getSession().getCamp().getTimeSlot();
+        List<Affiliation> personAffiliationsDuringCamp = affiliationDataManager.getPersonAffiliationsDuringTimeSlot(sessionTrainer.getPerson(), campTimeSlot);
+        if (personAffiliationsDuringCamp.isEmpty()) {
+            throw new DataManagerException("La personne portant l'identifiant '%d' n'est pas affiliée durant la période du stage lié à cette session".formatted(sessionTrainer.getPersonId()));
+        }
+    }
+
     // ─── Overrides & inheritance ─── //
 
     @Override
@@ -263,6 +271,13 @@ public class SessionTrainerDataManager extends DataManager<SessionTrainerDataMan
         }
 
         this.addSessionTrainer(sessionTrainer);
+    }
+
+    @Override
+    protected void validateResolvedModels() throws ModelException, DataManagerException {
+        for (SessionTrainer sessionTrainer : this.sessionTrainers.values()) {
+            this.validateCrossDataManagerConstraints(sessionTrainer);
+        }
     }
 
     @Override

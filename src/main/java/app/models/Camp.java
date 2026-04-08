@@ -3,6 +3,11 @@ package app.models;
 import app.models.managers.AddressDataManager;
 import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
+import app.utils.elements.money.Currency;
+import app.utils.elements.money.Price;
+import app.utils.elements.money.PriceException;
+import app.utils.elements.money.exceptions.NotACurrencyException;
+import app.utils.elements.money.exceptions.UnknownCurrencyException;
 import com.google.gson.*;
 import utils.data_management.converters.CustomSerializable;
 import utils.data_management.converters.Hydratable;
@@ -24,6 +29,7 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
     @ModelReference(manager = AddressDataManager.class) private Address address;
     private int pendingAddressPk = -1;
     private TimeSlot timeSlot;
+    private Price sessionsPricePerHour;
 
     // ─── Getters ─── //
 
@@ -37,6 +43,10 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
 
     public TimeSlot getTimeSlot() {
         return this.timeSlot;
+    }
+
+    public Price getSessionsPricePerHour() {
+        return this.sessionsPricePerHour;
     }
 
     // ─── Special getters ─── //
@@ -75,6 +85,14 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
         }
 
         this.timeSlot = timeSlot;
+    }
+
+    public void setSessionsPricePerHour(Price sessionsPricePerHour) throws ModelException {
+        if (sessionsPricePerHour == null) {
+            throw new ModelVerificationException("Le tarif horaire des sessions ne peut pas être nul");
+        }
+
+        this.sessionsPricePerHour = sessionsPricePerHour;
     }
 
     // ─── Special setters ─── //
@@ -119,6 +137,43 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
         }
     }
 
+    public static Currency verifySessionsPricePerHourCurrency(String priceCurrencyName) throws ModelException {
+        try {
+            priceCurrencyName = Validators.validateNotNullOrBlank(priceCurrencyName);
+        } catch (BlankOrNullValueValidatorException e) {
+            throw new ModelVerificationException("La monnaie du tarif horaire des sessions ne peut pas être vide ou nulle", e);
+        }
+
+        try {
+            return Currency.convert(priceCurrencyName);
+        } catch (UnknownCurrencyException e) {
+            throw new ModelVerificationException("La monnaie du tarif horaire renseignée est inconnue", e);
+        } catch (NotACurrencyException e) {
+            throw new ModelVerificationException("La monnaie du tarif horaire des sessions ne peut pas être vide ou nulle", e);
+        }
+    }
+
+    public static double verifySessionsPricePerHourAmount(String priceAmount) throws ModelException {
+        try {
+            priceAmount = Validators.validateNotNullOrBlank(priceAmount);
+        } catch (BlankOrNullValueValidatorException e) {
+            throw new ModelVerificationException("Le montant du tarif horaire des sessions ne peut pas être vide ou nul", e);
+        }
+
+        double priceAmountAsDouble;
+        try {
+            priceAmountAsDouble = Double.parseDouble(priceAmount);
+        } catch (NumberFormatException e) {
+            throw new ModelVerificationException("Le montant du tarif horaire des sessions doit être un entier, ou un nombre à décimales, positif", e);
+        }
+
+        if (priceAmountAsDouble < 0) {
+            throw new ModelVerificationException("Le montant du tarif horaire des sessions doit être un entier, ou un nombre à décimales, positif");
+        }
+
+        return priceAmountAsDouble;
+    }
+
     // ─── Overrides & inheritance ─── //
 
     @Override
@@ -135,6 +190,7 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
         clone.address = this.address;
         clone.pendingAddressPk = this.pendingAddressPk;
         clone.timeSlot = this.timeSlot;
+        clone.sessionsPricePerHour = this.sessionsPricePerHour;
 
         return clone;
     }
@@ -146,7 +202,7 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
 
     @Override
     public boolean isValid() {
-        return this.getId() > 0 && this.name != null && this.address != null && this.timeSlot != null;
+        return this.getId() > 0 && this.name != null && this.address != null && this.timeSlot != null && this.sessionsPricePerHour != null;
     }
 
     @Override
@@ -155,6 +211,14 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
         this.setName(dataObject.getName());
         this.pendingAddressPk = dataObject.getAddressId();
         this.setTimeSlot(dataObject.getTimeSlot());
+
+        try {
+            this.setSessionsPricePerHour(dataObject.getSessionsPricePerHour());
+        } catch (NotACurrencyException e) {
+            throw new ModelException("Le tarif horaire des sessions reçu à hydrater n'a pas une monnaie valide", e);
+        } catch (PriceException e) {
+            throw new ModelException("Le montant du tarif horaire des sessions reçu à hydrater n'est pas valide", e);
+        }
     }
 
     @Override
@@ -172,6 +236,8 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
         private int addressId = -1;
         private Instant timeSlotStart;
         private Instant timeSlotEnd;
+        private Currency sessionsPricePerHourCurrency;
+        private double sessionsPricePerHourAmount;
 
         // ─── Constructors ─── //
 
@@ -184,6 +250,8 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
             this.setAddressId(camp.getAddress().getId());
             this.setTimeSlotStart(camp.getTimeSlot().getFormattedStart());
             this.setTimeSlotEnd(camp.getTimeSlot().getFormattedEnd());
+            this.setSessionsPricePerHourCurrency(camp.getSessionsPricePerHour());
+            this.setSessionsPricePerHourAmount(camp.getSessionsPricePerHour());
         }
 
         // ─── Getters ─── //
@@ -204,10 +272,22 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
             return this.timeSlotEnd;
         }
 
+        public Currency getSessionsPricePerHourCurrency() {
+            return this.sessionsPricePerHourCurrency;
+        }
+
+        public double getSessionsPricePerHourAmount() {
+            return this.sessionsPricePerHourAmount;
+        }
+
         // ─── Special getters ─── //
 
         public TimeSlot getTimeSlot() {
             return new TimeSlot(this.timeSlotStart, this.timeSlotEnd);
+        }
+
+        public Price getSessionsPricePerHour() throws NotACurrencyException, PriceException {
+            return new Price(this.sessionsPricePerHourCurrency, this.sessionsPricePerHourAmount);
         }
 
         // ─── Setters ─── //
@@ -244,6 +324,34 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
             this.timeSlotEnd = timeSlotEndInstant;
         }
 
+        private void setSessionsPricePerHourCurrency(Price price) throws ModelException {
+            if (price == null) {
+                throw new ModelVerificationException("La monnaie du tarif horaire des sessions ne peut pas être nulle");
+            }
+
+            this.sessionsPricePerHourCurrency = price.getCurrency();
+        }
+
+        private void setSessionsPricePerHourCurrency(String priceCurrencyName) throws ModelException {
+            this.sessionsPricePerHourCurrency = verifySessionsPricePerHourCurrency(priceCurrencyName);
+        }
+
+        private void setSessionsPricePerHourAmount(Price price) throws ModelException {
+            if (price == null) {
+                throw new ModelVerificationException("Le montant du tarif horaire des sessions ne peut pas être nul");
+            }
+
+            this.sessionsPricePerHourAmount = price.getAmount();
+        }
+
+        private void setSessionsPricePerHourAmount(String priceAmount) throws ModelException {
+            this.sessionsPricePerHourAmount = verifySessionsPricePerHourAmount(priceAmount);
+        }
+
+        private void setSessionsPricePerHourAmount(Double priceAmount) throws ModelException {
+            this.setSessionsPricePerHourAmount(String.valueOf(priceAmount));
+        }
+
         // ─── Overrides & inheritance ─── //
 
         @Override
@@ -270,6 +378,12 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
             if (!obj.has("timeSlotEnd")) {
                 throw new StringParserException("Le champ 'timeSlotEnd' est manquant");
             }
+            if (!obj.has("sessionsPricePerHourCurrency")) {
+                throw new StringParserException("Le champ 'sessionsPricePerHourCurrency' est manquant");
+            }
+            if (!obj.has("sessionsPricePerHourAmount")) {
+                throw new StringParserException("Le champ 'sessionsPricePerHourAmount' est manquant");
+            }
 
             try {
                 this.setId(obj.get("id").getAsString());
@@ -277,6 +391,8 @@ public class Camp extends IdentifiedModel implements Hydratable<Camp.Data> {
                 this.setAddressId(obj.get("addressId").getAsString());
                 this.setTimeSlotStart(obj.get("timeSlotStart").getAsString());
                 this.setTimeSlotEnd(obj.get("timeSlotEnd").getAsString());
+                this.setSessionsPricePerHourCurrency(obj.get("sessionsPricePerHourCurrency").getAsString());
+                this.setSessionsPricePerHourAmount(obj.get("sessionsPricePerHourAmount").getAsString());
             } catch (ModelException e) {
                 throw new ParserException(e);
             }

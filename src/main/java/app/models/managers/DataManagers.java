@@ -88,6 +88,19 @@ public class DataManagers {
                 System.out.println(Functions.styleAsErrorMessage("La résolution des références du manager '%s' a échoué: %s".formatted(manager.getClass().getSimpleName(), e.getMessage())));
             }
         }
+
+        // Pass 3: cross-DataManager validation + mark as initialized
+        for (DataManager<?> manager : loadedManagers) {
+            if (!manager.isInitialized() && manager.dataLoaded) {
+                manager.initialized = true;
+                try {
+                    manager.validateResolvedModels();
+                } catch (DataManagerException | ModelException e) {
+                    manager.initialized = false;
+                    System.out.println(Functions.styleAsErrorMessage("La validation post-chargement du manager '%s' a échoué: %s".formatted(manager.getClass().getSimpleName(), e.getMessage())));
+                }
+            }
+        }
     }
 
     public static void resolveModelReferences(Model model) throws ModelException {
@@ -197,7 +210,25 @@ public class DataManagers {
     @SuppressWarnings("unchecked")
     public static <M extends DataManager<?>> M get(Class<M> clazz) throws ModelException, DataManagerException {
         initAndResolveReferencesWithThrow(clazz);
-        return (M) instances.get(clazz);
+        M manager = (M) instances.get(clazz);
+
+        if (!manager.isInitialized() && manager.dataLoaded) {
+            manager.initialized = true;
+            try {
+                manager.validateResolvedModels();
+            } catch (Exception e) {
+                manager.initialized = false;
+                if (e instanceof DataManagerException dme) {
+                    throw dme;
+                }
+                if (e instanceof ModelException me) {
+                    throw me;
+                }
+                throw new DataManagerException("La validation post-chargement du manager '%s' a échoué".formatted(clazz.getSimpleName()), e);
+            }
+        }
+
+        return manager;
     }
 
 }

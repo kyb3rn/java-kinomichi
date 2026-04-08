@@ -1,4 +1,4 @@
-> Dernière mise à jour : 2026-04-05 20:45
+> Dernière mise à jour : 2026-04-08 14:30
 
 # Projet
 
@@ -165,7 +165,17 @@ Hierarchie d'exceptions :
 
 ## Tarification (package `app.utils.tarification`)
 
-Systeme de tarification avec `ChargeableElement`, `ChargeableElementType`, `ChargingElementType`, `EChargeableCategory`. Exceptions : `ChargeableElementException`, `ChargeableException`, `TarificationException`.
+Systeme de tarification pour calculer les prix avec reductions par stage :
+
+- `ChargingElement` (interface) — element facturant, fournit `getBasePrice()` et `getUndiscountedPrice()` (prix de base par defaut)
+- `DurationBasedChargingElement` (interface, extends ChargingElement) — element facturant base sur la duree (ex : session). Fournit `getDuration()` et surcharge `getUndiscountedPrice()` pour calculer `basePrice * heures`
+- `ChargeableElement` (interface) — element facturable, fournit `getChargeableCategories(ChargingElement)` qui retourne les categories applicables
+- `ChargeableElementType` (enum) — types d'elements facturables
+- `ChargingElementType` (enum) — types d'elements facturants : `DINNER` (DinnerReservation), `LODGING` (LodgingReservation), `SESSION` (SessionRegistration)
+- `EChargeableCategory` (enum) — categories de reduction
+- `ChargeElement` — associe un `ChargeableElement`, un `ChargingElement` et un `Camp`. Calcule le prix avec reduction via `getDiscountedPrice()` en interrogeant `CampDiscountDataManager` pour la meilleure reduction applicable
+
+Exceptions : `ChargeableElementException`, `ChargeableException`, `TarificationException`.
 
 # Conventions
 
@@ -214,7 +224,7 @@ Modeles avec references (pattern complet hydrate/dehydrate) :
 `CampScheduledItem` (interface) : implemente par les modeles dont le `timeSlot` doit etre contenu dans celui du camp parent (`Dinner`, `Lodging`, `Session`). Fournit `validateTimeSlotWithinCampBounds()` et `validateInstantWithinCampBounds()`.
 
 Modeles existants :
-- `Camp` — Hydratable, references : `@ModelReference → Address`
+- `Camp` — Hydratable, references : `@ModelReference → Address`. Propriete `sessionsPricePerHour` (Price) pour le tarif horaire des sessions du stage
 - `Club` — Hydratable, references : `@ModelReference → Address`
 - `Affiliation` — extends `IdentifiedModel`, Hydratable, references : `@ModelReference → Person`, `@ModelReference → Club`. Propriete `validityPeriod` (TimeSlot) pour la periode de validite. Possede un `affiliationNumber` (format XXXX-YYYYY)
 - `Address` — Hydratable, references : `@ModelReference → Country`
@@ -227,7 +237,7 @@ Modeles existants :
 - `LodgingReservation` — extends `IdentifiedModel`, Hydratable, references : `@ModelReference → Person`, `@ModelReference → Lodging`
 - `Session` — extends `IdentifiedModel`, Hydratable, implements `CampScheduledItem`, references : `@ModelReference → Camp`. Proprietes `label`, `timeSlot`. Creneau horaire valide dans les bornes du camp
 - `SessionTrainer` — extends `IdentifiedModel`, Hydratable, references : `@ModelReference → Session`, `@ModelReference → Person`. Represente l'assignation d'un formateur a une session
-- `SessionRegistration` — extends `IdentifiedModel`, Hydratable, references : `@ModelReference → Session`, `@ModelReference → Person`. Represente l'inscription d'un participant a une session
+- `SessionRegistration` — extends `IdentifiedModel`, Hydratable, implements `DurationBasedChargingElement`, references : `@ModelReference → Session`, `@ModelReference → Person`. Represente l'inscription d'un participant a une session. Le prix est calcule a partir de la duree de la session et du `sessionsPricePerHour` du camp
 - `CampDiscount` — extends `IdentifiedModel`, Hydratable
 
 ### Exception `NoResultForPrimaryKeyException`
@@ -265,10 +275,12 @@ Auto-increment centralise : `DataManager.applyAutoIncrementIfPossible(Identified
 `DataManagers.exportAll()` : sauvegarde tous les DataManagers ayant `hasUnsavedChanges() == true`. Appelee a la sortie de l'application.
 
 Initialisation en deux passes (dans `DataManagers.initAndResolveReferencesOf()`) :
-1. **Pass 1** : instanciation + `init()` — lit le fichier, parse le JSON/CSV, appelle `hydrate()` qui cree des modeles avec des `pending*Pk` non resolus (stockes dans `this.pendingModels`)
+1. **Pass 1** : instanciation + `init()` — lit le fichier, parse le JSON/CSV, appelle `hydrate()` qui cree des modeles avec des `pending*Pk` non resolus (stockes dans `this.pendingModels`). Met `dataLoaded = true`
 2. **Pass 2** : `resolveReferences()` — cascade les dependances via `@ModelReference`, appelle les `set*FromPk()` par reflection, puis `addResolvedModel()` pour chaque modele valide
 
-Exceptions : `PersonDataManager` et `CountryDataManager` n'utilisent pas `pendingModels` — ils ajoutent les modeles directement dans `hydrate()` et font `this.initialized = true` immediatement (car pas de FK a resoudre).
+Deux flags d'etat dans `DataManager` : `dataLoaded` (fichier lu et parse) et `initialized` (references resolues, pret a l'emploi). Hook `validateResolvedModels()` (vide par defaut) appele apres resolution pour des validations post-hydratation.
+
+Exceptions : `PersonDataManager` et `CountryDataManager` n'utilisent pas `pendingModels` — ils ajoutent les modeles directement dans `hydrate()` et font `this.dataLoaded = true` immediatement (car pas de FK a resoudre).
 
 Donnees stockees dans `/data/` avec le nom de fichier derive automatiquement (voir section reflection).
 

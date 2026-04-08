@@ -182,10 +182,7 @@ public class LodgingReservation extends IdentifiedModel implements Hydratable<Lo
     @Override
     public double getBasePrice() {
         Lodging lodging = this.getLodging();
-        if (lodging == null) {
-            return 0;
-        }
-        return this.singleRoomOption ? lodging.getSingleRoomPrice().getAmount() : lodging.getSharedRoomPrice().getAmount();
+        return lodging != null ? (this.singleRoomOption ? lodging.getSingleRoomPrice().getAmount() : lodging.getSharedRoomPrice().getAmount()) : 0;
     }
 
     // ─── Sub classes ─── //

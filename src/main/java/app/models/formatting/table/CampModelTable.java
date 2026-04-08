@@ -3,6 +3,7 @@ package app.models.formatting.table;
 import app.models.Camp;
 import app.models.ModelException;
 import app.models.formatting.ModelKeyTextFormattingPreset;
+import app.utils.elements.money.Price;
 import utils.io.tables.ModelTableDisplay;
 import utils.io.tables.TableDisplayFormattingOptions;
 import utils.io.text_formatting.TextAlignment;
@@ -37,6 +38,12 @@ public class CampModelTable extends IdentifiedModelTable<Camp> {
     public String getTimeSlot() {
         TimeSlot timeSlot = this.getModel().getTimeSlot();
         return timeSlot != null ? timeSlot.toString() : ModelTable.getNullFormattedText().toString();
+    }
+
+    @ModelTableDisplay(name = "Tarif sessions/h", order = 5)
+    public String getSessionsPricePerHour() {
+        Price price = this.getModel().getSessionsPricePerHour();
+        return price != null ? price.getAmount() + " " + price.getCurrency().getSymbol() : ModelTable.getNullFormattedText().toString();
     }
 
 }

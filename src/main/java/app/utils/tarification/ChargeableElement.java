@@ -4,6 +4,6 @@ import java.util.Set;
 
 public interface ChargeableElement {
 
-    Set<EChargeableCategory> getChargeableCategory(ChargingElement chargingElement) throws Exception;
+    Set<EChargeableCategory> getChargeableCategories(ChargingElement chargingElement) throws Exception;
 
 }

@@ -5,6 +5,7 @@ import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
 import app.utils.elements.money.Currency;
 import app.utils.elements.money.Price;
+import app.utils.elements.money.PriceException;
 import app.utils.elements.money.exceptions.NotACurrencyException;
 import app.utils.elements.money.exceptions.UnknownCurrencyException;
 import com.google.gson.*;
@@ -229,12 +230,16 @@ public class Lodging extends IdentifiedModel implements Hydratable<Lodging.Data>
             this.setSharedRoomPrice(dataObject.getSharedRoomPrice());
         } catch (NotACurrencyException e) {
             throw new ModelException("Le prix de chambre partagée reçu à hydrater pour cet hébergement n'a pas une monnaie valide", e);
+        } catch (PriceException e) {
+            throw new ModelException("Le montant du prix de chambre partagée reçu à hydrater pour cet hébergement n'est pas valide", e);
         }
 
         try {
             this.setSingleRoomPrice(dataObject.getSingleRoomPrice());
         } catch (NotACurrencyException e) {
             throw new ModelException("Le prix de chambre individuelle reçu à hydrater pour cet hébergement n'a pas une monnaie valide", e);
+        } catch (PriceException e) {
+            throw new ModelException("Le montant du prix de chambre individuelle reçu à hydrater pour cet hébergement n'est pas valide", e);
         }
     }
 
@@ -324,11 +329,11 @@ public class Lodging extends IdentifiedModel implements Hydratable<Lodging.Data>
             return new TimeSlot(this.timeSlotStart, this.timeSlotEnd);
         }
 
-        public Price getSharedRoomPrice() throws NotACurrencyException {
+        public Price getSharedRoomPrice() throws NotACurrencyException, PriceException {
             return new Price(this.sharedRoomPriceCurrency, this.sharedRoomPriceAmount);
         }
 
-        public Price getSingleRoomPrice() throws NotACurrencyException {
+        public Price getSingleRoomPrice() throws NotACurrencyException, PriceException {
             return new Price(this.singleRoomPriceCurrency, this.singleRoomPriceAmount);
         }
 

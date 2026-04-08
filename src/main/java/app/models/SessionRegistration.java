@@ -4,6 +4,7 @@ import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
 import app.models.managers.PersonDataManager;
 import app.models.managers.SessionDataManager;
+import app.utils.tarification.DurationBasedChargingElement;
 import com.google.gson.*;
 import utils.data_management.converters.CustomSerializable;
 import utils.data_management.converters.Hydratable;
@@ -11,7 +12,9 @@ import utils.data_management.converters.convertibles.JsonConvertible;
 import utils.data_management.parsing.ParserException;
 import utils.data_management.parsing.StringParserException;
 
-public class SessionRegistration extends IdentifiedModel implements Hydratable<SessionRegistration.Data> {
+import java.time.Duration;
+
+public class SessionRegistration extends IdentifiedModel implements Hydratable<SessionRegistration.Data>, DurationBasedChargingElement {
 
     // ─── Properties ─── //
 
@@ -132,6 +135,16 @@ public class SessionRegistration extends IdentifiedModel implements Hydratable<S
     @Override
     public Data dehydrate() throws ModelException {
         return new SessionRegistration.Data(this);
+    }
+
+    @Override
+    public Duration getDuration() {
+        return this.session != null && this.session.getTimeSlot() != null ? this.session.getTimeSlot().getDuration() : Duration.ZERO;
+    }
+
+    @Override
+    public double getBasePrice() {
+        return this.getSession() != null && this.session.getCamp() != null && this.session.getCamp().getSessionsPricePerHour() != null ? this.session.getCamp().getSessionsPricePerHour().getAmount() : 0;
     }
 
     // ─── Sub classes ─── //

@@ -1,6 +1,6 @@
 package app.utils.elements.money;
 
-public class MoneyAmountException extends RuntimeException {
+public class MoneyAmountException extends Exception {
 
     // ─── Constructors ─── //
 

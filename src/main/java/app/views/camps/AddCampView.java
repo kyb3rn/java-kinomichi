@@ -4,6 +4,8 @@ import app.events.*;
 import app.models.Address;
 import app.models.Camp;
 import app.models.ModelException;
+import app.utils.elements.money.Currency;
+import app.utils.elements.money.Price;
 import app.utils.elements.time.TimeSlot;
 import app.utils.helpers.KinomichiFunctions;
 import app.utils.menus.KinomichiStandardMenu;
@@ -72,6 +74,10 @@ public class AddCampView extends FormView {
                 camp.setTimeSlot(new TimeSlot(timeSlotStart.get(), end));
             }
         }));
+        fieldHandlers.put(Field.SESSIONS_PRICE_PER_HOUR_AMOUNT, new FieldHandler(TextFormatter.bold(TextFormatter.green("5.")) + " Tarif horaire des sessions " + TextFormatter.italic("(en €)"), input -> {
+            double priceAmount = Camp.verifySessionsPricePerHourAmount(input);
+            camp.setSessionsPricePerHour(new Price(Currency.EURO, priceAmount));
+        }));
 
         try {
             promptField(scanner, fieldHandlers, Field.NAME);
@@ -87,6 +93,7 @@ public class AddCampView extends FormView {
             promptField(scanner, fieldHandlers, Field.ADDRESS_BOX_NUMBER);
             promptField(scanner, fieldHandlers, Field.TIME_SLOT_START);
             promptField(scanner, fieldHandlers, Field.TIME_SLOT_END);
+            promptField(scanner, fieldHandlers, Field.SESSIONS_PRICE_PER_HOUR_AMOUNT);
 
             SimpleBox confirmationSimpleBox = new SimpleBox();
             confirmationSimpleBox.addLine(TextFormatter.bold(TextFormatter.magenta("# Voulez-vous ajouter ce stage ?")));
@@ -131,6 +138,7 @@ public class AddCampView extends FormView {
                     editFieldMenu.addOption("Adresse - Numéro de boîte", Field.ADDRESS_BOX_NUMBER);
                     editFieldMenu.addOption("Date de début", Field.TIME_SLOT_START);
                     editFieldMenu.addOption("Date de fin", Field.TIME_SLOT_END);
+                    editFieldMenu.addOption("Tarif horaire des sessions", Field.SESSIONS_PRICE_PER_HOUR_AMOUNT);
                     editFieldMenu.addSectionSeparationIndex();
                     editFieldMenu.addOption("Annuler la modification", "CANCEL_UPDATE");
                     editFieldMenu.addOption("Annuler l'ajout", "CANCEL_ADD");
@@ -174,7 +182,7 @@ public class AddCampView extends FormView {
     }
 
     private enum Field implements FormViewField {
-        NAME, ADDRESS_COUNTRY_ISO3, ADDRESS_ZIP_CODE, ADDRESS_CITY, ADDRESS_STREET, ADDRESS_NUMBER, ADDRESS_BOX_NUMBER, TIME_SLOT_START, TIME_SLOT_END
+        NAME, ADDRESS_COUNTRY_ISO3, ADDRESS_ZIP_CODE, ADDRESS_CITY, ADDRESS_STREET, ADDRESS_NUMBER, ADDRESS_BOX_NUMBER, TIME_SLOT_START, TIME_SLOT_END, SESSIONS_PRICE_PER_HOUR_AMOUNT
     }
 
 }

@@ -5,6 +5,7 @@ import app.models.managers.DataManagerException;
 import app.models.managers.DataManagers;
 import app.utils.elements.money.Currency;
 import app.utils.elements.money.Price;
+import app.utils.elements.money.PriceException;
 import app.utils.elements.money.exceptions.NotACurrencyException;
 import app.utils.elements.money.exceptions.UnknownCurrencyException;
 import app.utils.tarification.ChargingElement;
@@ -208,6 +209,8 @@ public class Dinner extends IdentifiedModel implements Hydratable<Dinner.Data>, 
             this.setPrice(dataObject.getPrice());
         } catch (NotACurrencyException e) {
             throw new ModelException("Le prix reçu à hydrater pour ce repas n'a pas une monnaie valide", e);
+        } catch (PriceException e) {
+            throw new ModelException("Le montant du prix reçu à hydrater pour ce repas n'est pas valide", e);
         }
     }
 
@@ -285,7 +288,7 @@ public class Dinner extends IdentifiedModel implements Hydratable<Dinner.Data>, 
             return new TimeSlot(this.timeSlotStart, this.timeSlotEnd);
         }
 
-        public Price getPrice() throws NotACurrencyException {
+        public Price getPrice() throws NotACurrencyException, PriceException {
             return new Price(this.priceCurrency, this.priceAmount);
         }
 

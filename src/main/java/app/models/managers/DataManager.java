@@ -27,6 +27,7 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
     protected FileType defaultFileType = FileType.JSON;
     protected final String fileName = Functions.toSnakeCase(this.getModelSimpleName());
     protected List<Model> pendingModels;
+    protected boolean dataLoaded = false;
     protected boolean initialized = false;
 
     protected boolean unsavedChanges = false;
@@ -72,7 +73,7 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
 
     @SuppressWarnings("unchecked")
     protected <D extends CustomSerializable & JsonConvertible> void defaultJsonInit(D modelData) throws LoadDataManagerDataException {
-        if (!this.isInitialized()) {
+        if (!this.dataLoaded) {
             DataWriter<D> dataWriter = new DataWriter<>();
             JsonReader<D> jsonReader = new JsonReader<>(dataWriter);
 
@@ -88,6 +89,8 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
             } catch (Exception e) {
                 throw new LoadDataManagerDataException("Les données lues dans le fichier '%s' n'ont pas pu être enregistrées dans le manager '%s'".formatted(this.getClass().getSimpleName(), filePath), e);
             }
+
+            this.dataLoaded = true;
         }
     }
 
@@ -145,7 +148,7 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
 
     public void resolveReferences() throws ModelException, DataManagerException {
         if (this.pendingModels == null || this.pendingModels.isEmpty()) {
-            this.initialized = true;
+            this.dataLoaded = true;
             return;
         }
 
@@ -176,13 +179,15 @@ public abstract class DataManager<T extends CustomSerializable> implements Hydra
                 this.addResolvedModel(model);
             }
 
-            this.initialized = true;
+            this.dataLoaded = true;
         } finally {
             this.pendingModels = null;
         }
     }
 
     protected void addResolvedModel(Model model) throws ModelException, DataManagerException {}
+
+    protected void validateResolvedModels() throws ModelException, DataManagerException {}
 
     @SuppressWarnings("unchecked")
     protected void applyAutoIncrementIfPossible(IdentifiedModel identifiedModel) throws ModelException {

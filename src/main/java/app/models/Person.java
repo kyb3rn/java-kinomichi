@@ -180,7 +180,7 @@ public class Person extends IdentifiedModel implements Hydratable<Person>, Custo
     }
 
     @Override
-    public Set<EChargeableCategory> getChargeableCategory(ChargingElement chargingElement) throws ModelException, DataManagerException {
+    public Set<EChargeableCategory> getChargeableCategories(ChargingElement chargingElement) throws ModelException, DataManagerException {
         HashSet<EChargeableCategory> chargeableCategory = new HashSet<>();
 
         TimeSlot timeSlot;

@@ -66,12 +66,6 @@ public class SessionRegistrationDataManager extends DataManager<SessionRegistrat
             throw new DataManagerException("La personne portant l'identifiant '%d' est déjà inscrite à la session portant l'identifiant '%d'".formatted(sessionRegistration.getPersonId(), sessionRegistration.getSessionId()));
         }
 
-        // Check that the session has at least one trainer
-        SessionTrainerDataManager sessionTrainerDataManager = DataManagers.get(SessionTrainerDataManager.class);
-        if (!sessionTrainerDataManager.isSessionUsed(sessionRegistration.getSession())) {
-            throw new DataManagerException("Impossible de s'inscrire à la session portant l'identifiant '%d' : aucun formateur n'est assigné à cette session".formatted(sessionRegistration.getSessionId()));
-        }
-
         // Check that the person is not registered in another session that overlaps this one
         TimeSlot sessionTimeSlot = sessionRegistration.getSession().getTimeSlot();
         List<SessionRegistration> personOverlappingRegistrations = this.getPersonSessionRegistrationsDuringTimeSlot(sessionRegistration.getPerson(), sessionTimeSlot);
@@ -79,10 +73,9 @@ public class SessionRegistrationDataManager extends DataManager<SessionRegistrat
             throw new DataManagerException("La personne portant l'identifiant '%d' est déjà inscrite à une autre session dont le créneau horaire se superpose".formatted(sessionRegistration.getPersonId()));
         }
 
-        // Check that the person is not a trainer in a session that overlaps this one
-        List<SessionTrainer> personOverlappingTrainers = sessionTrainerDataManager.getPersonSessionTrainersDuringTimeSlot(sessionRegistration.getPerson(), sessionTimeSlot);
-        if (!personOverlappingTrainers.isEmpty()) {
-            throw new DataManagerException("La personne portant l'identifiant '%d' est déjà formateur dans une session dont le créneau horaire se superpose".formatted(sessionRegistration.getPersonId()));
+        // Cross-DataManager validations (skipped during init, run in validateResolvedModels)
+        if (this.isInitialized()) {
+            this.validateCrossDataManagerConstraints(sessionRegistration);
         }
 
         this.sessionRegistrations.put(sessionRegistration.getId(), sessionRegistration);
@@ -208,6 +201,21 @@ public class SessionRegistrationDataManager extends DataManager<SessionRegistrat
         });
     }
 
+    private void validateCrossDataManagerConstraints(SessionRegistration sessionRegistration) throws ModelException, DataManagerException {
+        // Check that the session has at least one trainer
+        SessionTrainerDataManager sessionTrainerDataManager = DataManagers.get(SessionTrainerDataManager.class);
+        if (!sessionTrainerDataManager.isSessionUsed(sessionRegistration.getSession())) {
+            throw new DataManagerException("Impossible de s'inscrire à la session portant l'identifiant '%d' : aucun formateur n'est assigné à cette session".formatted(sessionRegistration.getSessionId()));
+        }
+
+        // Check that the person is not a trainer in a session that overlaps this one
+        TimeSlot sessionTimeSlot = sessionRegistration.getSession().getTimeSlot();
+        List<SessionTrainer> personOverlappingTrainers = sessionTrainerDataManager.getPersonSessionTrainersDuringTimeSlot(sessionRegistration.getPerson(), sessionTimeSlot);
+        if (!personOverlappingTrainers.isEmpty()) {
+            throw new DataManagerException("La personne portant l'identifiant '%d' est déjà formateur dans une session dont le créneau horaire se superpose".formatted(sessionRegistration.getPersonId()));
+        }
+    }
+
     // ─── Overrides & inheritance ─── //
 
     @Override
@@ -255,6 +263,13 @@ public class SessionRegistrationDataManager extends DataManager<SessionRegistrat
         }
 
         this.addSessionRegistration(sessionRegistration);
+    }
+
+    @Override
+    protected void validateResolvedModels() throws ModelException, DataManagerException {
+        for (SessionRegistration sessionRegistration : this.sessionRegistrations.values()) {
+            this.validateCrossDataManagerConstraints(sessionRegistration);
+        }
     }
 
     @Override
